@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Roboto - Roboto Condensed */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
 /* Global Styles */
 
 /* Variables */
@@ -11,12 +14,16 @@
     --background-color: #F5F7FA;
     --primary-text-color: #232323;
     --secondary-text-color: #232323;
-    --danger-color : #EA4335;
-    --warrning-color : #FBBC05;
-    --safety-color : #34A853;
-    --white-color : #ffffff;
+    --danger-color: rgb(234, 67, 53);
+    --warning-color: #FBBC05;
+    --safety-color: #34A853;
+    --danger-color-min: rgba(234, 67, 53, 0.2);
+    --warning-color-min: rgba(251, 188, 5, 0.2);
+    --safety-color-min: rgba(52, 168, 83, 0.2);
+    --white-color: #ffffff;
     --font-family-title: 'Roboto Condensed', sans-serif;
-    --font-family: 'Roboto Condensed', sans-serif;
+    --font-family: 'Roboto', sans-serif;
+    --border-radius: 30px;
   }
   
   /* Reset & Base Styles */
@@ -28,7 +35,7 @@
   
   body {
     font-family: var(--font-family);
-    color: var(--text-color);
+    color: var(--primary-text-color);
     background-color: var(--background-color);
     line-height: 1.6;
   }
@@ -55,25 +62,38 @@
     display: inline-block;
     padding: 10px 20px;
     border: none;
-    border-radius: 30px;
+    border-radius: var(--border-radius);
     cursor: pointer;
     text-align: center;
     color: var(--white-color);
     transition: background 0.3s ease-in-out;
  }
-   /* status */
-  .status{
+   /* Status */
+  .status {
     padding: 0.3rem 0.6rem;
   }
-  .dangerButton{
+  .dangerButton {
     background-color: var(--danger-color);
   }
-  .warningButton{
-    background-color: var(--warrning-color);
+  .warningButton {
+    background-color: var(--warning-color);
   }
-  .safetyButton{
+  .safetyButton {
     background-color: var(--safety-color);
   }   
+
+  .dangerButton:hover {
+    background-color: var(--danger-color-min);
+    color: var(--danger-color);
+  }
+  .warningButton:hover {
+    background-color: var(--warning-color-min);
+    color: var(--warning-color);
+  }
+  .safetyButton:hover {
+    background-color: var(--safety-color-min);
+    color: var(--safety-color);
+  }
   
   /* Containers */
   .container {
@@ -91,4 +111,3 @@
   .hidden {
     display: none;
   }
-  
