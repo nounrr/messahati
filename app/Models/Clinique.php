@@ -10,6 +10,15 @@ class Clinique extends Model
     use HasFactory;
 
     protected $fillable = ['nom', 'adresse', 'email', 'site_web', 'description'];
+    public function departements()
+    {
+        return $this->hasMany(Departement::class);
+    }
+
+    public function partenaire()
+    {
+        return $this->hasMany(Partenaire::class);
+    }
 
   
 }

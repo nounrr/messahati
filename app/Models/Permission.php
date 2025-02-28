@@ -11,8 +11,12 @@ class Permission extends Model
 
     protected $fillable = ['nom_permission', 'description'];
 
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
     public function roles()
     {
         return $this->belongsToMany(Role::class);
-    }
+    } 
 }

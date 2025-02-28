@@ -15,5 +15,20 @@ class RendezVous extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function certificatMedical()
+    {
+        return $this->belongsTo(CertificatMedical::class);
+    }
+
+    public function paiement()
+    {
+        return $this->hasOne(Paiement::class);
+    }
+
+    public function ordonnance()
+    {
+        return $this->belongsTo(Ordonnance::class);
+    }
 }
 

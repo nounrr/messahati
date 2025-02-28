@@ -17,9 +17,6 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    
-    protected $fillable = ['nom', 'prenom', 'cin', 'email', 'telephone', 'adresse', 'date_inscription', 'mutuel'];
-
     public function role()
     {
         return $this->belongsTo(Role::class);
@@ -30,24 +27,19 @@ class User extends Authenticatable
         return $this->belongsTo(Departement::class);
     }
 
-    public function rendezVous()
-    {
-        return $this->hasMany(RendezVous::class);
-    }
-
-    public function payments()
-    {
-        return $this->hasMany(Payment::class);
-    }
-
     public function notifications()
     {
         return $this->hasMany(Notification::class);
     }
 
-    public function reclamations()
+    public function feedbacks()
     {
-        return $this->hasMany(Reclamation::class);
+        return $this->hasMany(Feedback::class);
+    }
+
+    public function mutuel()
+    {
+        return $this->belongsTo(Mutuel::class);
     }
 
     public function taches()
@@ -55,9 +47,29 @@ class User extends Authenticatable
         return $this->hasMany(Tache::class);
     }
 
-    public function feedbacks()
+    public function messages()
     {
-        return $this->hasMany(Feedback::class);
+        return $this->hasMany(Message::class);
+    }
+
+    public function paiements()
+    {
+        return $this->hasMany(Paiement::class);
+    }
+
+    public function ordonnances()
+    {
+        return $this->hasMany(Ordonnance::class);
+    }
+
+    public function reclamations()
+    {
+        return $this->hasMany(Reclamation::class);
+    }
+
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class);
     }
 
 

@@ -11,9 +11,23 @@ class Traitement extends Model
 
     protected $fillable = ['description', 'date_debut', 'date_fin'];
 
-    public function ordonnances()
+    public function type()
     {
-        return $this->belongsToMany(Ordonnance::class);
+        return $this->belongsTo(TypeTraitement::class);
+    }
+    public function certificatMedical()
+    {
+        return $this->belongsTo(CertificatMedical::class);
+    }
+
+    public function paiement()
+    {
+        return $this->hasOne(Paiement::class);
+    }
+
+    public function ordonnance()
+    {
+        return $this->belongsTo(Ordonnance::class);
     }
 }
 

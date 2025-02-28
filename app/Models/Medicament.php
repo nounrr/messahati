@@ -15,4 +15,8 @@ class Medicament extends Model
     {
         return $this->belongsToMany(Ordonnance::class, 'ordonnances_medicaments');
     }
+    public function type()
+    {
+        return $this->belongsTo(TypeMedicament::class);
+    }
 }

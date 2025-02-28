@@ -10,6 +10,11 @@ class Mutuel extends Model
     use HasFactory;
 
     protected $fillable = ['nom_mutuel'];
+    
+    public function type()
+    {
+        return $this->belongsTo(TypeMutuel::class);
+    }
 
     public function users()
     {

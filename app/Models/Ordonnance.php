@@ -15,5 +15,15 @@ class Ordonnance extends Model
     {
         return $this->belongsToMany(Medicament::class, 'ordonnances_medicaments');
     }
+
+    public function traitements()
+    {
+        return $this->hasMany(Traitement::class);
+    }
+
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class);
+    }
 }
 

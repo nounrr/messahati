@@ -11,6 +11,18 @@ class CertificatMedical extends Model
 
     protected $fillable = ['description', 'date_emission',];
 
+    public function type()
+    {
+        return $this->belongsTo(TypeCertificatMedical::class);
+    }
+    public function traitements()
+    {
+        return $this->hasMany(Traitement::class);
+    }
 
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class);
+    }
 }
 
