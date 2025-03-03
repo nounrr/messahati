@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('partenaires', function (Blueprint $table) {
+        Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinique_id')->constrained()->onDelete('cascade');
-            $table->string('nom');
-            $table->string('adress');
-            $table->string('telephone');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('contenu');
+            $table->date('date_envoie');
+            $table->time('heure_envoie');
+            $table->bool('etat');
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('partenaires');
+        Schema::dropIfExists('messages');
     }
 };
