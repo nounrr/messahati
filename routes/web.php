@@ -5,6 +5,14 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+
+
+Route::get('/Bienvenue', function () {
+    return Inertia::render('Bienvenue/Bienvenue');
+});
+Route::get('/AddInfo', function () {
+    return Inertia::render('Bienvenue/AddInfo');
+});
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
