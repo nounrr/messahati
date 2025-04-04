@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('mutuels', function (Blueprint $table) {
             $table->id();
-            $table->id();
             $table->string('nom_mutuel');
+            $table->string('code_mutuel', 20);
+            $table->text('description');
+            $table->date('date_creation');
+            $table->decimal('taux_remboursement', 5, 2);
             $table->timestamps();
         });
     }

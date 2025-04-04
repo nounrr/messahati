@@ -9,7 +9,12 @@ class Mutuel extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nom_mutuel'];
+    protected $fillable = [
+        'nom_mutuel',
+        'code_mutuel',
+        'description',
+        'date_creation',
+        'taux_remboursement',];
     
     public function type()
     {
