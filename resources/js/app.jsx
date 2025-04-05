@@ -1,4 +1,5 @@
 import '../css/app.css';
+import '../css/extra.css';
 import './bootstrap';
 import 'react-quill/dist/quill.snow.css';
 import "jsvectormap/dist/css/jsvectormap.css";
@@ -10,7 +11,9 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
-
+import { BrowserRouter } from 'react-router-dom';
+import RouteScrollToTop from './helper/RouteScrollToTop';
+import MasterLayout from './masterLayout/MasterLayout';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -23,7 +26,12 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+        <BrowserRouter>
+        <App {...props} />
+        </BrowserRouter>
+    
+    );
     },
     progress: {
         color: '#4B5563',
