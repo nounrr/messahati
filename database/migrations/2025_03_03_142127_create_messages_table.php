@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('contenu');
             $table->date('date_envoie');
             $table->time('heure_envoie');
-            $table->bool('etat');
+            $table->boolean('etat');
             $table->timestamps();
         });
     }
