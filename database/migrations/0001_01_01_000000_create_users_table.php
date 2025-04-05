@@ -23,12 +23,6 @@ return new class extends Migration
             $table->unsignedBigInteger('mutuel_id')->nullable();
             $table->unsignedBigInteger('departement_id')->nullable();
             $table->string('password');
-            $table->string('cin')->unique();
-            $table->string('prenom');
-            $table->string('telephone');
-            $table->string('adresse');
-            $table->date('date_inscription');
-            $table->unsignedBigInteger('mutuel_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
