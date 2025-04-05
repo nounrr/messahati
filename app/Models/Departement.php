@@ -25,4 +25,3 @@ class Departement extends Model
         return $this->belongsTo(Clinique::class);
     }
 }
-
