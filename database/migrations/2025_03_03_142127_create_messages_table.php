@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('date_envoie');
             $table->time('heure_envoie');
             $table->boolean('etat');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

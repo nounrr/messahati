@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('date_expiration');
             $table->decimal('prix_unitaire', 8, 2);
             $table->string('img_path')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

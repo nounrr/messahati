@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('certificat_id')->constrained('certificats_medicale')->onDelete('cascade');
             $table->string('type_certificat');
             $table->string('description');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

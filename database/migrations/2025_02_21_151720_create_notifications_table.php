@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('message');
             $table->date('date');
             $table->boolean('statut');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

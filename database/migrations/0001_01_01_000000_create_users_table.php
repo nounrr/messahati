@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('img_path')->nullable();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 

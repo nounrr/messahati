@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('rendez_vous_id')->constrained('rendez_vous')->onDelete('cascade');
             $table->float('montant');
             $table->date('date');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

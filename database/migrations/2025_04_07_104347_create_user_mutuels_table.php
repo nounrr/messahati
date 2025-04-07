@@ -22,7 +22,9 @@ return new class extends Migration
             $table->string('lien_assure')->nullable(); // ex: assuré, enfant, conjoint
             $table->date('date_validite')->nullable();
             $table->integer('pourcentage_prise_en_charge')->default(100);
+            $table->softDeletes();
             $table->timestamps();
+            
         });
         
     }

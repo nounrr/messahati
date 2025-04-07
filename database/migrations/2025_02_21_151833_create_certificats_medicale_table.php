@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->text('description');
             $table->date('date_emission');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

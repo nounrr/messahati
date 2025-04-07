@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
             $table->string('nom');
             $table->float('prix-default');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
