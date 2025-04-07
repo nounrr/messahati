@@ -4,26 +4,17 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\DepartementController;
-use App\Http\Controllers\PartenaireController;
-use App\Http\Controllers\TypePartenaireController;
-use App\Http\Controllers\CliniqueController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\TraitementsController;
-use App\Http\Controllers\TypeTraitementController;
-use App\Http\Controllers\OrdonanceController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\RendezVousController;
 
 
 
 
+Route::get('/typeTraitement', function () {return Inertia::render('Components/Forms/TypeTraitement');});
 Route::get('/AccesDenied', function () {return Inertia::render('AccesDenied/AccesDenied');});
 Route::get('/popup', function () {return Inertia::render('Home');});
 Route::get('/home', function () {return Inertia::render('Components/Popup/Departement');});
 Route::get('/Bienvenue', function () {return Inertia::render('Bienvenue/Bienvenue');});
 Route::get('/AddInfo', function () {return Inertia::render('Bienvenue/AddInfo');});
-Route::get('/Departement', function () {return Inertia::render('Bienvenue/Departement');});
+Route::get('/Departement', function () {return Inertia::render('Components/Popup/Departement');});
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -43,15 +34,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::resource('departements', DepartementController::class);
-Route::resource('partenaires', PartenaireController::class);
-Route::resource('type-partenaires', TypePartenaireController::class);
-Route::resource('cliniques', CliniqueController::class);
-Route::resource('services', ServiceController::class);
-Route::resource('traitements', TraitementsController::class);
-Route::resource('type-traitements', TypeTraitementController::class);
-Route::resource('ordonances', OrdonanceController::class);
-Route::resource('payments', PaymentController::class);
-Route::resource('rendezvous', RendezVousController::class);
+
 
 require __DIR__.'/auth.php';

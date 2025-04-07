@@ -1,5 +1,5 @@
 import React from "react";
-import { SafetyStatus, DangerStatus, WarningStatus } from "../Components/Buttons/Status";
+import { SafetyStatus, DangerStatus, WarningStatus } from "../Components/Child/Status";
 import Departement from "./Components/Popup/Departement";
 const Home = () => {
     const [isActive, setIsActive] = useState(false)

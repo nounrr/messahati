@@ -9,7 +9,7 @@ class Clinique extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nom', 'adresse', 'email', 'site_web', 'description'];
+    protected $fillable = ['nom', 'adresse', 'email', 'site_web', 'description',"logo_path"];
     public function departements()
     {
         return $this->hasMany(Departement::class);

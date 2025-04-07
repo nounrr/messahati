@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Ordonance;
+use App\Models\Ordonnance;
 
 class OrdonanceController extends Controller
 {
     public function index()
     {
-        $ordonances = Ordonance::all();
+        $ordonances = Ordonnance::all();
         return response()->json($ordonances);
     }
 
@@ -27,7 +27,7 @@ class OrdonanceController extends Controller
         ]);
 
         foreach ($validatedData['ordonances'] as $data) {
-            Ordonance::create($data);
+            Ordonnance::create($data);
         }
 
         return response()->json(['message' => 'Ordonnances créées avec succès.']);
@@ -35,13 +35,13 @@ class OrdonanceController extends Controller
 
     public function show(string $id)
     {
-        $ordonance = Ordonance::findOrFail($id);
+        $ordonance = Ordonnance::findOrFail($id);
         return response()->json($ordonance);
     }
 
     public function edit(string $id)
     {
-        $ordonance = Ordonance::findOrFail($id);
+        $ordonance = Ordonnance::findOrFail($id);
         return view('ordonances.edit', compact('ordonance'));
     }
 
@@ -55,7 +55,7 @@ class OrdonanceController extends Controller
         ]);
 
         foreach ($validatedData['ordonances'] as $data) {
-            $ordonance = Ordonance::find($data['id']);
+            $ordonance = Ordonnance::find($data['id']);
             $ordonance->update($data);
         }
 
@@ -65,7 +65,7 @@ class OrdonanceController extends Controller
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {
-            $ordonance = Ordonance::findOrFail($id);
+            $ordonance = Ordonnance::findOrFail($id);
             $ordonance->delete();
         } else {
             $validatedData = $request->validate([
@@ -73,7 +73,7 @@ class OrdonanceController extends Controller
                 'ids.*' => 'required|exists:ordonances,id',
             ]);
 
-            Ordonance::whereIn('id', $validatedData['ids'])->delete();
+            Ordonnance::whereIn('id', $validatedData['ids'])->delete();
         }
 
         return response()->json(['message' => 'Ordonnances supprimées avec succès.']);
