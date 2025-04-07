@@ -24,6 +24,7 @@ function AddInfo() {
             email,
             telephone,
             adresse,
+            site_web,
             logo, // Include logo in the object
         };
 
