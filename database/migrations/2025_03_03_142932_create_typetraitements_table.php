@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('typetraitements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
             $table->string('nom');
             $table->float('prix-default');
             $table->timestamps();

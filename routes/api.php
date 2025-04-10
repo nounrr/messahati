@@ -13,13 +13,18 @@ use App\Http\Controllers\OrdonanceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RendezVousController;
 
-
+// Excel import/export for Departement
+Route::get('departements/export', [DepartementController::class, 'export']);
+Route::post('departements/import', [DepartementController::class, 'import']);
+// Excel import/export for TypeTraitement
+Route::get('type-traitements/export', [TypeTraitementController::class, 'export']);
+Route::post('type-traitements/import', [TypeTraitementController::class, 'import']);
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-Route::resource('/departements', DepartementController::class);
-Route::resource('/cliniques', CliniqueController::class);
-Route::resource('/type-traitements', TypeTraitementController::class);
+// Route::resource('/departements', DepartementController::class);
+// Route::resource('/cliniques', CliniqueController::class);
+// Route::resource('/type-traitements', TypeTraitementController::class);
 Route::resource('departements', DepartementController::class);
 Route::resource('partenaires', PartenaireController::class);
 Route::resource('type-partenaires', TypePartenaireController::class);
@@ -29,3 +34,4 @@ Route::resource('traitements', TraitementsController::class);
 Route::resource('ordonances', OrdonanceController::class);
 Route::resource('payments', PaymentController::class);
 Route::resource('rendezvous', RendezVousController::class);
+

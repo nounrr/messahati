@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Departement;
+use App\Exports\DepartementExport;
+use App\Imports\DepartementImport;
+use App\Traits\ExcelExportImport;  // <-- Excel specific
 
 class DepartementController extends Controller
 {
@@ -84,5 +87,20 @@ class DepartementController extends Controller
         }
 
         return response()->json(['message' => 'Départements supprimés avec succès.']);
+    }
+
+    use ExcelExportImport;
+
+    // Export and import methods
+    public function export()
+    {
+        return $this->exportExcel(DepartementExport::class, 'departements.xlsx', Departement::all());
+    }
+    
+
+    public function import(Request $request)
+    {
+        $this->importExcel($request->file('file'), DepartementImport::class);
+        return response()->json(['message' => 'Départements importés avec succès.']);
     }
 }

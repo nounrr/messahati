@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TypeTraitement;
+use App\Exports\TypeTraitementExport;
+use App\Imports\TypeTraitementImport;
+use App\Traits\ExcelExportImport;  // <-- Excel specific
+
 
 class TypeTraitementController extends Controller
 {
@@ -77,5 +81,19 @@ class TypeTraitementController extends Controller
         }
 
         return response()->json(['message' => 'Types de traitements supprimés avec succès.']);
+    }
+
+    use ExcelExportImport;
+
+    // Export and import methods
+    public function export()
+    {
+        return $this->exportExcel(TypeTraitementExport::class, 'type_traitements.xlsx', TypeTraitement::all());
+    }
+
+    public function import(Request $request)
+    {
+        $this->importExcel($request->file('file'), TypeTraitementImport::class);
+        return response()->json(['message' => 'Types de traitements importés avec succès.']);
     }
 }
