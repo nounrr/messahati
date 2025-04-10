@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class TypeTraitement extends Model
 {
     use HasFactory;
-
-
+    
+    protected $table = 'typetraitements';
 }
