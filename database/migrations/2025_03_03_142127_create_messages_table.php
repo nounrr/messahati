@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('destinataire_id');
+            $table->unsignedBigInteger('emetteure_id');
+            $table->foreign('destinataire_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('emetteure_id')->references('id')->on('users')->onDelet('cascade');
             $table->string('contenu');
             $table->date('date_envoie');
             $table->time('heure_envoie');
-            $table->bool('etat');
+            $table->boolean('status');
             $table->timestamps();
         });
     }

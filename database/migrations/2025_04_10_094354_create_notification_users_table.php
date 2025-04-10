@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('typecertificats', function (Blueprint $table) {
+        Schema::create('notification_users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('certificat_id')->constrained()->onDelete('cascade');
-            $table->string('type_certificat');
-            $table->string('description');
+            $table->text('message');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('notification_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('typecertificats');
+        Schema::dropIfExists('notification_users');
     }
 };

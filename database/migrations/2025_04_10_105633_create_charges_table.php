@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('typepartenaires', function (Blueprint $table) {
+        Schema::create('charges', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('partenaire_id')->constrained()->onDelete('cascade');
             $table->string('nom');
+            $table->float('prix_unitaire');
+            $table->integer('quantite');
+            $table->foreignId('partenaire_id')->references('id')->on('partenaires')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('typepartenaires');
+        Schema::dropIfExists('charges');
     }
 };

@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('typetraitements', function (Blueprint $table) {
+        Schema::create('attachements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
-            $table->string('nom');
-            $table->float('prix-default');
+            $table->string('filename');
+            $table->foreignId('taches_id')->references('id')->on('taches')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('typetraitements');
+        Schema::dropIfExists('attachements');
     }
 };
