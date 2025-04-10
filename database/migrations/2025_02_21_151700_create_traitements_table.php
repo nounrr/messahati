@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('traitements', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('typetraitement_id')->references('id')->on('typetraitements')->onDelete('cascade');
             $table->text('description');
             $table->date('date_debut');
             $table->date('date_fin');
+
             $table->timestamps();
         });
     }

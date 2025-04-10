@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('attachements', function (Blueprint $table) {
             $table->id();
-            $table->date('date');
-            $table->boolean('statut');
+            $table->string('filename');
+            $table->foreignId('taches_id')->references('id')->on('taches')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('attachements');
     }
 };

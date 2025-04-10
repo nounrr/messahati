@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('typetraitements', function (Blueprint $table) {
+        Schema::create('typepartenaires', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
             $table->string('nom');
-            $table->float('prix-default');
             $table->timestamps();
         });
     }
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('typetraitements');
+        Schema::dropIfExists('typepartenaires');
     }
 };

@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('charges', function (Blueprint $table) {
             $table->id();
-            $table->date('date');
-            $table->boolean('statut');
+            $table->string('nom');
+            $table->float('prix_unitaire');
+            $table->integer('quantite');
+            $table->foreignId('partenaire_id')->references('id')->on('partenaires')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('charges');
     }
 };

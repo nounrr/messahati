@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('typemutuels', function (Blueprint $table) {
+        Schema::create('typetraitements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('mutuel_id')->constrained()->onDelete('cascade');
-            $table->string('name');
+            $table->string('nom');
+            $table->float('prix-default');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('typemutuels');
+        Schema::dropIfExists('typetraitements');
     }
 };
