@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('typecertificats', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('certificat_id')->constrained()->onDelete('cascade');
+            $table->foreignId('certificat_id')->constrained('certificats_medicale')->onDelete('cascade');
             $table->string('type_certificat');
             $table->string('description');
             $table->timestamps();
