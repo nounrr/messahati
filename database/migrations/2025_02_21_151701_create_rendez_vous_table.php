@@ -13,8 +13,14 @@ return new class extends Migration
     {
         Schema::create('rendez_vous', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->unsignedBigInteger('patient_id');
+            $table->unsignedBigInteger('docteur_id');
+            $table->unsignedBigInteger('departement_id');
+            $table->foreign('patient_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('docteur_id')->references('id')->on('users')->onDelete('cascade');
             $table->dateTime('date_heure');
+            $table->foreign('departement_id')->references('id')->on('departements')->onDelete('cascade');
+            $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
             $table->boolean('statut');
             $table->timestamps();
         });

@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('cin')->unique();
-            $table->string('name');
+            $table->string('cin')->unique()->nullable();  // Made 'cin' nullable as per one branch
+            $table->string('name');  // Keeping 'name' from the initial version
+            $table->string('prenom'); // Added 'prenom' from the second version
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('telephone');
             $table->string('adresse');
             $table->date('date_inscription');
-            $table->unsignedBigInteger('mutuel_id')->nullable();
-            $table->unsignedBigInteger('departement_id')->nullable();
+            $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
             $table->string('password');
+            $table->string('img_path'); // Added 'img_path' from the second version
+            $table->boolean('status'); // Added 'status' from the second version
             $table->rememberToken();
             $table->timestamps();
         });

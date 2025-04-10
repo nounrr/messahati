@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mutuels', function (Blueprint $table) {
+        Schema::create('charges', function (Blueprint $table) {
             $table->id();
-            $table->string('nom_mutuel');
+            $table->string('nom');
+            $table->float('prix_unitaire');
+            $table->integer('quantite');
+            $table->foreignId('partenaire_id')->references('id')->on('partenaires')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -23,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('mutuels');
+        Schema::dropIfExists('charges');
     }
 };

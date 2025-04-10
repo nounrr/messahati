@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('feedbacks', function (Blueprint $table) {
+        Schema::create('mutuel_users', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('mutuel_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('contenu');
-            $table->float('rating');
-            $table->date('date');
-            $table->boolean('status');
+            $table->string('numero_police');
+            $table->string('numero_carte');
+            $table->string('lien_assure');
+            $table->date('date_validite');
+            $table->decimal('pourcentage_prise_en_charge',4,2);
             $table->timestamps();
         });
     }
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('feedbacks');
+        Schema::dropIfExists('mutuel_users');
     }
 };
