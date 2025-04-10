@@ -49,6 +49,46 @@ export const deleteDepartements = createAsyncThunk(
     }
 );
 
+// Export départements
+export const exportDepartements = createAsyncThunk(
+    'departements/exportDepartements',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get('/departements/export', {
+                responseType: 'blob',
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'departements.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+// Import départements
+export const importDepartements = createAsyncThunk(
+    'departements/importDepartements',
+    async (file, { rejectWithValue }) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await axiosInstance.post('/departements/import', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 const departementSlice = createSlice({
     name: 'departements',
     initialState: {
@@ -90,6 +130,10 @@ const departementSlice = createSlice({
 
             .addCase(deleteDepartements.fulfilled, (state, action) => {
                 state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
+            })
+
+            .addCase(importDepartements.fulfilled, (state, action) => {
+                state.items.push(...action.payload);
             });
     },
 });

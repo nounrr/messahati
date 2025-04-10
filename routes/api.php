@@ -22,9 +22,7 @@ Route::post('type-traitements/import', [TypeTraitementController::class, 'import
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-// Route::resource('/departements', DepartementController::class);
-// Route::resource('/cliniques', CliniqueController::class);
-// Route::resource('/type-traitements', TypeTraitementController::class);
+
 Route::resource('departements', DepartementController::class);
 Route::resource('partenaires', PartenaireController::class);
 Route::resource('type-partenaires', TypePartenaireController::class);
