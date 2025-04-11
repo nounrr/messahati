@@ -21,61 +21,49 @@ class TraitementsController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'traitements' => 'required|array',
-            'traitements.*.nom' => 'required|string|max:255',
-            'traitements.*.description' => 'nullable|string',
+            'nom' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'prix' => 'required|numeric',
+            'type_traitement_id' => 'required|exists:type_traitements,id',
         ]);
 
-        foreach ($validatedData['traitements'] as $data) {
-            Traitement::create($data);
-        }
+        Traitement::create($validatedData);
 
-        return response()->json(['message' => 'Traitements créés avec succès.']);
+        return redirect()->route('traitements.index')->with('success', 'Traitement créé avec succès.');
     }
 
-    public function show(string $id)
+    public function show($id)
     {
         $traitement = Traitement::findOrFail($id);
         return response()->json($traitement);
     }
 
-    public function edit(string $id)
+    public function edit($id)
     {
         $traitement = Traitement::findOrFail($id);
         return view('traitements.edit', compact('traitement'));
     }
 
-    public function update(Request $request, string $id = null)
+    public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'traitements' => 'required|array',
-            'traitements.*.id' => 'required|exists:traitements,id',
-            'traitements.*.nom' => 'required|string|max:255',
-            'traitements.*.description' => 'nullable|string',
+            'nom' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'prix' => 'required|numeric',
+            'type_traitement_id' => 'required|exists:type_traitements,id',
         ]);
 
-        foreach ($validatedData['traitements'] as $data) {
-            $traitement = Traitement::find($data['id']);
-            $traitement->update($data);
-        }
+        $traitement = Traitement::findOrFail($id);
+        $traitement->update($validatedData);
 
-        return response()->json(['message' => 'Traitements mis à jour avec succès.']);
+        return redirect()->route('traitements.index')->with('success', 'Traitement mis à jour avec succès.');
     }
 
-    public function destroy(Request $request, string $id = null)
+    public function destroy($id)
     {
-        if ($id) {
-            $traitement = Traitement::findOrFail($id);
-            $traitement->delete();
-        } else {
-            $validatedData = $request->validate([
-                'ids' => 'required|array',
-                'ids.*' => 'required|exists:traitements,id',
-            ]);
+        $traitement = Traitement::findOrFail($id);
+        $traitement->delete();
 
-            Traitement::whereIn('id', $validatedData['ids'])->delete();
-        }
-
-        return response()->json(['message' => 'Traitements supprimés avec succès.']);
+        return redirect()->route('traitements.index')->with('success', 'Traitement supprimé avec succès.');
     }
 }

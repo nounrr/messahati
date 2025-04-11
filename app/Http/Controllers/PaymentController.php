@@ -21,63 +21,49 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'payments' => 'required|array',
-            'payments.*.montant' => 'required|numeric',
-            'payments.*.date' => 'required|date',
-            'payments.*.description' => 'nullable|string',
+            'amount' => 'required|numeric',
+            'method' => 'required|string|max:255',
+            'date' => 'required|date',
+            'user_id' => 'required|exists:users,id',
         ]);
 
-        foreach ($validatedData['payments'] as $data) {
-            Payment::create($data);
-        }
+        Payment::create($validatedData);
 
-        return response()->json(['message' => 'Paiements créés avec succès.']);
+        return redirect()->route('payments.index')->with('success', 'Payment created successfully.');
     }
 
-    public function show(string $id)
+    public function show($id)
     {
         $payment = Payment::findOrFail($id);
         return response()->json($payment);
     }
 
-    public function edit(string $id)
+    public function edit($id)
     {
         $payment = Payment::findOrFail($id);
         return view('payments.edit', compact('payment'));
     }
 
-    public function update(Request $request, string $id = null)
+    public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'payments' => 'required|array',
-            'payments.*.id' => 'required|exists:payments,id',
-            'payments.*.montant' => 'required|numeric',
-            'payments.*.date' => 'required|date',
-            'payments.*.description' => 'nullable|string',
+            'amount' => 'required|numeric',
+            'method' => 'required|string|max:255',
+            'date' => 'required|date',
+            'user_id' => 'required|exists:users,id',
         ]);
 
-        foreach ($validatedData['payments'] as $data) {
-            $payment = Payment::find($data['id']);
-            $payment->update($data);
-        }
+        $payment = Payment::findOrFail($id);
+        $payment->update($validatedData);
 
-        return response()->json(['message' => 'Paiements mis à jour avec succès.']);
+        return redirect()->route('payments.index')->with('success', 'Payment updated successfully.');
     }
 
-    public function destroy(Request $request, string $id = null)
+    public function destroy($id)
     {
-        if ($id) {
-            $payment = Payment::findOrFail($id);
-            $payment->delete();
-        } else {
-            $validatedData = $request->validate([
-                'ids' => 'required|array',
-                'ids.*' => 'required|exists:payments,id',
-            ]);
+        $payment = Payment::findOrFail($id);
+        $payment->delete();
 
-            Payment::whereIn('id', $validatedData['ids'])->delete();
-        }
-
-        return response()->json(['message' => 'Paiements supprimés avec succès.']);
+        return redirect()->route('payments.index')->with('success', 'Payment deleted successfully.');
     }
 }

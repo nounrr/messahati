@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('nom_medicament');
             $table->integer('quantite');
             $table->date('date_expiration');
+            $table->foreignId('typemedicaments_id')->references('id')->on('typemedicaments')->onDelete('cascade');
             $table->decimal('prix_unitaire', 8, 2);
+            $table->string('img_path');
             $table->timestamps();
         });
     }

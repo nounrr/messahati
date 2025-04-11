@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
             $table->foreignId('rendez_vous_id')->constrained('rendez_vous')->onDelete('cascade');
             $table->float('montant');
             $table->date('date');
+            $table->boolean('status');
             $table->timestamps();
         });
     }

@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('typecertificats', function (Blueprint $table) {
+        Schema::create('typepartenaires', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('certificat_id')->constrained('certificats_medicale')->onDelete('cascade');
-            $table->string('type_certificat');
+            $table->string('nom');
             $table->string('description');
             $table->timestamps();
         });
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('typecertificats');
+        Schema::dropIfExists('typepartenaires');
     }
 };

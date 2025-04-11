@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('clinique', function (Blueprint $table) {
+        Schema::create('traitements', function (Blueprint $table) {
             $table->id();
-            $table->string('nom');
-            $table->string('adresse');
-            $table->string('email');
-            $table->string('site_web')->nullable();
-            $table->text('description')->nullable();
+            $table->foreignId('typetraitement_id')->references('id')->on('typetraitements')->onDelete('cascade');
+            $table->text('description');
+            $table->date('date_debut');
+            $table->date('date_fin');
+
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('clinique');
+        Schema::dropIfExists('traitements');
     }
 };

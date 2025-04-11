@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->date('date_emission');
             $table->text('description');
+            $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
