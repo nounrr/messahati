@@ -19,103 +19,50 @@ class CliniqueController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'cliniques' => 'required|array',
-        'cliniques.*.nom' => 'required|string|max:255',
-        'cliniques.*.adresse' => 'required|string|max:255',
-        'cliniques.*.email' => 'required|email',
-        'cliniques.*.site_web' => 'nullable|url',
-        'cliniques.*.description' => 'nullable|string',
-        'cliniques.*.logo' => 'nullable|file|image|max:2048',
-    ]);
+    {
+        $validatedData = $request->validate([
+            'nom' => 'required|string|max:255',
+            'adresse' => 'required|string|max:255',
+            'telephone' => 'required|string|max:15',
+        ]);
 
-    foreach ($validatedData['cliniques'] as $key => $data) {
-        // Gestion du fichier logo
-        if ($request->hasFile("cliniques.$key.logo")) {
-            $logoFile = $request->file("cliniques.$key.logo");
-            $cliniqueName = str_replace(' ', '_', strtolower($data['nom']));
-            $path = "image/clinique/{$cliniqueName}";
+        Clinique::create($validatedData);
 
-            $logoFile->move(public_path($path), 'logo.png');
-
-            $data['logo_path'] = $path . '/logo.png';
-        }
-
-        Clinique::create($data);
+        return redirect()->route('cliniques.index')->with('success', 'Clinique créée avec succès.');
     }
 
-    return response()->json(['message' => 'Cliniques créées avec succès.']);
-}
-
-
-    public function show(string $id)
+    public function show($id)
     {
         $clinique = Clinique::findOrFail($id);
         return response()->json($clinique);
     }
 
-    public function edit(string $id)
+    public function edit($id)
     {
         $clinique = Clinique::findOrFail($id);
         return view('cliniques.edit', compact('clinique'));
     }
 
-    public function update(Request $request, string $id = null)
-{
-    $validatedData = $request->validate([
-        'cliniques' => 'required|array',
-        'cliniques.*.id' => 'required|exists:cliniques,id',
-        'cliniques.*.nom' => 'required|string|max:255',
-        'cliniques.*.adresse' => 'required|string|max:255',
-        'cliniques.*.email' => 'required|email',
-        'cliniques.*.site_web' => 'nullable|url',
-        'cliniques.*.description' => 'nullable|string',
-        'cliniques.*.logo' => 'nullable|file|image|max:2048',
-    ]);
+    public function update(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'nom' => 'required|string|max:255',
+            'adresse' => 'required|string|max:255',
+            'telephone' => 'required|string|max:15',
+        ]);
 
-    foreach ($validatedData['cliniques'] as $key => $data) {
-        $clinique = Clinique::find($data['id']);
+        $clinique = Clinique::findOrFail($id);
+        $clinique->update($validatedData);
 
-        // Gestion du nouveau fichier logo (si fourni)
-        if ($request->hasFile("cliniques.$key.logo")) {
-            $logoFile = $request->file("cliniques.$key.logo");
-            $cliniqueName = str_replace(' ', '_', strtolower($data['nom']));
-            $path = "image/clinique/{$cliniqueName}";
-
-            // Supprimer l'ancien logo si existe
-            if ($clinique->logo_path && file_exists(public_path($clinique->logo_path))) {
-                unlink(public_path($clinique->logo_path));
-            }
-
-            // Sauvegarder le nouveau fichier logo
-            $logoFile->move(public_path($path), 'logo.png');
-
-            $data['logo_path'] = $path . '/logo.png';
-        }
-
-        $clinique->update($data);
+        return redirect()->route('cliniques.index')->with('success', 'Clinique mise à jour avec succès.');
     }
 
-    return response()->json(['message' => 'Cliniques mises à jour avec succès.']);
-}
-
-
-    public function destroy(Request $request, string $id = null)
+    public function destroy($id)
     {
-        if ($id) {
-            $clinique = Clinique::findOrFail($id);
-            $clinique->delete();
-        } else {
-            $validatedData = $request->validate([
-                'ids' => 'required|array',
-                'ids.*' => 'required|exists:cliniques,id',
-            ]);
+        $clinique = Clinique::findOrFail($id);
+        $clinique->delete();
 
-            Clinique::whereIn('id', $validatedData['ids'])->delete();
-        }
-
-        return response()->json(['message' => 'Cliniques supprimées avec succès.']);
+        return redirect()->route('cliniques.index')->with('success', 'Clinique supprimée avec succès.');
     }
 }
 
