@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TypeTraitement;
+use Illuminate\Support\Facades\Storage;
 
 class TypeTraitementController extends Controller
 {
@@ -24,9 +25,13 @@ class TypeTraitementController extends Controller
             'types' => 'required|array',
             'types.*.nom' => 'required|string|max:255',
             'types.*.description' => 'nullable|string',
+            'types.*.image' => 'nullable|file|image|max:2048',
         ]);
 
         foreach ($validatedData['types'] as $data) {
+            if (isset($data['image'])) {
+                $data['image_path'] = $data['image']->store('images/type-traitements', 'public');
+            }
             TypeTraitement::create($data);
         }
 
@@ -52,10 +57,17 @@ class TypeTraitementController extends Controller
             'types.*.id' => 'required|exists:type_traitements,id',
             'types.*.nom' => 'required|string|max:255',
             'types.*.description' => 'nullable|string',
+            'types.*.image' => 'nullable|file|image|max:2048',
         ]);
 
         foreach ($validatedData['types'] as $data) {
             $type = TypeTraitement::find($data['id']);
+            if (isset($data['image'])) {
+                if ($type->image_path && Storage::disk('public')->exists($type->image_path)) {
+                    Storage::disk('public')->delete($type->image_path);
+                }
+                $data['image_path'] = $data['image']->store('images/type-traitements', 'public');
+            }
             $type->update($data);
         }
 
