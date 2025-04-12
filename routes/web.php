@@ -15,7 +15,8 @@ Route::get('/popup', function () {return Inertia::render('Home');});
 Route::get('/home', function () {return Inertia::render('Components/Popup/Departement');});
 Route::get('/Bienvenue', function () {return Inertia::render('Bienvenue/Bienvenue');});
 Route::get('/AddInfo', function () {return Inertia::render('Bienvenue/AddInfo');});
-Route::get('/Departement', function () {return Inertia::render('Bienvenue/Departement');});
+Route::get('/Departement', function () {return Inertia::render('Components/Popup/Departement');});
+// Route::get('/Departement', function () {return Inertia::render('Components/DepartementCreate');});
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),

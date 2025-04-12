@@ -24,13 +24,10 @@ class TypeTraitementController extends Controller
             'types' => 'required|array',
             'types.*.nom' => 'required|string|max:255',
             'types.*.description' => 'nullable|string',
-            'types.*.image' => 'nullable|file|image|max:2048',
         ]);
 
         foreach ($validatedData['types'] as $data) {
-            if (isset($data['image'])) {
-                $data['image_path'] = $data['image']->store('images/type-traitements', 'public');
-            }
+          
             TypeTraitement::create($data);
         }
 

@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react/dist/iconify.js";
 import React from "react";
 import { Head, Link, useForm } from '@inertiajs/react';
-import InputError from '@/Components/InputError';
+import InputError from '@/Components/Child/InputError';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
