@@ -16,10 +16,17 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // User::factory()->create([
+        //     'name' => 'Test User',
+        //     'prenom'=>'test',
+        //     'date_inscription'=>'2025/2/6',
+        //     'telephone'=>'',
+        //     'departement_id'=>1,
+        //     'img_path'=>'',
+        //     'adresse'=>'',
+        //     'status'=>false,
+        //     'email' => 'test@example.com',
+        // ]);
         $this->call(RolesAndPermissionsSeeder::class);
     }
 }
