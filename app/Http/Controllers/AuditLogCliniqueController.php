@@ -18,23 +18,28 @@ class AuditLogCliniqueController extends Controller
         return view('audit_logs.create');
     }
 
-    
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'audit_log_clinique.*.user_id' => 'required|exists:users,id',
-        'audit_log_clinique.*.action' => 'required|string',
-        'audit_log_clinique.*.date' => 'required|date'
-    ]);
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'audit_log_clinique.*.user_id' => 'required|exists:users,id',
+            'audit_log_clinique.*.action' => 'required|string',
+            'audit_log_clinique.*.date' => 'required|date'
+        ]);
 
-    $createdItems = [];
-    foreach ($validated['audit_log_clinique'] as $data) {
-        
-        $createdItems[] = Auditlogclinique::create($data);
+        $createdItems = [];
+
+        foreach ($validated['audit_log_clinique'] as $data) {
+            $item = new AuditLogClinique();
+            $item->user_id = $data['user_id'];
+            $item->action = $data['action'];
+            $item->date = $data['date'];
+            $item->save();
+
+            $createdItems[] = $item;
+        }
+
+        return response()->json($createdItems, 201);
     }
-
-    return response()->json($createdItems, 201);
-}
 
     public function show($id)
     {
@@ -47,6 +52,7 @@ public function store(Request $request)
         $auditLog = AuditLogClinique::findOrFail($id);
         return view('audit_logs.edit', compact('auditLog'));
     }
+
     public function update(Request $request)
     {
         $validated = $request->validate([
@@ -56,15 +62,19 @@ public function store(Request $request)
             'updates.*.action' => 'required|string',
             'updates.*.date' => 'required|date'
         ]);
-    
+
         $updatedItems = [];
+
         foreach ($validated['updates'] as $data) {
-            $item = Auditlogclinique::findOrFail($data['id']);
-            
-            $item->update($data);
+            $item = AuditLogClinique::findOrFail($data['id']);
+            $item->user_id = $data['user_id'];
+            $item->action = $data['action'];
+            $item->date = $data['date'];
+            $item->save();
+
             $updatedItems[] = $item;
         }
-    
+
         return response()->json($updatedItems, 200);
     }
 

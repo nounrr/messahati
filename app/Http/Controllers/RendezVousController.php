@@ -7,81 +7,97 @@ use App\Models\RendezVous;
 
 class RendezVousController extends Controller
 {
+    // Liste des rendez-vous
     public function index()
     {
         $rendezVous = RendezVous::all();
         return response()->json($rendezVous);
     }
 
+    // Formulaire de création
     public function create()
     {
         return view('rendezvous.create');
     }
 
+    // Enregistrement sans mass-assignement
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'rendez_vous.*.patient_id' => 'required|exists:patients,id',
-        'rendez_vous.*.docteur_id' => 'required|exists:docteurs,id',
-        'rendez_vous.*.departement_id' => 'required|exists:departements,id',
-        'rendez_vous.*.patient_id' => 'required|exists:patients,id',
-        'rendez_vous.*.docteur_id' => 'required|exists:docteurs,id',
-        'rendez_vous.*.date_heure' => 'required',
-        'rendez_vous.*.departement_id' => 'required|exists:departements,id',
-        'rendez_vous.*.traitement_id' => 'required|exists:traitements,id',
-        'rendez_vous.*.statut' => 'required'
-    ]);
+    {
+        $validated = $request->validate([
+            'rendez_vous' => 'required|array',
+            'rendez_vous.*.patient_id' => 'required|exists:patients,id',
+            'rendez_vous.*.docteur_id' => 'required|exists:docteurs,id',
+            'rendez_vous.*.departement_id' => 'required|exists:departements,id',
+            'rendez_vous.*.date_heure' => 'required',
+            'rendez_vous.*.traitement_id' => 'required|exists:traitements,id',
+            'rendez_vous.*.statut' => 'required'
+        ]);
 
-    $createdItems = [];
-    foreach ($validated['rendez_vous'] as $data) {
-        
-        $createdItems[] = Rendezvous::create($data);
+        $createdItems = [];
+
+        foreach ($validated['rendez_vous'] as $data) {
+            $rendezVous = new RendezVous();
+            $rendezVous->patient_id = $data['patient_id'];
+            $rendezVous->docteur_id = $data['docteur_id'];
+            $rendezVous->departement_id = $data['departement_id'];
+            $rendezVous->date_heure = $data['date_heure'];
+            $rendezVous->traitement_id = $data['traitement_id'];
+            $rendezVous->statut = $data['statut'];
+            $rendezVous->save();
+
+            $createdItems[] = $rendezVous;
+        }
+
+        return response()->json($createdItems, 201);
     }
 
-    return response()->json($createdItems, 201);
-}
-
-
-
+    // Affiche un rendez-vous spécifique
     public function show(string $id)
     {
         $rendezVous = RendezVous::findOrFail($id);
         return response()->json($rendezVous);
     }
 
+    // Formulaire d’édition
     public function edit(string $id)
     {
         $rendezVous = RendezVous::findOrFail($id);
         return view('rendezvous.edit', compact('rendezVous'));
     }
 
+    // Mise à jour sans mass-assignement
     public function update(Request $request)
-{
-    $validated = $request->validate([
-        'updates' => 'required|array',
-        'updates.*.id' => 'required|exists:rendez_vous,id',
-        'updates.*.patient_id' => 'required|exists:patients,id',
-        'updates.*.docteur_id' => 'required|exists:docteurs,id',
-        'updates.*.departement_id' => 'required|exists:departements,id',
-        'updates.*.patient_id' => 'required|exists:patients,id',
-        'updates.*.docteur_id' => 'required|exists:docteurs,id',
-        'updates.*.date_heure' => 'required',
-        'updates.*.departement_id' => 'required|exists:departements,id',
-        'updates.*.traitement_id' => 'required|exists:traitements,id',
-        'updates.*.statut' => 'required'
-    ]);
+    {
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:rendez_vous,id',
+            'updates.*.patient_id' => 'required|exists:patients,id',
+            'updates.*.docteur_id' => 'required|exists:docteurs,id',
+            'updates.*.departement_id' => 'required|exists:departements,id',
+            'updates.*.date_heure' => 'required',
+            'updates.*.traitement_id' => 'required|exists:traitements,id',
+            'updates.*.statut' => 'required'
+        ]);
 
-    $updatedItems = [];
-    foreach ($validated['updates'] as $data) {
-        $item = Rendezvous::findOrFail($data['id']);
-        
-        $item->update($data);
-        $updatedItems[] = $item;
+        $updatedItems = [];
+
+        foreach ($validated['updates'] as $data) {
+            $rendezVous = RendezVous::findOrFail($data['id']);
+            $rendezVous->patient_id = $data['patient_id'];
+            $rendezVous->docteur_id = $data['docteur_id'];
+            $rendezVous->departement_id = $data['departement_id'];
+            $rendezVous->date_heure = $data['date_heure'];
+            $rendezVous->traitement_id = $data['traitement_id'];
+            $rendezVous->statut = $data['statut'];
+            $rendezVous->save();
+
+            $updatedItems[] = $rendezVous;
+        }
+
+        return response()->json($updatedItems, 200);
     }
 
-    return response()->json($updatedItems, 200);
-}
-
+    // Suppression d’un ou plusieurs rendez-vous
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {

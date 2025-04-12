@@ -7,61 +7,56 @@ use Illuminate\Http\Request;
 
 class TypecertificatController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Liste des types de certificats
     public function index()
     {
         $typeCertificats = TypeCertificat::all();
         return response()->json($typeCertificats);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Formulaire de création (inutile en API)
     public function create()
     {
-        // If you're using API only, this may not be needed.
+        // API only
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Enregistrement de plusieurs types de certificats
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'typecertificats' => 'required|array',
             'typecertificats.*.type_certificat' => 'required|string',
             'typecertificats.*.description' => 'required|string'
         ]);
 
         $createdItems = [];
+
         foreach ($validated['typecertificats'] as $data) {
-            $createdItems[] = TypeCertificat::create($data);
+            $typeCertificat = new TypeCertificat();
+            $typeCertificat->type_certificat = $data['type_certificat'];
+            $typeCertificat->description = $data['description'];
+            $typeCertificat->save();
+
+            $createdItems[] = $typeCertificat;
         }
 
         return response()->json($createdItems, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // Affiche un type de certificat
     public function show(string $id)
     {
         $typeCertificat = TypeCertificat::findOrFail($id);
         return response()->json($typeCertificat);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // Formulaire d’édition (inutile en API)
     public function edit(string $id)
     {
-        // If you're using API only, this may not be needed.
+        // API only
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // Mise à jour de plusieurs types de certificats
     public function update(Request $request)
     {
         $validated = $request->validate([
@@ -72,18 +67,20 @@ class TypecertificatController extends Controller
         ]);
 
         $updatedItems = [];
+
         foreach ($validated['updates'] as $data) {
-            $item = TypeCertificat::findOrFail($data['id']);
-            $item->update($data);
-            $updatedItems[] = $item;
+            $typeCertificat = TypeCertificat::findOrFail($data['id']);
+            $typeCertificat->type_certificat = $data['type_certificat'];
+            $typeCertificat->description = $data['description'];
+            $typeCertificat->save();
+
+            $updatedItems[] = $typeCertificat;
         }
 
         return response()->json($updatedItems, 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // Suppression
     public function destroy(string $id)
     {
         $typeCertificat = TypeCertificat::findOrFail($id);

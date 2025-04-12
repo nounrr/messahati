@@ -4,43 +4,51 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TypeTraitement;
-use Illuminate\Support\Facades\Storage;
 
 class TypeTraitementController extends Controller
 {
+    // Affiche tous les types de traitements
     public function index()
     {
         $types = TypeTraitement::all();
         return response()->json($types);
     }
 
+    // Formulaire de création (si utilisé avec Blade)
     public function create()
     {
         return view('type-traitements.create');
     }
 
+    // Enregistrement de plusieurs types de traitements (sans mass-assignement)
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'typetraitements' => 'required|array',
             'typetraitements.*.nom' => 'required|string'
         ]);
-    
+
         $createdItems = [];
+
         foreach ($validated['typetraitements'] as $data) {
-            
-            $createdItems[] = TypeTraitement::create($data);
+            $type = new TypeTraitement();
+            $type->nom = $data['nom'];
+            $type->save();
+
+            $createdItems[] = $type;
         }
-    
+
         return response()->json($createdItems, 201);
     }
-    
-   
+
+    // Formulaire d'édition
     public function edit(string $id)
     {
         $type = TypeTraitement::findOrFail($id);
         return view('type-traitements.edit', compact('type'));
     }
 
+    // Mise à jour de plusieurs types de traitements
     public function update(Request $request)
     {
         $validated = $request->validate([
@@ -48,18 +56,21 @@ class TypeTraitementController extends Controller
             'updates.*.id' => 'required|exists:typetraitements,id',
             'updates.*.nom' => 'required|string'
         ]);
-    
+
         $updatedItems = [];
+
         foreach ($validated['updates'] as $data) {
-            $item = TypeTraitement::findOrFail($data['id']);
-            
-            $item->update($data);
-            $updatedItems[] = $item;
+            $type = TypeTraitement::findOrFail($data['id']);
+            $type->nom = $data['nom'];
+            $type->save();
+
+            $updatedItems[] = $type;
         }
-    
+
         return response()->json($updatedItems, 200);
     }
 
+    // Suppression d’un ou plusieurs types
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {

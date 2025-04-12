@@ -8,7 +8,7 @@ use App\Models\Medicament;
 class MedicamentController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Affiche la liste des médicaments.
      */
     public function index()
     {
@@ -17,7 +17,7 @@ class MedicamentController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Affiche le formulaire de création.
      */
     public function create()
     {
@@ -25,35 +25,44 @@ class MedicamentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Enregistre de nouveaux médicaments (instanciation sans mass-assignement).
      */
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'medicaments.*.nom' => 'required|string',
-        'medicaments.*.prix' => 'required|numeric',
-        'medicaments.*.description' => 'nullable|string',
-        'medicaments.*.typemedicaments_id' => 'required|exists:typemedicaments,id',
-        'medicaments.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-    ]);
+    {
+        $validated = $request->validate([
+            'medicaments' => 'required|array',
+            'medicaments.*.nom' => 'required|string',
+            'medicaments.*.prix' => 'required|numeric',
+            'medicaments.*.description' => 'nullable|string',
+            'medicaments.*.typemedicaments_id' => 'required|exists:typemedicaments,id',
+            'medicaments.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
 
-    $created = [];
-    foreach ($validated['medicaments'] as $data) {
-        if (isset($data['image'])) {
-            $filename = time() . '_' . $data['image']->getClientOriginalName();
-            $data['image']->storeAs('public/images', $filename);
-            $data['image'] = $filename;
+        $created = [];
+
+        foreach ($validated['medicaments'] as $index => $data) {
+            $medicament = new Medicament();
+            $medicament->nom = $data['nom'];
+            $medicament->prix = $data['prix'];
+            $medicament->description = $data['description'] ?? null;
+            $medicament->typemedicaments_id = $data['typemedicaments_id'];
+
+            if ($request->hasFile("medicaments.$index.image")) {
+                $file = $request->file("medicaments.$index.image");
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->storeAs('public/images', $filename);
+                $medicament->image = $filename;
+            }
+
+            $medicament->save();
+            $created[] = $medicament;
         }
 
-        $created[] = Medicament::create($data);
+        return response()->json($created, 201);
     }
 
-    return response()->json($created, 201);
-}
-
-
     /**
-     * Display the specified resource.
+     * Affiche un médicament spécifique.
      */
     public function show($id)
     {
@@ -62,7 +71,7 @@ class MedicamentController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Affiche le formulaire d’édition.
      */
     public function edit($id)
     {
@@ -71,41 +80,46 @@ class MedicamentController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Met à jour des médicaments (sans mass-assignement).
      */
     public function update(Request $request)
-{
-    $validated = $request->validate([
-        'medicaments.*.id' => 'required|exists:medicaments,id',
-        'medicaments.*.nom' => 'required|string',
-        'medicaments.*.prix' => 'required|numeric',
-        'medicaments.*.description' => 'nullable|string',
-        'medicaments.*.typemedicaments_id' => 'required|exists:typemedicaments,id',
-        'medicaments.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-    ]);
+    {
+        $validated = $request->validate([
+            'medicaments' => 'required|array',
+            'medicaments.*.id' => 'required|exists:medicaments,id',
+            'medicaments.*.nom' => 'required|string',
+            'medicaments.*.prix' => 'required|numeric',
+            'medicaments.*.description' => 'nullable|string',
+            'medicaments.*.typemedicaments_id' => 'required|exists:typemedicaments,id',
+            'medicaments.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
 
-    $updated = [];
-    foreach ($validated['medicaments'] as $data) {
-        $medicament = Medicament::find($data['id']);
+        $updated = [];
 
-        if (isset($data['image'])) {
-            $filename = time() . '_' . $data['image']->getClientOriginalName();
-            $data['image']->storeAs('public/images', $filename);
-            $data['image'] = $filename;
-        } else {
-            unset($data['image']); // Don't override if not provided
+        foreach ($validated['medicaments'] as $index => $data) {
+            $medicament = Medicament::findOrFail($data['id']);
+
+            $medicament->nom = $data['nom'];
+            $medicament->prix = $data['prix'];
+            $medicament->description = $data['description'] ?? null;
+            $medicament->typemedicaments_id = $data['typemedicaments_id'];
+
+            if ($request->hasFile("medicaments.$index.image")) {
+                $file = $request->file("medicaments.$index.image");
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->storeAs('public/images', $filename);
+                $medicament->image = $filename;
+            }
+
+            $medicament->save();
+            $updated[] = $medicament;
         }
 
-        $medicament->update($data);
-        $updated[] = $medicament;
+        return response()->json($updated, 200);
     }
 
-    return response()->json($updated, 200);
-}
-
-
     /**
-     * Remove the specified resource from storage.
+     * Supprime un médicament.
      */
     public function destroy($id)
     {

@@ -26,17 +26,22 @@ class CertificatsMedicaleController extends Controller
             'certificats_medicale.*.typecertificat_id' => 'required|exists:typecertificats,id',
             'certificats_medicale.*.traitement_id' => 'required|exists:traitements,id'
         ]);
-    
+
         $createdItems = [];
+
         foreach ($validated['certificats_medicale'] as $data) {
-            
-            $createdItems[] = CertificatMedicale::create($data);
+            $item = new CertificatMedicale();
+            $item->description = $data['description'];
+            $item->date_emission = $data['date_emission'];
+            $item->typecertificat_id = $data['typecertificat_id'];
+            $item->traitement_id = $data['traitement_id'];
+            $item->save();
+
+            $createdItems[] = $item;
         }
-    
+
         return response()->json($createdItems, 201);
     }
-    
-
 
     public function show($id)
     {
@@ -60,18 +65,23 @@ class CertificatsMedicaleController extends Controller
             'updates.*.typecertificat_id' => 'required|exists:typecertificats,id',
             'updates.*.traitement_id' => 'required|exists:traitements,id'
         ]);
-    
+
         $updatedItems = [];
+
         foreach ($validated['updates'] as $data) {
             $item = CertificatMedicale::findOrFail($data['id']);
-            
-            $item->update($data);
+            $item->description = $data['description'];
+            $item->date_emission = $data['date_emission'];
+            $item->typecertificat_id = $data['typecertificat_id'];
+            $item->traitement_id = $data['traitement_id'];
+            $item->save();
+
             $updatedItems[] = $item;
         }
-    
+
         return response()->json($updatedItems, 200);
     }
-    
+
     public function destroy($id)
     {
         $certificat = CertificatMedicale::findOrFail($id);

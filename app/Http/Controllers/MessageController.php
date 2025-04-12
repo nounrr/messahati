@@ -8,7 +8,7 @@ use App\Models\Message;
 class MessageController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Affiche tous les messages.
      */
     public function index()
     {
@@ -17,7 +17,7 @@ class MessageController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Affiche le formulaire de création.
      */
     public function create()
     {
@@ -25,34 +25,40 @@ class MessageController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Enregistre plusieurs messages.
      */
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'messages.*.destinataire_id' => 'required|exists:destinataires,id',
-        'messages.*.emetteure_id' => 'required|exists:emetteures,id',
-        'messages.*.destinataire_id' => 'required|exists:destinataires,id',
-        'messages.*.emetteure_id' => 'required|exists:emetteures,id',
-        'messages.*.contenu' => 'required|string',
-        'messages.*.date_envoie' => 'required|date',
-        'messages.*.heure_envoie' => 'required',
-        'messages.*.status' => 'required'
-    ]);
+    {
+        $validated = $request->validate([
+            'messages' => 'required|array',
+            'messages.*.destinataire_id' => 'required|exists:destinataires,id',
+            'messages.*.emetteure_id' => 'required|exists:emetteures,id',
+            'messages.*.contenu' => 'required|string',
+            'messages.*.date_envoie' => 'required|date',
+            'messages.*.heure_envoie' => 'required',
+            'messages.*.status' => 'required'
+        ]);
 
-    $createdItems = [];
-    foreach ($validated['messages'] as $data) {
-        
-        $createdItems[] = Message::create($data);
+        $createdItems = [];
+
+        foreach ($validated['messages'] as $data) {
+            $message = new Message();
+            $message->destinataire_id = $data['destinataire_id'];
+            $message->emetteure_id = $data['emetteure_id'];
+            $message->contenu = $data['contenu'];
+            $message->date_envoie = $data['date_envoie'];
+            $message->heure_envoie = $data['heure_envoie'];
+            $message->status = $data['status'];
+            $message->save();
+
+            $createdItems[] = $message;
+        }
+
+        return response()->json($createdItems, 201);
     }
 
-    return response()->json($createdItems, 201);
-}
-
-
-
     /**
-     * Display the specified resource.
+     * Affiche un message spécifique.
      */
     public function show($id)
     {
@@ -61,7 +67,7 @@ class MessageController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Affiche le formulaire d'édition.
      */
     public function edit($id)
     {
@@ -70,7 +76,7 @@ class MessageController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Met à jour plusieurs messages.
      */
     public function update(Request $request)
     {
@@ -79,33 +85,38 @@ class MessageController extends Controller
             'updates.*.id' => 'required|exists:messages,id',
             'updates.*.destinataire_id' => 'required|exists:destinataires,id',
             'updates.*.emetteure_id' => 'required|exists:emetteures,id',
-            'updates.*.destinataire_id' => 'required|exists:destinataires,id',
-            'updates.*.emetteure_id' => 'required|exists:emetteures,id',
             'updates.*.contenu' => 'required|string',
             'updates.*.date_envoie' => 'required|date',
             'updates.*.heure_envoie' => 'required',
             'updates.*.status' => 'required'
         ]);
-    
+
         $updatedItems = [];
+
         foreach ($validated['updates'] as $data) {
-            $item = Message::findOrFail($data['id']);
-            
-            $item->update($data);
-            $updatedItems[] = $item;
+            $message = Message::findOrFail($data['id']);
+            $message->destinataire_id = $data['destinataire_id'];
+            $message->emetteure_id = $data['emetteure_id'];
+            $message->contenu = $data['contenu'];
+            $message->date_envoie = $data['date_envoie'];
+            $message->heure_envoie = $data['heure_envoie'];
+            $message->status = $data['status'];
+            $message->save();
+
+            $updatedItems[] = $message;
         }
-    
+
         return response()->json($updatedItems, 200);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprime un message.
      */
     public function destroy($id)
     {
         $message = Message::findOrFail($id);
         $message->delete();
 
-        return redirect()->route('messages.index')->with('success', 'Message deleted successfully.');
+        return redirect()->route('messages.index')->with('success', 'Message supprimé avec succès.');
     }
 }
