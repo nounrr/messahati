@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Clinique;
+use Illuminate\Support\Facades\Storage;
 
 class CliniqueController extends Controller
 {
@@ -19,17 +20,35 @@ class CliniqueController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'adresse' => 'required|string|max:255',
-            'telephone' => 'required|string|max:15',
-        ]);
+{
+    $validatedData = $request->validate([
+        'cliniques' => 'required|array',
+        'cliniques.*.nom' => 'required|string|max:255',
+        'cliniques.*.adresse' => 'required|string|max:255',
+        'cliniques.*.email' => 'required|email',
+        'cliniques.*.site_web' => 'nullable|url',
+        'cliniques.*.description' => 'nullable|string',
+        'cliniques.*.logo' => 'nullable|file|image|max:2048',
+    ]);
 
-        Clinique::create($validatedData);
+    foreach ($validatedData['cliniques'] as $key => $data) {
+        // Gestion du fichier logo
+        if ($request->hasFile("cliniques.$key.logo")) {
+            $logoFile = $request->file("cliniques.$key.logo");
+            $cliniqueName = str_replace(' ', '_', strtolower($data['nom']));
+            $path = "image/clinique/{$cliniqueName}";
 
-        return redirect()->route('cliniques.index')->with('success', 'Clinique créée avec succès.');
+            $logoFile->move(public_path($path), 'logo.png');
+
+            $data['logo_path'] = $path . '/logo.png';
+        }
+
+        Clinique::create($data);
     }
+
+    return response()->json(['message' => 'Cliniques créées avec succès.']);
+}
+
 
     public function show($id)
     {
@@ -43,19 +62,45 @@ class CliniqueController extends Controller
         return view('cliniques.edit', compact('clinique'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'adresse' => 'required|string|max:255',
-            'telephone' => 'required|string|max:15',
-        ]);
+    public function update(Request $request, string $id = null)
+{
+    $validatedData = $request->validate([
+        'cliniques' => 'required|array',
+        'cliniques.*.id' => 'required|exists:cliniques,id',
+        'cliniques.*.nom' => 'required|string|max:255',
+        'cliniques.*.adresse' => 'required|string|max:255',
+        'cliniques.*.email' => 'required|email',
+        'cliniques.*.site_web' => 'nullable|url',
+        'cliniques.*.description' => 'nullable|string',
+        'cliniques.*.logo' => 'nullable|file|image|max:2048',
+    ]);
 
-        $clinique = Clinique::findOrFail($id);
-        $clinique->update($validatedData);
+    foreach ($validatedData['cliniques'] as $key => $data) {
+        $clinique = Clinique::find($data['id']);
 
-        return redirect()->route('cliniques.index')->with('success', 'Clinique mise à jour avec succès.');
+        // Gestion du nouveau fichier logo (si fourni)
+        if ($request->hasFile("cliniques.$key.logo")) {
+            $logoFile = $request->file("cliniques.$key.logo");
+            $cliniqueName = str_replace(' ', '_', strtolower($data['nom']));
+            $path = "image/clinique/{$cliniqueName}";
+
+            // Supprimer l'ancien logo si existe
+            if ($clinique->logo_path && file_exists(public_path($clinique->logo_path))) {
+                unlink(public_path($clinique->logo_path));
+            }
+
+            // Sauvegarder le nouveau fichier logo
+            $logoFile->move(public_path($path), 'logo.png');
+
+            $data['logo_path'] = $path . '/logo.png';
+        }
+
+        $clinique->update($data);
     }
+
+    return response()->json(['message' => 'Cliniques mises à jour avec succès.']);
+}
+
 
     public function destroy($id)
     {

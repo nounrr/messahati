@@ -20,27 +20,22 @@ class MutuelController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'mutuels.*.nom_mutuel' => 'required|string',
-        'mutuels.*.code_mutuel' => 'required|string|unique:mutuels,code_mutuel',
-        'mutuels.*.description' => 'nullable|string',
-        'mutuels.*.date_creation' => 'required|date',
-        'mutuels.*.taux_remboursement' => 'required|numeric',
-    ]);
-
-    // Boucle sur chaque mutuel et crée une nouvelle entrée
-    $createdMutuels = [];
-    foreach ($validated['mutuels'] as $data) {
-        $createdMutuels[] = Mutuel::create($data);
+    {
+        $validated = $request->validate([
+            'mutuels.*.nom_mutuel' => 'required|string'
+        ]);
+    
+        $createdItems = [];
+        foreach ($validated['mutuels'] as $data) {
+            
+            $createdItems[] = Mutuel::create($data);
+        }
+    
+        return response()->json($createdItems, 201);
     }
-
-    return response()->json([
-        'message' => count($createdMutuels) . ' Mutuels created successfully.',
-        'mutuels' => $createdMutuels
-    ], 201);
-}
-
+    
+  
+    
 
     public function show($id)
     {
@@ -54,22 +49,24 @@ class MutuelController extends Controller
         return view('mutuel.edit', compact('mutuel'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $mutuel = Mutuel::findOrFail($id);
         $validated = $request->validate([
-            'nom_mutuel' => 'required|string',
-            'code_mutuel' => 'required|string|unique:mutuels,code_mutuel,' . $id,
-            'description' => 'nullable|string',
-            'date_creation' => 'required|date',
-            'taux_remboursement' => 'required|numeric',
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:mutuels,id',
+            'updates.*.nom_mutuel' => 'required|string'
         ]);
-      
-            $mutuel->update($validated);
-        
-        return redirect()->route('mutuel.index')->with('success', 'Mutuel updated successfully');
+    
+        $updatedItems = [];
+        foreach ($validated['updates'] as $data) {
+            $item = Mutuel::findOrFail($data['id']);
+            
+            $item->update($data);
+            $updatedItems[] = $item;
+        }
+    
+        return response()->json($updatedItems, 200);
     }
-
     public function destroy($id)
     {
         Mutuel::findOrFail($id)->delete();

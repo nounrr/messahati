@@ -17,47 +17,59 @@ class PaymentController extends Controller
     {
         return view('payments.create');
     }
-
+//store
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'amount' => 'required|numeric',
-            'method' => 'required|string|max:255',
-            'date' => 'required|date',
-            'user_id' => 'required|exists:users,id',
-        ]);
+{
+    $validated = $request->validate([
+        'payments.*.rendez_vous_id' => 'required|exists:rendez_vouss,id',
+        'payments.*.montant' => 'required|numeric',
+        'payments.*.date' => 'required|date',
+        'payments.*.status' => 'required'
+    ]);
 
-        Payment::create($validatedData);
-
-        return redirect()->route('payments.index')->with('success', 'Payment created successfully.');
+    $createdItems = [];
+    foreach ($validated['payments'] as $data) {
+        
+        $createdItems[] = Payment::create($data);
     }
 
+    return response()->json($createdItems, 201);
+}
+
+//show
     public function show($id)
     {
         $payment = Payment::findOrFail($id);
         return response()->json($payment);
     }
-
+//edit
     public function edit($id)
     {
         $payment = Payment::findOrFail($id);
         return view('payments.edit', compact('payment'));
     }
+//update
+    public function update(Request $request)
+{
+    $validated = $request->validate([
+        'updates' => 'required|array',
+        'updates.*.id' => 'required|exists:payments,id',
+        'updates.*.rendez_vous_id' => 'required|exists:rendez_vouss,id',
+        'updates.*.montant' => 'required|numeric',
+        'updates.*.date' => 'required|date',
+        'updates.*.status' => 'required'
+    ]);
 
-    public function update(Request $request, $id)
-    {
-        $validatedData = $request->validate([
-            'amount' => 'required|numeric',
-            'method' => 'required|string|max:255',
-            'date' => 'required|date',
-            'user_id' => 'required|exists:users,id',
-        ]);
-
-        $payment = Payment::findOrFail($id);
-        $payment->update($validatedData);
-
-        return redirect()->route('payments.index')->with('success', 'Payment updated successfully.');
+    $updatedItems = [];
+    foreach ($validated['updates'] as $data) {
+        $item = Payment::findOrFail($data['id']);
+        
+        $item->update($data);
+        $updatedItems[] = $item;
     }
+
+    return response()->json($updatedItems, 200);
+}
 
     public function destroy($id)
     {

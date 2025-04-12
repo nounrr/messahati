@@ -2,33 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RendezVous extends Model
+class Rendezvous extends Model
 {
-    use HasFactory;
-
-    protected $fillable = ['date_heure', 'statut', 'id_user'];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
+    protected $fillable = ['date_heure','statut'];
+    public function patient(){
+        return $this->belongsTo(User::class,"patient_id");
+    }
+    public function docteur(){
+        return $this->belongsTo(User::class,"docteur_id");
+    }
+    public function departement(){
+        return $this->belongsTo(Departement::class);
+    }
+    public function payment(){
+        return $this->hasOne(Payment::class);
+    }
+    public function traitement(){
+        return $this->belongsTo(Traitement::class);
     }
 
-    public function certificatMedical()
-    {
-        return $this->belongsTo(CertificatMedical::class);
-    }
-
-    public function paiement()
-    {
-        return $this->hasOne(Paiement::class);
-    }
-
-    public function ordonnance()
-    {
-        return $this->belongsTo(Ordonnance::class);
-    }
 }
-

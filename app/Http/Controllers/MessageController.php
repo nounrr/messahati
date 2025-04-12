@@ -28,20 +28,28 @@ class MessageController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'destinataire_id' => 'required|exists:users,id',
-            'emetteure_id' => 'required|exists:users,id',
-            'contenu' => 'required|string',
-            'date_envoie' => 'required|date',
-            'heure_envoie' => 'required|date_format:H:i:s',
-            'status' => 'required|boolean',
-        ]);
+{
+    $validated = $request->validate([
+        'messages.*.destinataire_id' => 'required|exists:destinataires,id',
+        'messages.*.emetteure_id' => 'required|exists:emetteures,id',
+        'messages.*.destinataire_id' => 'required|exists:destinataires,id',
+        'messages.*.emetteure_id' => 'required|exists:emetteures,id',
+        'messages.*.contenu' => 'required|string',
+        'messages.*.date_envoie' => 'required|date',
+        'messages.*.heure_envoie' => 'required',
+        'messages.*.status' => 'required'
+    ]);
 
-        Message::create($validatedData);
-
-        return redirect()->route('messages.index')->with('success', 'Message created successfully.');
+    $createdItems = [];
+    foreach ($validated['messages'] as $data) {
+        
+        $createdItems[] = Message::create($data);
     }
+
+    return response()->json($createdItems, 201);
+}
+
+
 
     /**
      * Display the specified resource.
@@ -64,21 +72,30 @@ class MessageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'destinataire_id' => 'required|exists:users,id',
-            'emetteure_id' => 'required|exists:users,id',
-            'contenu' => 'required|string',
-            'date_envoie' => 'required|date',
-            'heure_envoie' => 'required|date_format:H:i:s',
-            'status' => 'required|boolean',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:messages,id',
+            'updates.*.destinataire_id' => 'required|exists:destinataires,id',
+            'updates.*.emetteure_id' => 'required|exists:emetteures,id',
+            'updates.*.destinataire_id' => 'required|exists:destinataires,id',
+            'updates.*.emetteure_id' => 'required|exists:emetteures,id',
+            'updates.*.contenu' => 'required|string',
+            'updates.*.date_envoie' => 'required|date',
+            'updates.*.heure_envoie' => 'required',
+            'updates.*.status' => 'required'
         ]);
-
-        $message = Message::findOrFail($id);
-        $message->update($validatedData);
-
-        return redirect()->route('messages.index')->with('success', 'Message updated successfully.');
+    
+        $updatedItems = [];
+        foreach ($validated['updates'] as $data) {
+            $item = Message::findOrFail($data['id']);
+            
+            $item->update($data);
+            $updatedItems[] = $item;
+        }
+    
+        return response()->json($updatedItems, 200);
     }
 
     /**

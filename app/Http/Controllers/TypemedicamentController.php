@@ -27,16 +27,20 @@ class TypemedicamentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-        ]);
+    // STORE
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'typemedicaments.*.nom' => 'required|string',
+    ]);
 
-        TypeMedicament::create($validatedData);
-
-        return redirect()->route('typemedicaments.index')->with('success', 'Type de médicament créé avec succès.');
+    $created = [];
+    foreach ($validated['typemedicaments'] as $data) {
+        $created[] = TypeMedicament::create($data);
     }
+
+    return response()->json($created, 201);
+}
 
     /**
      * Display the specified resource.
@@ -59,17 +63,22 @@ class TypemedicamentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
-    {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-        ]);
+    public function update(Request $request)
+{
+    $validated = $request->validate([
+        'typemedicaments.*.id' => 'required|exists:typemedicaments,id',
+        'typemedicaments.*.nom' => 'required|string',
+    ]);
 
-        $type = TypeMedicament::findOrFail($id);
-        $type->update($validatedData);
-
-        return redirect()->route('typemedicaments.index')->with('success', 'Type de médicament mis à jour avec succès.');
+    $updated = [];
+    foreach ($validated['typemedicaments'] as $data) {
+        $model = TypeMedicament::findOrFail($data['id']);
+        $model->update($data);
+        $updated[] = $model;
     }
+
+    return response()->json($updated, 200);
+}
 
     /**
      * Remove the specified resource from storage.

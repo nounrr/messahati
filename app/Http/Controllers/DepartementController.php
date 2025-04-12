@@ -22,19 +22,27 @@ class DepartementController extends Controller
 
     // Valide et enregistre un nouveau département
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'departements' => 'required|array',
-            'departements.*.nom' => 'required|string|max:255',
-            'departements.*.description' => 'nullable|string',
-        ]);
+{
+    $validatedData = $request->validate([
+        'departements' => 'required|array',
+        'departements.*.nom' => 'required|string|max:255',
+        'departements.*.description' => 'nullable|string',
+        'departements.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        foreach ($validatedData['departements'] as $data) {
-            Departement::create($data);
+    foreach ($validatedData['departements'] as $key => $data) {
+        if ($request->hasFile("departements.$key.image")) {
+            $file = $request->file("departements.$key.image");
+            $path = $file->store('departements', 'public');
+            $data['img_path'] = $path;
         }
 
-        return response()->json(['message' => 'Départements créés avec succès.']);
+        Departement::create($data);
     }
+
+    return response()->json(['message' => 'Départements créés avec succès.']);
+}
+
 
     // Retourne les détails d'un département spécifique
     public function show(string $id)
@@ -52,21 +60,29 @@ class DepartementController extends Controller
 
     // Met à jour un département ou plusieurs existants
     public function update(Request $request, string $id = null)
-    {
-        $validatedData = $request->validate([
-            'departements' => 'required|array',
-            'departements.*.id' => 'required|exists:departements,id',
-            'departements.*.nom' => 'required|string|max:255',
-            'departements.*.description' => 'nullable|string',
-        ]);
+{
+    $validatedData = $request->validate([
+        'departements' => 'required|array',
+        'departements.*.id' => 'required|exists:departements,id',
+        'departements.*.nom' => 'required|string|max:255',
+        'departements.*.description' => 'nullable|string',
+        'departements.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        foreach ($validatedData['departements'] as $data) {
-            $departement = Departement::find($data['id']);
-            $departement->update($data);
+    foreach ($validatedData['departements'] as $key => $data) {
+        $departement = Departement::find($data['id']);
+
+        if ($request->hasFile("departements.$key.image")) {
+            $file = $request->file("departements.$key.image");
+            $path = $file->store('departements', 'public');
+            $data['img_path'] = $path;
         }
 
-        return response()->json(['message' => 'Départements mis à jour avec succès.']);
+        $departement->update($data);
     }
+
+    return response()->json(['message' => 'Départements mis à jour avec succès.']);
+}
 
     // Supprime un département ou plusieurs spécifiques
     public function destroy(Request $request, string $id = null)

@@ -18,20 +18,23 @@ class AuditLogCliniqueController extends Controller
         return view('audit_logs.create');
     }
 
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'action' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'user_id' => 'required|exists:users,id',
-            'clinique_id' => 'required|exists:cliniques,id',
-            'date' => 'required|date',
-        ]);
+    
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'audit_log_clinique.*.user_id' => 'required|exists:users,id',
+        'audit_log_clinique.*.action' => 'required|string',
+        'audit_log_clinique.*.date' => 'required|date'
+    ]);
 
-        AuditLogClinique::create($validatedData);
-
-        return redirect()->route('audit_logs.index')->with('success', 'Audit log créé avec succès.');
+    $createdItems = [];
+    foreach ($validated['audit_log_clinique'] as $data) {
+        
+        $createdItems[] = Auditlogclinique::create($data);
     }
+
+    return response()->json($createdItems, 201);
+}
 
     public function show($id)
     {
@@ -44,21 +47,25 @@ class AuditLogCliniqueController extends Controller
         $auditLog = AuditLogClinique::findOrFail($id);
         return view('audit_logs.edit', compact('auditLog'));
     }
-
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'action' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'user_id' => 'required|exists:users,id',
-            'clinique_id' => 'required|exists:cliniques,id',
-            'date' => 'required|date',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:audit_log_clinique,id',
+            'updates.*.user_id' => 'required|exists:users,id',
+            'updates.*.action' => 'required|string',
+            'updates.*.date' => 'required|date'
         ]);
-
-        $auditLog = AuditLogClinique::findOrFail($id);
-        $auditLog->update($validatedData);
-
-        return redirect()->route('audit_logs.index')->with('success', 'Audit log mis à jour avec succès.');
+    
+        $updatedItems = [];
+        foreach ($validated['updates'] as $data) {
+            $item = Auditlogclinique::findOrFail($data['id']);
+            
+            $item->update($data);
+            $updatedItems[] = $item;
+        }
+    
+        return response()->json($updatedItems, 200);
     }
 
     public function destroy($id)

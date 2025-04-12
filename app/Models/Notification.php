@@ -2,18 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    use HasFactory;
+    protected $fillable = ['date','statut'];
 
-    protected $fillable = ['message', 'statut', 'id_user'];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
+    public function users(){
+        return $this->belongsToMany(User::class)->using(NotificationUser::class)->withPivot('message');
     }
 }
-

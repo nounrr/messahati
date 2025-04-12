@@ -7,61 +7,70 @@ use App\Models\Ordonance;
 
 class OrdonanceController extends Controller
 {
+    //index
     public function index()
     {
         $ordonances = Ordonance::all();
         return response()->json($ordonances);
     }
-
+//create
     public function create()
     {
         return view('ordonances.create');
     }
-
+//store
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'ordonances' => 'required|array',
-            'ordonances.*.nom' => 'required|string|max:255',
-            'ordonances.*.description' => 'nullable|string',
-        ]);
+{
+    $validated = $request->validate([
+        'ordonances.*.date_emission' => 'required|date',
+        'ordonances.*.description' => 'required|string',
+        'ordonances.*.traitement_id' => 'required|exists:traitements,id'
+    ]);
 
-        foreach ($validatedData['ordonances'] as $data) {
-            Ordonance::create($data);
-        }
-
-        return response()->json(['message' => 'Ordonnances créées avec succès.']);
+    $createdItems = [];
+    foreach ($validated['ordonances'] as $data) {
+        
+        $createdItems[] = Ordonance::create($data);
     }
 
+    return response()->json($createdItems, 201);
+}
+
+
+// show 
     public function show(string $id)
     {
         $ordonance = Ordonance::findOrFail($id);
         return response()->json($ordonance);
     }
-
+// edit
     public function edit(string $id)
     {
         $ordonance = Ordonance::findOrFail($id);
         return view('ordonances.edit', compact('ordonance'));
     }
-
-    public function update(Request $request, string $id = null)
+//update 
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'ordonances' => 'required|array',
-            'ordonances.*.id' => 'required|exists:ordonances,id',
-            'ordonances.*.nom' => 'required|string|max:255',
-            'ordonances.*.description' => 'nullable|string',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:ordonances,id',
+            'updates.*.date_emission' => 'required|date',
+            'updates.*.description' => 'required|string',
+            'updates.*.traitement_id' => 'required|exists:traitements,id'
         ]);
-
-        foreach ($validatedData['ordonances'] as $data) {
-            $ordonance = Ordonance::find($data['id']);
-            $ordonance->update($data);
+    
+        $updatedItems = [];
+        foreach ($validated['updates'] as $data) {
+            $item = Ordonance::findOrFail($data['id']);
+            
+            $item->update($data);
+            $updatedItems[] = $item;
         }
-
-        return response()->json(['message' => 'Ordonnances mises à jour avec succès.']);
+    
+        return response()->json($updatedItems, 200);
     }
-
+//delete
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {

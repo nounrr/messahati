@@ -29,18 +29,23 @@ class ChargeController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'prix_unitaire' => 'required|numeric',
-            'quantite' => 'required|integer',
-            'partenaire_id' => 'required|exists:partenaires,id',
+        $validated = $request->validate([
+            'charges.*.nom' => 'required|string',
+            'charges.*.prix_unitaire' => 'required|numeric',
+            'charges.*.quantite' => 'required|numeric',
+            'charges.*.partenaire_id' => 'required|exists:partenaires,id'
         ]);
-
-        Charge::create($validatedData);
-
-        return redirect()->route('charges.index')->with('success', 'Charge created successfully.');
+    
+        $createdItems = [];
+        foreach ($validated['charges'] as $data) {
+            
+            $createdItems[] = Charge::create($data);
+        }
+    
+        return response()->json($createdItems, 201);
     }
-
+    
+    
     /**
      * Display the specified resource.
      */
@@ -62,19 +67,26 @@ class ChargeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'prix_unitaire' => 'required|numeric',
-            'quantite' => 'required|integer',
-            'partenaire_id' => 'required|exists:partenaires,id',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:charges,id',
+            'updates.*.nom' => 'required|string',
+            'updates.*.prix_unitaire' => 'required|numeric',
+            'updates.*.quantite' => 'required|numeric',
+            'updates.*.partenaire_id' => 'required|exists:partenaires,id'
         ]);
-
-        $charge = Charge::findOrFail($id);
-        $charge->update($validatedData);
-
-        return redirect()->route('charges.index')->with('success', 'Charge updated successfully.');
+    
+        $updatedItems = [];
+        foreach ($validated['updates'] as $data) {
+            $item = Charge::findOrFail($data['id']);
+            
+            $item->update($data);
+            $updatedItems[] = $item;
+        }
+    
+        return response()->json($updatedItems, 200);
     }
 
     /**

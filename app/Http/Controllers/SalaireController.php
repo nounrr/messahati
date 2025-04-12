@@ -27,19 +27,24 @@ class SalaireController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'montant' => 'required|numeric',
-            'primes' => 'nullable|numeric',
-            'date' => 'required|date',
-            'user_id' => 'required|exists:users,id',
-        ]);
+    // STORE
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'salaires.*.montant' => 'required|numeric',
+        'salaires.*.primes' => 'required|numeric',
+        'salaires.*.date' => 'required|date',
+        'salaires.*.user_id' => 'required|exists:users,id',
+    ]);
 
-        Salaire::create($validatedData);
-
-        return redirect()->route('salaires.index')->with('success', 'Salaire créé avec succès.');
+    $created = [];
+    foreach ($validated['salaires'] as $data) {
+        $created[] = Salaire::create($data);
     }
+
+    return response()->json($created, 201);
+}
+
 
     /**
      * Display the specified resource.
@@ -62,20 +67,27 @@ class SalaireController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
-    {
-        $validatedData = $request->validate([
-            'montant' => 'required|numeric',
-            'primes' => 'nullable|numeric',
-            'date' => 'required|date',
-            'user_id' => 'required|exists:users,id',
-        ]);
+    // UPDATE
+public function update(Request $request)
+{
+    $validated = $request->validate([
+        'salaires.*.id' => 'required|exists:salaires,id',
+        'salaires.*.montant' => 'required|numeric',
+        'salaires.*.primes' => 'required|numeric',
+        'salaires.*.date' => 'required|date',
+        'salaires.*.user_id' => 'required|exists:users,id',
+    ]);
 
-        $salaire = Salaire::findOrFail($id);
-        $salaire->update($validatedData);
-
-        return redirect()->route('salaires.index')->with('success', 'Salaire mis à jour avec succès.');
+    $updated = [];
+    foreach ($validated['salaires'] as $data) {
+        $salaire = Salaire::findOrFail($data['id']);
+        $salaire->update($data);
+        $updated[] = $salaire;
     }
+
+    return response()->json($updated, 200);
+}
+
 
     /**
      * Remove the specified resource from storage.

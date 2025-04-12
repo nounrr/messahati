@@ -28,18 +28,29 @@ class MedicamentController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'prix' => 'required|numeric',
-            'type_medicament_id' => 'required|exists:type_medicaments,id',
-        ]);
+{
+    $validated = $request->validate([
+        'medicaments.*.nom' => 'required|string',
+        'medicaments.*.prix' => 'required|numeric',
+        'medicaments.*.description' => 'nullable|string',
+        'medicaments.*.typemedicaments_id' => 'required|exists:typemedicaments,id',
+        'medicaments.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    ]);
 
-        Medicament::create($validatedData);
+    $created = [];
+    foreach ($validated['medicaments'] as $data) {
+        if (isset($data['image'])) {
+            $filename = time() . '_' . $data['image']->getClientOriginalName();
+            $data['image']->storeAs('public/images', $filename);
+            $data['image'] = $filename;
+        }
 
-        return redirect()->route('medicaments.index')->with('success', 'Médicament créé avec succès.');
+        $created[] = Medicament::create($data);
     }
+
+    return response()->json($created, 201);
+}
+
 
     /**
      * Display the specified resource.
@@ -62,20 +73,36 @@ class MedicamentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
-    {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'prix' => 'required|numeric',
-            'type_medicament_id' => 'required|exists:type_medicaments,id',
-        ]);
+    public function update(Request $request)
+{
+    $validated = $request->validate([
+        'medicaments.*.id' => 'required|exists:medicaments,id',
+        'medicaments.*.nom' => 'required|string',
+        'medicaments.*.prix' => 'required|numeric',
+        'medicaments.*.description' => 'nullable|string',
+        'medicaments.*.typemedicaments_id' => 'required|exists:typemedicaments,id',
+        'medicaments.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    ]);
 
-        $medicament = Medicament::findOrFail($id);
-        $medicament->update($validatedData);
+    $updated = [];
+    foreach ($validated['medicaments'] as $data) {
+        $medicament = Medicament::find($data['id']);
 
-        return redirect()->route('medicaments.index')->with('success', 'Médicament mis à jour avec succès.');
+        if (isset($data['image'])) {
+            $filename = time() . '_' . $data['image']->getClientOriginalName();
+            $data['image']->storeAs('public/images', $filename);
+            $data['image'] = $filename;
+        } else {
+            unset($data['image']); // Don't override if not provided
+        }
+
+        $medicament->update($data);
+        $updated[] = $medicament;
     }
+
+    return response()->json($updated, 200);
+}
+
 
     /**
      * Remove the specified resource from storage.

@@ -20,17 +20,23 @@ class CertificatsMedicaleController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'description' => 'required|string',
-            'date_emission' => 'required|date',
-            'typecertificat_id' => 'required|exists:typecertificats,id',
-            'traitement_id' => 'required|exists:traitements,id',
+        $validated = $request->validate([
+            'certificats_medicale.*.description' => 'required|string',
+            'certificats_medicale.*.date_emission' => 'required|date',
+            'certificats_medicale.*.typecertificat_id' => 'required|exists:typecertificats,id',
+            'certificats_medicale.*.traitement_id' => 'required|exists:traitements,id'
         ]);
-
-        CertificatMedicale::create($validatedData);
-
-        return redirect()->route('certificats.index')->with('success', 'Certificat médical créé avec succès.');
+    
+        $createdItems = [];
+        foreach ($validated['certificats_medicale'] as $data) {
+            
+            $createdItems[] = CertificatMedicale::create($data);
+        }
+    
+        return response()->json($createdItems, 201);
     }
+    
+
 
     public function show($id)
     {
@@ -44,21 +50,28 @@ class CertificatsMedicaleController extends Controller
         return view('certificats.edit', compact('certificat'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'description' => 'required|string',
-            'date_emission' => 'required|date',
-            'typecertificat_id' => 'required|exists:typecertificats,id',
-            'traitement_id' => 'required|exists:traitements,id',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:certificats_medicale,id',
+            'updates.*.description' => 'required|string',
+            'updates.*.date_emission' => 'required|date',
+            'updates.*.typecertificat_id' => 'required|exists:typecertificats,id',
+            'updates.*.traitement_id' => 'required|exists:traitements,id'
         ]);
-
-        $certificat = CertificatMedicale::findOrFail($id);
-        $certificat->update($validatedData);
-
-        return redirect()->route('certificats.index')->with('success', 'Certificat médical mis à jour avec succès.');
+    
+        $updatedItems = [];
+        foreach ($validated['updates'] as $data) {
+            $item = CertificatMedicale::findOrFail($data['id']);
+            
+            $item->update($data);
+            $updatedItems[] = $item;
+        }
+    
+        return response()->json($updatedItems, 200);
     }
-
+    
     public function destroy($id)
     {
         $certificat = CertificatMedicale::findOrFail($id);

@@ -23,17 +23,23 @@ class FeedbackController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'message' => 'required|string',
-            'rating' => 'required|integer|min:1|max:5',
+            'feedbacks.*.user_id' => 'required|exists:users,id',
+            'feedbacks.*.contenu' => 'required|string',
+            'feedbacks.*.rating' => 'required|numeric',
+            'feedbacks.*.date' => 'required|date',
+            'feedbacks.*.status' => 'required'
         ]);
-
-        //$validated['user_id'] = auth()->id();
-        foreach ($validated['feedback'] as $data){
-            Feedback::create($validated);
-        } 
-        return redirect()->route('feedback.index')->with('success', 'Feedback submitted successfully');
+    
+        $createdItems = [];
+        foreach ($validated['feedbacks'] as $data) {
+            
+            $createdItems[] = Feedback::create($data);
+        }
+    
+        return response()->json($createdItems, 201);
     }
-
+    
+   
     public function show($id)
     {
         $feedback = Feedback::with('user')->findOrFail($id);
@@ -46,18 +52,29 @@ class FeedbackController extends Controller
         return view('feedback.edit', compact('feedback'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $feedback = Feedback::findOrFail($id);
         $validated = $request->validate([
-            'message' => 'required|string',
-            'rating' => 'required|integer|min:1|max:5',
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:feedbacks,id',
+            'updates.*.user_id' => 'required|exists:users,id',
+            'updates.*.contenu' => 'required|string',
+            'updates.*.rating' => 'required|numeric',
+            'updates.*.date' => 'required|date',
+            'updates.*.status' => 'required'
         ]);
-        foreach ($validated['feedback'] as $data){
-            $feedback->update($validated);
-        } 
-        return redirect()->route('feedback.index')->with('success', 'Feedback updated successfully');
+    
+        $updatedItems = [];
+        foreach ($validated['updates'] as $data) {
+            $item = Feedback::findOrFail($data['id']);
+            
+            $item->update($data);
+            $updatedItems[] = $item;
+        }
+    
+        return response()->json($updatedItems, 200);
     }
+
 
     public function destroy($id)
     {

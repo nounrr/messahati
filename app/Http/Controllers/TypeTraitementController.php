@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TypeTraitement;
+use Illuminate\Support\Facades\Storage;
 
 class TypeTraitementController extends Controller
 {
@@ -20,46 +21,43 @@ class TypeTraitementController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'types' => 'required|array',
-            'types.*.nom' => 'required|string|max:255',
-            'types.*.description' => 'nullable|string',
+        $validated = $request->validate([
+            'typetraitements.*.nom' => 'required|string'
         ]);
-
-        foreach ($validatedData['types'] as $data) {
-            TypeTraitement::create($data);
+    
+        $createdItems = [];
+        foreach ($validated['typetraitements'] as $data) {
+            
+            $createdItems[] = TypeTraitement::create($data);
         }
-
-        return response()->json(['message' => 'Types de traitements créés avec succès.']);
+    
+        return response()->json($createdItems, 201);
     }
-
-    public function show(string $id)
-    {
-        $type = TypeTraitement::findOrFail($id);
-        return response()->json($type);
-    }
-
+    
+   
     public function edit(string $id)
     {
         $type = TypeTraitement::findOrFail($id);
         return view('type-traitements.edit', compact('type'));
     }
 
-    public function update(Request $request, string $id = null)
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'types' => 'required|array',
-            'types.*.id' => 'required|exists:type_traitements,id',
-            'types.*.nom' => 'required|string|max:255',
-            'types.*.description' => 'nullable|string',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:typetraitements,id',
+            'updates.*.nom' => 'required|string'
         ]);
-
-        foreach ($validatedData['types'] as $data) {
-            $type = TypeTraitement::find($data['id']);
-            $type->update($data);
+    
+        $updatedItems = [];
+        foreach ($validated['updates'] as $data) {
+            $item = TypeTraitement::findOrFail($data['id']);
+            
+            $item->update($data);
+            $updatedItems[] = $item;
         }
-
-        return response()->json(['message' => 'Types de traitements mis à jour avec succès.']);
+    
+        return response()->json($updatedItems, 200);
     }
 
     public function destroy(Request $request, string $id = null)
