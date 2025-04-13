@@ -115,16 +115,19 @@ class DepartementController extends Controller
 
     use ExcelExportImport;
 
-    // Export and import methods
     public function export()
     {
         return $this->exportExcel(DepartementExport::class, 'departements.xlsx', Departement::all());
     }
-    
 
     public function import(Request $request)
     {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx',
+        ]);
+
         $this->importExcel($request->file('file'), DepartementImport::class);
+
         return response()->json(['message' => 'Départements importés avec succès.']);
     }
 }
