@@ -28,24 +28,62 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
+    use Illuminate\Support\Facades\Hash;
+    use Illuminate\Auth\Events\Registered;
+    use Illuminate\Http\RedirectResponse;
+    use App\Models\User;
+    
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        $validated = $request->validate([
+            'users.*.name' => 'required|string',
+            'users.*.cin' => 'required|string|unique:users,cin',
+            'users.*.email' => 'nullable|email', // devient facultatif
+            'users.*.email_verified_at' => 'nullable|date',
+            'users.*.password' => 'required|string|min:8|confirmed',
+            'users.*.role' => 'required|string',
+            'users.*.telephone' => 'required|string',
+            'users.*.photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'users.*.adresse' => 'required|string',
+            'users.*.departement_id' => 'required|exists:departements,id',
         ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        event(new Registered($user));
-
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+    
+        $createdUsers = [];
+    
+        foreach ($validated['users'] as $data) {
+            // Définir l'email selon le rôle
+            if (strtolower($data['role']) === 'patient') {
+                $email = $data['email']; // l'utilisateur doit le fournir
+            } else {
+                $email = strtolower($data['cin']) . '@gmail.com'; // auto-généré
+            }
+    
+            // Gestion de la photo s'il y en a une
+            if (isset($data['photo'])) {
+                $filename = time() . '_' . $data['photo']->getClientOriginalName();
+                $data['photo']->storeAs('public/images', $filename);
+                $data['photo'] = $filename;
+            }
+    
+            $user = User::create([
+                'name' => $data['name'],
+                'cin' => $data['cin'],
+                'email' => $email,
+                'email_verified_at' => $data['email_verified_at'] ?? null,
+                'password' => Hash::make($data['password']),
+                'role' => $data['role'],
+                'telephone' => $data['telephone'],
+                'photo' => $data['photo'] ?? null,
+                'adresse' => $data['adresse'],
+                'departement_id' => $data['departement_id'],
+            ]);
+    
+            event(new Registered($user));
+            $createdUsers[] = $user;
+        }
+    
+        return redirect()->back()->with('success', 'Utilisateurs enregistrés avec succès.');
     }
+    
+    
 }

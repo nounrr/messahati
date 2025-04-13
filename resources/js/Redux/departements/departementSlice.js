@@ -15,8 +15,21 @@ export const createDepartements = createAsyncThunk(
     'departements/createDepartements',
     async (departements, { rejectWithValue }) => {
         try {
-            await axiosInstance.post('/departements', { departements });
-            return departements; // 👈 Retourne les départements qu’on vient d’envoyer
+            const formData = new FormData();
+            departements.forEach((departement, index) => {
+                Object.entries(departement).forEach(([key, value]) => {
+                    if (key === 'image' && value instanceof File) {
+                        formData.append(`departements[${index}][image]`, value);
+                    } else {
+                        formData.append(`departements[${index}][${key}]`, value);
+                    }
+                });
+            });
+
+            const response = await axiosInstance.post('/departements', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -28,7 +41,20 @@ export const updateDepartements = createAsyncThunk(
     'departements/updateDepartements',
     async (departements, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/departements', { departements });
+            const formData = new FormData();
+            departements.forEach((departement, index) => {
+                Object.entries(departement).forEach(([key, value]) => {
+                    if (key === 'image' && value instanceof File) {
+                        formData.append(`departements[${index}][image]`, value);
+                    } else {
+                        formData.append(`departements[${index}][${key}]`, value);
+                    }
+                });
+            });
+
+            const response = await axiosInstance.post('/departements/update', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

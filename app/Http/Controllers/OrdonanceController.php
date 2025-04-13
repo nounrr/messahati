@@ -7,61 +7,86 @@ use App\Models\Ordonnance;
 
 class OrdonanceController extends Controller
 {
+    // Affiche la liste des ordonnances
     public function index()
     {
         $ordonances = Ordonnance::all();
         return response()->json($ordonances);
     }
 
+    // Affiche le formulaire de création
     public function create()
     {
         return view('ordonances.create');
     }
 
+    // Enregistre plusieurs ordonnances (instanciation manuelle)
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        $validated = $request->validate([
             'ordonances' => 'required|array',
-            'ordonances.*.nom' => 'required|string|max:255',
-            'ordonances.*.description' => 'nullable|string',
+            'ordonances.*.date_emission' => 'required|date',
+            'ordonances.*.description' => 'required|string',
+            'ordonances.*.traitement_id' => 'required|exists:traitements,id'
         ]);
 
-        foreach ($validatedData['ordonances'] as $data) {
-            Ordonnance::create($data);
+
+        $createdItems = [];
+
+        foreach ($validated['ordonances'] as $data) {
+            $ordonance = new Ordonance();
+            $ordonance->date_emission = $data['date_emission'];
+            $ordonance->description = $data['description'];
+            $ordonance->traitement_id = $data['traitement_id'];
+            $ordonance->save();
+
+            $createdItems[] = $ordonance;
         }
 
-        return response()->json(['message' => 'Ordonnances créées avec succès.']);
+        return response()->json($createdItems, 201);
     }
 
+    // Affiche une ordonnance spécifique
     public function show(string $id)
     {
         $ordonance = Ordonnance::findOrFail($id);
         return response()->json($ordonance);
     }
 
+    // Affiche le formulaire d’édition
     public function edit(string $id)
     {
         $ordonance = Ordonnance::findOrFail($id);
         return view('ordonances.edit', compact('ordonance'));
     }
 
-    public function update(Request $request, string $id = null)
+    // Met à jour plusieurs ordonnances (instanciation + affectation directe)
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'ordonances' => 'required|array',
-            'ordonances.*.id' => 'required|exists:ordonances,id',
-            'ordonances.*.nom' => 'required|string|max:255',
-            'ordonances.*.description' => 'nullable|string',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:ordonances,id',
+            'updates.*.date_emission' => 'required|date',
+            'updates.*.description' => 'required|string',
+            'updates.*.traitement_id' => 'required|exists:traitements,id'
         ]);
 
-        foreach ($validatedData['ordonances'] as $data) {
-            $ordonance = Ordonnance::find($data['id']);
-            $ordonance->update($data);
+        $updatedItems = [];
+
+        foreach ($validated['updates'] as $data) {
+            $ordonance = Ordonance::findOrFail($data['id']);
+            $ordonance->date_emission = $data['date_emission'];
+            $ordonance->description = $data['description'];
+            $ordonance->traitement_id = $data['traitement_id'];
+            $ordonance->save();
+
+            $updatedItems[] = $ordonance;
         }
 
-        return response()->json(['message' => 'Ordonnances mises à jour avec succès.']);
+        return response()->json($updatedItems, 200);
     }
 
+    // Supprime une ou plusieurs ordonnances
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {

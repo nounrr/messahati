@@ -2,21 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Medicament extends Model
 {
-    use HasFactory;
+    protected $fillable = ['nom_medicament','quantite','date_expiration','prix_unitaire','img_path'];
 
-    protected $fillable = ['nom_medicament', 'quantite', 'date_expiration', 'prix_unitaire'];
-
-    public function ordonnances()
-    {
-        return $this->belongsToMany(Ordonnance::class, 'ordonnances_medicaments');
+    public function ordonances(){
+        return $this->belongsToMany(Ordonance::class);
     }
-    public function type()
-    {
+    public function typemedicament(){
         return $this->belongsTo(TypeMedicament::class);
     }
+
 }

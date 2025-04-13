@@ -29,19 +29,22 @@ class AttachementController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'path' => 'required|string|max:255',
-            'type' => 'required|string|max:50',
-            'related_id' => 'nullable|integer',
-            'related_type' => 'nullable|string|max:255',
+        $validated = $request->validate([
+            'attachements.*.filename' => 'required|string',
+            'attachements.*.taches_id' => 'required|exists:tachess,id'
         ]);
-
-        Attachement::create($validatedData);
-
-        return redirect()->route('attachements.index')->with('success', 'Attachement créé avec succès.');
+    
+        $createdItems = [];
+        foreach ($validated['attachements'] as $data) {
+            
+            $createdItems[] = Attachement::create($data);
+        }
+    
+        return response()->json($createdItems, 201);
     }
-
+    
+   
+        
     /**
      * Display the specified resource.
      */
@@ -63,22 +66,25 @@ class AttachementController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'path' => 'required|string|max:255',
-            'type' => 'required|string|max:50',
-            'related_id' => 'nullable|integer',
-            'related_type' => 'nullable|string|max:255',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:attachements,id',
+            'updates.*.filename' => 'required|string',
+            'updates.*.taches_id' => 'required|exists:tachess,id'
         ]);
-
-        $attachement = Attachement::findOrFail($id);
-        $attachement->update($validatedData);
-
-        return redirect()->route('attachements.index')->with('success', 'Attachement mis à jour avec succès.');
+    
+        $updatedItems = [];
+        foreach ($validated['updates'] as $data) {
+            $item = Attachement::findOrFail($data['id']);
+            
+            $item->update($data);
+            $updatedItems[] = $item;
+        }
+    
+        return response()->json($updatedItems, 200);
     }
-
     /**
      * Remove the specified resource from storage.
      */

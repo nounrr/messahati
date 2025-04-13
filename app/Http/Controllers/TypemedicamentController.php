@@ -7,73 +7,77 @@ use App\Models\TypeMedicament;
 
 class TypemedicamentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Liste des types de médicaments
     public function index()
     {
         $types = TypeMedicament::all();
         return response()->json($types);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Formulaire de création (si utilisé côté Blade)
     public function create()
     {
         return view('typemedicaments.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Enregistrement de plusieurs types
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
+        $validated = $request->validate([
+            'typemedicaments' => 'required|array',
+            'typemedicaments.*.nom' => 'required|string',
         ]);
 
-        TypeMedicament::create($validatedData);
+        $created = [];
 
-        return redirect()->route('typemedicaments.index')->with('success', 'Type de médicament créé avec succès.');
+        foreach ($validated['typemedicaments'] as $data) {
+            $type = new TypeMedicament();
+            $type->nom = $data['nom'];
+            $type->save();
+
+            $created[] = $type;
+        }
+
+        return response()->json($created, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // Affiche un type spécifique
     public function show($id)
     {
         $type = TypeMedicament::findOrFail($id);
         return response()->json($type);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // Formulaire d’édition
     public function edit($id)
     {
         $type = TypeMedicament::findOrFail($id);
         return view('typemedicaments.edit', compact('type'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    // Mise à jour de plusieurs types
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
+        $validated = $request->validate([
+            'typemedicaments' => 'required|array',
+            'typemedicaments.*.id' => 'required|exists:typemedicaments,id',
+            'typemedicaments.*.nom' => 'required|string',
         ]);
 
-        $type = TypeMedicament::findOrFail($id);
-        $type->update($validatedData);
+        $updated = [];
 
-        return redirect()->route('typemedicaments.index')->with('success', 'Type de médicament mis à jour avec succès.');
+        foreach ($validated['typemedicaments'] as $data) {
+            $type = TypeMedicament::findOrFail($data['id']);
+            $type->nom = $data['nom'];
+            $type->save();
+
+            $updated[] = $type;
+        }
+
+        return response()->json($updated, 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // Suppression
     public function destroy($id)
     {
         $type = TypeMedicament::findOrFail($id);

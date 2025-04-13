@@ -8,7 +8,7 @@ use App\Models\Notification;
 class NotificationController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Affiche toutes les notifications.
      */
     public function index()
     {
@@ -17,7 +17,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Affiche le formulaire de création.
      */
     public function create()
     {
@@ -25,7 +25,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Enregistre une nouvelle notification (sans mass-assignement).
      */
     public function store(Request $request)
     {
@@ -34,13 +34,16 @@ class NotificationController extends Controller
             'statut' => 'required|boolean',
         ]);
 
-        Notification::create($validatedData);
+        $notification = new Notification();
+        $notification->date = $validatedData['date'];
+        $notification->statut = $validatedData['statut'];
+        $notification->save();
 
-        return redirect()->route('notifications.index')->with('success', 'Notification created successfully.');
+        return redirect()->route('notifications.index')->with('success', 'Notification créée avec succès.');
     }
 
     /**
-     * Display the specified resource.
+     * Affiche une notification spécifique.
      */
     public function show($id)
     {
@@ -49,7 +52,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Affiche le formulaire d'édition.
      */
     public function edit($id)
     {
@@ -58,7 +61,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Met à jour une notification (sans mass-assignement).
      */
     public function update(Request $request, $id)
     {
@@ -68,19 +71,21 @@ class NotificationController extends Controller
         ]);
 
         $notification = Notification::findOrFail($id);
-        $notification->update($validatedData);
+        $notification->date = $validatedData['date'];
+        $notification->statut = $validatedData['statut'];
+        $notification->save();
 
-        return redirect()->route('notifications.index')->with('success', 'Notification updated successfully.');
+        return redirect()->route('notifications.index')->with('success', 'Notification mise à jour avec succès.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprime une notification.
      */
     public function destroy($id)
     {
         $notification = Notification::findOrFail($id);
         $notification->delete();
 
-        return redirect()->route('notifications.index')->with('success', 'Notification deleted successfully.');
+        return redirect()->route('notifications.index')->with('success', 'Notification supprimée avec succès.');
     }
 }

@@ -7,79 +7,89 @@ use App\Models\Salaire;
 
 class SalaireController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Liste des salaires
     public function index()
     {
         $salaires = Salaire::all();
         return response()->json($salaires);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Formulaire de création
     public function create()
     {
         return view('salaires.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Enregistrement de plusieurs salaires
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'montant' => 'required|numeric',
-            'primes' => 'nullable|numeric',
-            'date' => 'required|date',
-            'user_id' => 'required|exists:users,id',
+        $validated = $request->validate([
+            'salaires' => 'required|array',
+            'salaires.*.montant' => 'required|numeric',
+            'salaires.*.primes' => 'required|numeric',
+            'salaires.*.date' => 'required|date',
+            'salaires.*.user_id' => 'required|exists:users,id',
         ]);
 
-        Salaire::create($validatedData);
+        $created = [];
 
-        return redirect()->route('salaires.index')->with('success', 'Salaire créé avec succès.');
+        foreach ($validated['salaires'] as $data) {
+            $salaire = new Salaire();
+            $salaire->montant = $data['montant'];
+            $salaire->primes = $data['primes'];
+            $salaire->date = $data['date'];
+            $salaire->user_id = $data['user_id'];
+            $salaire->save();
+
+            $created[] = $salaire;
+        }
+
+        return response()->json($created, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // Affiche un salaire
     public function show($id)
     {
         $salaire = Salaire::findOrFail($id);
         return response()->json($salaire);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // Formulaire d’édition
     public function edit($id)
     {
         $salaire = Salaire::findOrFail($id);
         return view('salaires.edit', compact('salaire'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    // Mise à jour de plusieurs salaires
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'montant' => 'required|numeric',
-            'primes' => 'nullable|numeric',
-            'date' => 'required|date',
-            'user_id' => 'required|exists:users,id',
+        $validated = $request->validate([
+            'salaires' => 'required|array',
+            'salaires.*.id' => 'required|exists:salaires,id',
+            'salaires.*.montant' => 'required|numeric',
+            'salaires.*.primes' => 'required|numeric',
+            'salaires.*.date' => 'required|date',
+            'salaires.*.user_id' => 'required|exists:users,id',
         ]);
 
-        $salaire = Salaire::findOrFail($id);
-        $salaire->update($validatedData);
+        $updated = [];
 
-        return redirect()->route('salaires.index')->with('success', 'Salaire mis à jour avec succès.');
+        foreach ($validated['salaires'] as $data) {
+            $salaire = Salaire::findOrFail($data['id']);
+            $salaire->montant = $data['montant'];
+            $salaire->primes = $data['primes'];
+            $salaire->date = $data['date'];
+            $salaire->user_id = $data['user_id'];
+            $salaire->save();
+
+            $updated[] = $salaire;
+        }
+
+        return response()->json($updated, 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // Suppression d’un salaire
     public function destroy($id)
     {
         $salaire = Salaire::findOrFail($id);

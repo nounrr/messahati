@@ -7,79 +7,81 @@ use App\Models\Charge;
 
 class ChargeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $charges = Charge::all();
         return response()->json($charges);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('charges.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'prix_unitaire' => 'required|numeric',
-            'quantite' => 'required|integer',
-            'partenaire_id' => 'required|exists:partenaires,id',
+        $validated = $request->validate([
+            'charges.*.nom' => 'required|string',
+            'charges.*.prix_unitaire' => 'required|numeric',
+            'charges.*.quantite' => 'required|numeric',
+            'charges.*.partenaire_id' => 'required|exists:partenaires,id'
         ]);
 
-        Charge::create($validatedData);
+        $createdItems = [];
 
-        return redirect()->route('charges.index')->with('success', 'Charge created successfully.');
+        foreach ($validated['charges'] as $data) {
+            $item = new Charge();
+            $item->nom = $data['nom'];
+            $item->prix_unitaire = $data['prix_unitaire'];
+            $item->quantite = $data['quantite'];
+            $item->partenaire_id = $data['partenaire_id'];
+            $item->save();
+
+            $createdItems[] = $item;
+        }
+
+        return response()->json($createdItems, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $charge = Charge::findOrFail($id);
         return response()->json($charge);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         $charge = Charge::findOrFail($id);
         return view('charges.edit', compact('charge'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'nom' => 'required|string|max:255',
-            'prix_unitaire' => 'required|numeric',
-            'quantite' => 'required|integer',
-            'partenaire_id' => 'required|exists:partenaires,id',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:charges,id',
+            'updates.*.nom' => 'required|string',
+            'updates.*.prix_unitaire' => 'required|numeric',
+            'updates.*.quantite' => 'required|numeric',
+            'updates.*.partenaire_id' => 'required|exists:partenaires,id'
         ]);
 
-        $charge = Charge::findOrFail($id);
-        $charge->update($validatedData);
+        $updatedItems = [];
 
-        return redirect()->route('charges.index')->with('success', 'Charge updated successfully.');
+        foreach ($validated['updates'] as $data) {
+            $item = Charge::findOrFail($data['id']);
+            $item->nom = $data['nom'];
+            $item->prix_unitaire = $data['prix_unitaire'];
+            $item->quantite = $data['quantite'];
+            $item->partenaire_id = $data['partenaire_id'];
+            $item->save();
+
+            $updatedItems[] = $item;
+        }
+
+        return response()->json($updatedItems, 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         $charge = Charge::findOrFail($id);
