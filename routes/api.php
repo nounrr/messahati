@@ -10,3 +10,5 @@ Route::get('/user', function (Request $request) {
 use App\Http\Controllers\ChatController;
 
 Route::post('/send-message', [ChatController::class, 'send']);
+
+// Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);

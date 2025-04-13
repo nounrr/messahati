@@ -8,7 +8,7 @@ use Illuminate\Queue\SerializesModels;
 
 class MessageSent implements ShouldBroadcast
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable, SerializesModels,InteractsWithSockets;
 
     public $message;
     public $user;
@@ -34,7 +34,12 @@ class MessageSent implements ShouldBroadcast
     {
         return new Channel('chat-channel');
     }
+    public function broadcastAs()
+    {
+        return 'message.sent';
+    }
 
+    
     /**
      * Les données à diffuser avec l'événement.
      *
