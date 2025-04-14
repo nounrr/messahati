@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Events\MessageSent;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Auth;  
+use Illuminate\Support\Facades\Log;
 class ChatController extends Controller
 {
     public function send(Request $request)
