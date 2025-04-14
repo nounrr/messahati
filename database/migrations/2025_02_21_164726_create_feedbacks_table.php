@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('contenu');
             $table->float('rating');
             $table->date('date');
+            $table->boolean('status');
             $table->timestamps();
         });
     }

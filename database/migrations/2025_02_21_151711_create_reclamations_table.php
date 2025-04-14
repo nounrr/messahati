@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('reclamations', function (Blueprint $table) {
             $table->id();
-            $table->text('contenu');
-            $table->date('date');
-            $table->foreignId('id_user')->constrained('users')->onDelete('cascade');
-            
+            $table->string('titre');
+            $table->text('description');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('statut')->default('en_attente')->change();
             $table->timestamps();
         });
     }

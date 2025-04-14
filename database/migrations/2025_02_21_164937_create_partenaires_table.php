@@ -1,4 +1,4 @@
-<?php
+            <?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('partenaires', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinique_id')->constrained('clinique')->onDelete('cascade');
             $table->string('nom');
-            $table->string('adress');
-            $table->string('telephone');
+            $table->string('adress')->nullable();
+            $table->foreignId('typepartenaires_id')->constrained()->onDelete('cascade')->on('type_partenaires')->references('id');
+            $table->string('telephone')->nullable();
             $table->timestamps();
         });
     }

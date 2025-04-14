@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('medicaments', function (Blueprint $table) {
             $table->id();
             $table->string('nom_medicament');
-            $table->integer('quantite');
-            $table->date('date_expiration');
-            $table->decimal('prix_unitaire', 8, 2);
+            $table->integer('quantite')->nullable();
+            $table->date('date_expiration')->nullable();
+            $table->foreignId('typemedicaments_id')->references('id')->on('type_medicaments')->onDelete('cascade');
+            $table->decimal('prix_unitaire', 8, 2)->nullable();
+            $table->string('img_path')->nullable();
             $table->timestamps();
         });
     }

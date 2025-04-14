@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('ordonances_medicaments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_ordonance')->constrained('ordonances')->onDelete('cascade');
-            $table->foreignId('id_medicament')->constrained('medicaments')->onDelete('cascade');
+            $table->unsignedBigInteger('ordonance_id');
+            $table->unsignedBigInteger('medicament_id');
+            $table->foreign('ordonance_id')->references('id')->on('ordonances')->onDelete('cascade');
+            $table->foreign('medicament_id')->references('id')->on('medicaments')->onDelete('cascade');
             $table->timestamps();
         });
     }
