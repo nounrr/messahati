@@ -5,14 +5,15 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Messages\BroadcastMessage;
-use Illuminate\Notifications\Messages\DatabaseMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 
 class NewMessageNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
     protected $message;
+
     /**
      * Create a new notification instance.
      */
@@ -26,9 +27,9 @@ class NewMessageNotification extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'broadcast'];
+        return ['database', 'broadcast'];
     }
 
     /**
@@ -41,28 +42,43 @@ class NewMessageNotification extends Notification implements ShouldQueue
                     ->action('Notification Action', url('/'))
                     ->line('Thank you for using our application!');
     }
-    public function toBroadcast($notifiable)
-    {
-        return new BroadcastMessage([
-            'message_id' => $this->message->id,
-            'from_user_id' => $this->message->user_id,
-            'content' => $this->message->content,
-        ]);
-    }
 
     /**
      * Get the array representation of the notification.
      *
      * @return array<string, mixed>
      */
-    public function broadcastType()
-    {
-        return 'new.message';
-    }
-    public function toArray(object $notifiable): array
+    public function toArray($notifiable)
     {
         return [
-            //
+            'type' => 'new_message',
+            'title' => 'Nouveau message',
+            'message' => [
+                'id' => $this->message['emetteur_id'],
+                'content' => $this->message['content'],
+                'user_name' => $this->message['user_name'],
+                'timestamp' => $this->message['timestamp'],
+            ],
+            'icon' => 'message',
+            'sound' => 'default',
+            'click_action' => '/chat/' . $this->message['emetteur_id']
         ];
+    }
+
+    public function toBroadcast($notifiable)
+    {
+        return new BroadcastMessage([
+            'type' => 'new_message',
+            'title' => 'Nouveau message',
+            'message' => [
+                'id' => $this->message['emetteur_id'],
+                'content' => $this->message['content'],
+                'user_name' => $this->message['user_name'],
+                'timestamp' => $this->message['timestamp'],
+            ],
+            'icon' => 'message',
+            'sound' => 'default',
+            'click_action' => '/chat/' . $this->message['emetteur_id']
+        ]);
     }
 }

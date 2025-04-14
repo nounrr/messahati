@@ -9,6 +9,7 @@ Route::get('/user', function (Request $request) {
 
 use App\Http\Controllers\ChatController;
 
-Route::post('/send-message', [ChatController::class, 'send']);
+
+Route::post('/chat/send', [ChatController::class, 'send'])->middleware('auth');
 
 // Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);
