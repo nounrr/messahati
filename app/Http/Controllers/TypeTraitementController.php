@@ -4,64 +4,75 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TypeTraitement;
+use App\Traits\ExcelExportImport;
 
 class TypeTraitementController extends Controller
 {
+    // Affiche tous les types de traitements
     public function index()
     {
         $types = TypeTraitement::all();
         return response()->json($types);
     }
 
+    // Formulaire de création (si utilisé avec Blade)
     public function create()
     {
         return view('type-traitements.create');
     }
 
+    // Enregistrement de plusieurs types de traitements (sans mass-assignement)
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'types' => 'required|array',
-            'types.*.nom' => 'required|string|max:255',
-            'types.*.description' => 'nullable|string',
+
+        $validated = $request->validate([
+            'typetraitements' => 'required|array',
+            'typetraitements.*.nom' => 'required|string'
         ]);
 
-        foreach ($validatedData['types'] as $data) {
-            TypeTraitement::create($data);
+        $createdItems = [];
+
+        foreach ($validated['typetraitements'] as $data) {
+            $type = new TypeTraitement();
+            $type->nom = $data['nom'];
+            $type->save();
+
+            $createdItems[] = $type;
         }
 
-        return response()->json(['message' => 'Types de traitements créés avec succès.']);
+        return response()->json($createdItems, 201);
     }
 
-    public function show(string $id)
-    {
-        $type = TypeTraitement::findOrFail($id);
-        return response()->json($type);
-    }
-
+    // Formulaire d'édition
     public function edit(string $id)
     {
         $type = TypeTraitement::findOrFail($id);
         return view('type-traitements.edit', compact('type'));
     }
 
-    public function update(Request $request, string $id = null)
+    // Mise à jour de plusieurs types de traitements
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'types' => 'required|array',
-            'types.*.id' => 'required|exists:type_traitements,id',
-            'types.*.nom' => 'required|string|max:255',
-            'types.*.description' => 'nullable|string',
+        $validated = $request->validate([
+            'updates' => 'required|array',
+            'updates.*.id' => 'required|exists:typetraitements,id',
+            'updates.*.nom' => 'required|string'
         ]);
 
-        foreach ($validatedData['types'] as $data) {
-            $type = TypeTraitement::find($data['id']);
-            $type->update($data);
+        $updatedItems = [];
+
+        foreach ($validated['updates'] as $data) {
+            $type = TypeTraitement::findOrFail($data['id']);
+            $type->nom = $data['nom'];
+            $type->save();
+
+            $updatedItems[] = $type;
         }
 
-        return response()->json(['message' => 'Types de traitements mis à jour avec succès.']);
+        return response()->json($updatedItems, 200);
     }
 
+    // Suppression d'un ou plusieurs types
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {
@@ -77,5 +88,19 @@ class TypeTraitementController extends Controller
         }
 
         return response()->json(['message' => 'Types de traitements supprimés avec succès.']);
+    }
+
+    use ExcelExportImport;
+
+    // Export and import methods
+    public function export()
+    {
+        return $this->exportExcel(TypeTraitementExport::class, 'type_traitements.xlsx', TypeTraitement::all());
+    }
+
+    public function import(Request $request)
+    {
+        $this->importExcel($request->file('file'), TypeTraitementImport::class);
+        return response()->json(['message' => 'Types de traitements importés avec succès.']);
     }
 }

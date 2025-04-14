@@ -12,8 +12,10 @@
 
         <!-- Scripts -->
         @routes
-        @viteReactRefresh
-        @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
+        @if (file_exists(public_path('build/manifest.json')))
+            @viteReactRefresh
+            @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
+        @endif
         @inertiaHead
     </head>
     <body class="font-sans antialiased">

@@ -10,35 +10,52 @@ function AddInfo() {
     const [email, setEmail] = useState('');
     const [telephone, setTelephone] = useState('');
     const [adresse, setAdresse] = useState('');
-    const [logo, setLogo] = useState(null); // Add state for logo
+    const [siteWeb, setSiteWeb] = useState('');
+    const [description, setDescription] = useState('');
+    const [logo, setLogo] = useState(null);
     const dispatch = useDispatch();
 
     const handleAddClinique = () => {
-        if (!nom.trim() || !email.trim() || !telephone.trim() || !adresse.trim() || !logo) {
-            alert('Tous les champs sont requis.');
+        if (!nom.trim() || !email.trim() || !adresse.trim()) {
+            alert('Les champs nom, email et adresse sont requis.');
             return;
         }
 
         const newClinique = {
             nom,
             email,
-            telephone,
             adresse,
-            site_web,
-            logo, // Include logo in the object
+            site_web: siteWeb,
+            description,
+            logo,
         };
 
+        console.log('Envoi des données:', newClinique);
+
         dispatch(createCliniques([newClinique]))
-            .then(() => {
+            .then((result) => {
+                console.log('Réponse du serveur:', result);
                 alert('Clinique ajoutée avec succès.');
                 setNom('');
                 setEmail('');
                 setTelephone('');
                 setAdresse('');
-                setLogo(null); // Reset logo
+                setSiteWeb('');
+                setDescription('');
+                setLogo(null);
             })
             .catch((error) => {
                 console.error('Erreur lors de l\'ajout de la clinique:', error);
+                
+                // Afficher un message d'erreur plus détaillé
+                if (error.payload && error.payload.errors) {
+                    const errorMessages = Object.values(error.payload.errors).flat();
+                    alert(`Erreur de validation: ${errorMessages.join(', ')}`);
+                } else if (error.payload && error.payload.message) {
+                    alert(`Erreur: ${error.payload.message}`);
+                } else {
+                    alert('Erreur lors de l\'ajout de la clinique. Veuillez réessayer.');
+                }
             });
     };
 
@@ -52,11 +69,11 @@ function AddInfo() {
                     <h6 className='mb-12 text-neutral-500'>Veuillez fournir les informations suivantes :</h6>
                     <div className="flex flex-col sm:flex-row gap-2 justify-between">
                         <div className="mb-3 text-left w-100">
-                            <label htmlFor="nom" className="form-label">Nom de l’établissement</label>
+                            <label htmlFor="nom" className="form-label">Nom de l&apos;établissement</label>
                             <input
                                 type='text'
                                 className='form-control h-56-px bg-white radius-12'
-                                placeholder='Nom de l’établissement'
+                                placeholder='Nom de l&apos;établissement'
                                 value={nom}
                                 onChange={(e) => setNom(e.target.value)}
                             />
@@ -74,16 +91,6 @@ function AddInfo() {
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 justify-between">
                         <div className="mb-3 text-left w-100">
-                            <label htmlFor="telephone" className="form-label">Téléphone</label>
-                            <input
-                                type='number'
-                                className='form-control h-56-px bg-white radius-12'
-                                placeholder='Téléphone'
-                                value={telephone}
-                                onChange={(e) => setTelephone(e.target.value)}
-                            />
-                        </div>
-                        <div className="mb-3 text-left w-100">
                             <label htmlFor="adresse" className="form-label">Adresse</label>
                             <input
                                 type='text'
@@ -93,11 +100,30 @@ function AddInfo() {
                                 onChange={(e) => setAdresse(e.target.value)}
                             />
                         </div>
-                        
+                        <div className="mb-3 text-left w-100">
+                            <label htmlFor="siteWeb" className="form-label">Site Web</label>
+                            <input
+                                type='url'
+                                className='form-control h-56-px bg-white radius-12'
+                                placeholder='Site Web (optionnel)'
+                                value={siteWeb}
+                                onChange={(e) => setSiteWeb(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="mb-3 text-left w-100">
+                        <label htmlFor="description" className="form-label">Description</label>
+                        <textarea
+                            className='form-control h-56-px bg-white radius-12'
+                            placeholder='Description de l&apos;établissement (optionnel)'
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            rows="3"
+                        />
                     </div>
                     <div className="col-12">
                         <label htmlFor="logo" className="form-label text-left justify-start">Téléverser votre Logo</label>
-                        <ImageUpload img="votre logo" onImageChange={setLogo} /> {/* Pass setLogo as prop */}
+                        <ImageUpload img="votre logo" onImageChange={setLogo} />
                     </div>
 
                     <button

@@ -1,80 +1,170 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
 import { createDepartements } from '../../../Redux/departements/departementSlice';
+import { X, Upload } from 'lucide-react';
 
-function Departement(props) {
-    const [libelle, setLibelle] = useState('');
-    const [description, setDescription] = useState('');
+function Departement({ onClose }) {
     const dispatch = useDispatch();
+    const [departements, setDepartements] = useState([{ nom: '', description: '', image: null }]);
+    const [imagePreview, setImagePreview] = useState([null]);
 
-    const handleAddDepartement = () => {
-        if (libelle.trim() === '') {
-            alert('Le libellé est requis.');
+    const handleAddField = () => {
+        setDepartements([...departements, { nom: '', description: '', image: null }]);
+        setImagePreview([...imagePreview, null]);
+    };
+
+    const handleChange = (index, field, value) => {
+        const updated = [...departements];
+        updated[index][field] = value;
+        setDepartements(updated);
+    };
+
+    const handleImageChange = (index, e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const updated = [...departements];
+            updated[index].image = file;
+            setDepartements(updated);
+            
+            // Create preview URL
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const updatedPreviews = [...imagePreview];
+                updatedPreviews[index] = reader.result;
+                setImagePreview(updatedPreviews);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveField = (index) => {
+        const updated = [...departements];
+        updated.splice(index, 1);
+        setDepartements(updated);
+        
+        const updatedPreviews = [...imagePreview];
+        updatedPreviews.splice(index, 1);
+        setImagePreview(updatedPreviews);
+    };
+
+    const handleSubmit = () => {
+        const isValid = departements.every(dep => dep.nom.trim() !== '');
+        if (!isValid) {
+            Swal.fire('Erreur', 'Chaque département doit avoir un libellé.', 'error');
             return;
         }
 
-        const newDepartement = {
-            nom: libelle,
-            description: description || '',
-        };
+        // Vérifier que toutes les images sont des objets File
+        const formData = new FormData();
+        departements.forEach((dep, index) => {
+            formData.append(`departements[${index}][nom]`, dep.nom);
+            formData.append(`departements[${index}][description]`, dep.description || '');
+            if (dep.image instanceof File) {
+                formData.append(`departements[${index}][image]`, dep.image);
+            }
+        });
 
-        dispatch(createDepartements([newDepartement]))
-            .then(() => {
-                alert('Département ajouté avec succès.');
-                setLibelle('');
-                setDescription('');
+        dispatch(createDepartements(departements))
+            .unwrap()
+            .then((res) => {
+                console.log('Réponse reçue :', res);
+                Swal.fire('Succès', 'Départements ajoutés avec succès.', 'success');
+                setDepartements([{ nom: '', description: '', image: null }]);
+                setImagePreview([null]);
+                onClose();
             })
             .catch((error) => {
-                console.error('Erreur lors de l\'ajout du département:', error);
+                console.error('Erreur capturée :', error);
+                Swal.fire('Erreur', 'Une erreur s\'est produite.', 'error');
             });
     };
 
     return (
-        <div className='flex flex-col m-auto items-center justify-center w-50 border-4 bg-white '>
-            <div className='w-100 md:w-1/2 mx-auto text-center'>
-                <div className="text-center">
-                    <img src='assets/images/logo.png' alt='logo' className='mx-auto mb-3' />
-                    <h4 className='mb-12'>Ajoutez les différents Départements.</h4>
-                    <h6 className='mb-12 text-neutral-500'>Veuillez fournir les informations suivantes :</h6>
-                    <div className="flex flex-col gap-2 justify-between">
-                        <div className="mb-3 text-left w-100">
-                            <label htmlFor="libelle" className="form-label">Libellé</label>
-                            <input
-                                type='text'
-                                className='form-control h-56-px bg-white radius-12'
-                                placeholder='Libellé'
-                                value={libelle}
-                                onChange={(e) => setLibelle(e.target.value)}
-                            />
-                        </div>
-                        <div className="mb-3 text-left w-100">
-                            <label htmlFor="description" className="form-label">Description</label>
-                            <textarea
-                                name="description"
-                                cols="30"
-                                rows="10"
-                                className='form-control h-56-px bg-white radius-12'
-                                placeholder='Description'
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                            ></textarea>
-                        </div>
+        <div className="bg-white rounded-xl shadow-lg p-6">
+            <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-red-500">
+                <X size={22} />
+            </button>
+            <div className='text-center mb-6'>
+                <img src='assets/images/logo.png' alt='logo' className='mx-auto mb-4 w-28 h-auto' />
+                <h4 className='text-2xl font-semibold mb-1'>Ajoutez les différents Départements</h4>
+                <h6 className='text-gray-500 text-md'>Veuillez fournir les informations suivantes :</h6>
+            </div>
+
+            {departements.map((dep, index) => (
+                <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm relative">
+                    {departements.length > 1 && (
+                        <button
+                            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                            onClick={() => handleRemoveField(index)}
+                        >
+                            <X size={18} />
+                        </button>
+                    )}
+                    <div className="mb-4 text-left">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Libellé</label>
+                        <input
+                            type='text'
+                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                            placeholder='Libellé'
+                            value={dep.nom}
+                            onChange={(e) => handleChange(index, 'nom', e.target.value)}
+                        />
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            className='btn-radius btn btn-success text-sm btn-sm px-2 py-2 w-50 mt-3'
-                            onClick={handleAddDepartement}
-                        >
-                            Ajouter
-                        </button>
-                        <button
-                            className='btn-radius btn btn-primary text-sm btn-sm px-2 py-2 w-50 mt-3'
-                            onClick={props.onNext}
-                        >
-                            Suivant
-                        </button>
+                    <div className="mb-4 text-left">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                            placeholder='Description'
+                            rows="3"
+                            value={dep.description}
+                            onChange={(e) => handleChange(index, 'description', e.target.value)}
+                        ></textarea>
+                    </div>
+                    <div className="mb-4 text-left">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                        <div className="flex items-center justify-center w-full">
+                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    {imagePreview[index] ? (
+                                        <img 
+                                            src={imagePreview[index]} 
+                                            alt="Preview" 
+                                            className="h-20 w-auto object-contain mb-2"
+                                        />
+                                    ) : (
+                                        <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                                    )}
+                                    <p className="mb-2 text-sm text-gray-500">
+                                        <span className="font-semibold">Cliquez pour télécharger</span> ou glissez-déposez
+                                    </p>
+                                    <p className="text-xs text-gray-500">PNG, JPG ou GIF</p>
+                                </div>
+                                <input 
+                                    type="file" 
+                                    className="hidden" 
+                                    accept="image/*"
+                                    onChange={(e) => handleImageChange(index, e)}
+                                />
+                            </label>
+                        </div>
                     </div>
                 </div>
+            ))}
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                <button
+                    className='bg-green-600 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition'
+                    onClick={handleAddField}
+                >
+                    Ajouter un autre département
+                </button>
+                <button
+                    className='bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition'
+                    onClick={handleSubmit}
+                >
+                    Enregistrer
+                </button>
             </div>
         </div>
     );
