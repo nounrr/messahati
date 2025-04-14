@@ -27,7 +27,8 @@ class TypeTraitementController extends Controller
 
         $validated = $request->validate([
             'typetraitements' => 'required|array',
-            'typetraitements.*.nom' => 'required|string'
+            'typetraitements.*.nom' => 'required|string',
+            'typetraitements.*.prix-default' => 'nullable|numeric'
         ]);
 
         $createdItems = [];
@@ -35,6 +36,7 @@ class TypeTraitementController extends Controller
         foreach ($validated['typetraitements'] as $data) {
             $type = new TypeTraitement();
             $type->nom = $data['nom'];
+            $type->{'prix-default'} = $data['prix-default'] ?? null;
             $type->save();
 
             $createdItems[] = $type;
@@ -56,7 +58,8 @@ class TypeTraitementController extends Controller
         $validated = $request->validate([
             'updates' => 'required|array',
             'updates.*.id' => 'required|exists:typetraitements,id',
-            'updates.*.nom' => 'required|string'
+            'updates.*.nom' => 'required|string',
+            'updates.*.prix-default' => 'nullable|numeric'
         ]);
 
         $updatedItems = [];
@@ -64,6 +67,7 @@ class TypeTraitementController extends Controller
         foreach ($validated['updates'] as $data) {
             $type = TypeTraitement::findOrFail($data['id']);
             $type->nom = $data['nom'];
+            $type->{'prix-default'} = $data['prix-default'] ?? null;
             $type->save();
 
             $updatedItems[] = $type;

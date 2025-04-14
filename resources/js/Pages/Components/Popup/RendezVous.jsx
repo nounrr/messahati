@@ -9,9 +9,9 @@ import { X } from 'lucide-react';
 
 function RendezVous({ onClose }) {
     const dispatch = useDispatch();
-    const { users } = useSelector((state) => state.users);
-    const { departements } = useSelector((state) => state.departements);
-    const { traitements } = useSelector((state) => state.traitements);
+    const users = useSelector((state) => state.users.items);
+    const departements = useSelector((state) => state.departements.items);
+    const traitements = useSelector((state) => state.traitements.items);
     const [rendezVous, setRendezVous] = useState([{
         patient_id: '',
         docteur_id: '',

@@ -1,4 +1,4 @@
-<?php
+            <?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->string('adress')->nullable();
-            $table->foreignId('typepartenaires_id')->references('id')->on('type_partenaires')->onDelete('cascade');
+            $table->foreignId('typepartenaires_id')->constrained()->onDelete('cascade')->on('type_partenaires')->references('id');
             $table->string('telephone')->nullable();
             $table->timestamps();
         });

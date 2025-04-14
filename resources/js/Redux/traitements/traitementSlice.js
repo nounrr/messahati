@@ -11,9 +11,9 @@ export const fetchTraitements = createAsyncThunk(
 
 export const createTraitements = createAsyncThunk(
     'traitements/createTraitements',
-    async (traitements, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/traitements', { traitements });
+            const response = await axiosInstance.post('/traitements', data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -23,9 +23,9 @@ export const createTraitements = createAsyncThunk(
 
 export const updateTraitements = createAsyncThunk(
     'traitements/updateTraitements',
-    async (traitements, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/traitements', { traitements });
+            const response = await axiosInstance.put('/traitements', data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

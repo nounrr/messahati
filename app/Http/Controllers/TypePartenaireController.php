@@ -29,14 +29,18 @@ class TypePartenaireController extends Controller
             'types.*.description' => 'nullable|string',
         ]);
 
+        $createdItems = [];
+
         foreach ($validatedData['types'] as $data) {
             $type = new TypePartenaire();
             $type->nom = $data['nom'];
             $type->description = $data['description'] ?? null;
             $type->save();
+            
+            $createdItems[] = $type;
         }
 
-        return response()->json(['message' => 'Types de partenaires créés avec succès.']);
+        return response()->json($createdItems, 201);
     }
 
     // Affiche un type spécifique
@@ -46,7 +50,7 @@ class TypePartenaireController extends Controller
         return response()->json($type);
     }
 
-    // Formulaire d’édition
+    // Formulaire d'édition
     public function edit(string $id)
     {
         $type = TypePartenaire::findOrFail($id);
@@ -73,7 +77,7 @@ class TypePartenaireController extends Controller
         return response()->json(['message' => 'Types de partenaires mis à jour avec succès.']);
     }
 
-    // Suppression d’un ou plusieurs types
+    // Suppression d'un ou plusieurs types
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {

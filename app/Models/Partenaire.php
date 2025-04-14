@@ -12,4 +12,8 @@ class Partenaire extends Model
     public function charges(){
         return $this->hasMany(Charge::class);
     }
+
+    public function typePartenaire(){
+        return $this->belongsTo(TypePartenaire::class);
+    }
 }

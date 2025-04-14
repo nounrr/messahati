@@ -6,10 +6,10 @@ import { X } from 'lucide-react';
 
 function TypeTraitement({ onClose }) {
     const dispatch = useDispatch();
-    const [typeTraitements, setTypeTraitements] = useState([{ nom: '', description: '' }]);
+    const [typeTraitements, setTypeTraitements] = useState([{ 'nom': '', 'prix-default': '' }]);
 
     const handleAddField = () => {
-        setTypeTraitements([...typeTraitements, { nom: '', description: '' }]);
+        setTypeTraitements([...typeTraitements, { 'nom': '', 'prix-default': '' }]);
     };
 
     const handleChange = (index, field, value) => {
@@ -31,12 +31,12 @@ function TypeTraitement({ onClose }) {
             return;
         }
 
-        dispatch(createTypeTraitements(typeTraitements))
+        dispatch(createTypeTraitements({ typetraitements: typeTraitements }))
             .unwrap()
             .then((res) => {
                 console.log('Réponse reçue :', res);
-                Swal.fire('Succès', 'Types de traitements ajoutés avec succès.', 'success');
-                setTypeTraitements([{ nom: '', description: '' }]);
+                Swal.fire('Succès', 'Types de traitement ajoutés avec succès.', 'success');
+                setTypeTraitements([{ nom: '', 'prix-default': '' }]);
                 onClose();
             })
             .catch((error) => {
@@ -77,14 +77,15 @@ function TypeTraitement({ onClose }) {
                         />
                     </div>
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Prix par défaut</label>
+                        <input
+                            type='number'
+                            step="0.01"
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            placeholder='Description'
-                            rows="3"
-                            value={type.description}
-                            onChange={(e) => handleChange(index, 'description', e.target.value)}
-                        ></textarea>
+                            placeholder='Prix par défaut'
+                            value={type['prix-default']}
+                            onChange={(e) => handleChange(index, 'prix-default', e.target.value)}
+                        />
                     </div>
                 </div>
             ))}

@@ -13,24 +13,14 @@ export const fetchMedicaments = createAsyncThunk(
 // Create new medicaments
 export const createMedicaments = createAsyncThunk(
     'medicaments/createMedicaments',
-    async (medicaments, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            const formData = new FormData();
-            medicaments.forEach((medicament, index) => {
-                Object.keys(medicament).forEach(key => {
-                    if (key === 'image' && medicament[key]) {
-                        formData.append(`medicaments[${index}][${key}]`, medicament[key]);
-                    } else {
-                        formData.append(`medicaments[${index}][${key}]`, medicament[key]);
-                    }
-                });
-            });
-            await axiosInstance.post('/medicaments', formData, {
+            const response = await axiosInstance.post('/medicaments', data.medicaments, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            return medicaments;
+            return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -40,18 +30,33 @@ export const createMedicaments = createAsyncThunk(
 // Update existing medicaments
 export const updateMedicaments = createAsyncThunk(
     'medicaments/updateMedicaments',
-    async (medicaments, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
             const formData = new FormData();
-            medicaments.forEach((medicament, index) => {
-                Object.keys(medicament).forEach(key => {
-                    if (key === 'image' && medicament[key]) {
-                        formData.append(`medicaments[${index}][${key}]`, medicament[key]);
-                    } else {
-                        formData.append(`medicaments[${index}][${key}]`, medicament[key]);
-                    }
+            
+            if (Array.isArray(data.medicaments)) {
+                data.medicaments.forEach((medicament, index) => {
+                    Object.keys(medicament).forEach(key => {
+                        if (key === 'image' && medicament[key]) {
+                            formData.append(`medicaments[${index}][${key}]`, medicament[key]);
+                        } else {
+                            formData.append(`medicaments[${index}][${key}]`, medicament[key]);
+                        }
+                    });
                 });
-            });
+            } else {
+                // Fallback for backward compatibility
+                data.forEach((medicament, index) => {
+                    Object.keys(medicament).forEach(key => {
+                        if (key === 'image' && medicament[key]) {
+                            formData.append(`medicaments[${index}][${key}]`, medicament[key]);
+                        } else {
+                            formData.append(`medicaments[${index}][${key}]`, medicament[key]);
+                        }
+                    });
+                });
+            }
+            
             const response = await axiosInstance.put('/medicaments', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',

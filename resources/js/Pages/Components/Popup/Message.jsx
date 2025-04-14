@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 
 function Message({ onClose }) {
     const dispatch = useDispatch();
-    const { users } = useSelector((state) => state.users);
+    const users = useSelector((state) => state.users.items);
     const [messages, setMessages] = useState([{
         expediteur_id: '',
         destinataire_id: '',

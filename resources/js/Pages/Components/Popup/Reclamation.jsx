@@ -7,13 +7,12 @@ import { X } from 'lucide-react';
 
 function Reclamation({ onClose }) {
     const dispatch = useDispatch();
-    const { users } = useSelector((state) => state.users);
+    const users = useSelector((state) => state.users.items);
     const [reclamations, setReclamations] = useState([{
-        patient_id: '',
-        docteur_id: '',
-        sujet: '',
+        user_id: '',
+        titre: '',
         description: '',
-        statut: false
+        statut: 'en_attente'
     }]);
 
     useEffect(() => {
@@ -22,11 +21,10 @@ function Reclamation({ onClose }) {
 
     const handleAddField = () => {
         setReclamations([...reclamations, {
-            patient_id: '',
-            docteur_id: '',
-            sujet: '',
+            user_id: '',
+            titre: '',
             description: '',
-            statut: false
+            statut: 'en_attente'
         }]);
     };
 
@@ -44,9 +42,8 @@ function Reclamation({ onClose }) {
 
     const handleSubmit = () => {
         const isValid = reclamations.every(reclamation => 
-            reclamation.patient_id !== '' && 
-            reclamation.docteur_id !== '' &&
-            reclamation.sujet !== '' &&
+            reclamation.user_id !== '' && 
+            reclamation.titre !== '' &&
             reclamation.description !== ''
         );
 
@@ -60,11 +57,10 @@ function Reclamation({ onClose }) {
             .then(() => {
                 Swal.fire('Succès', 'Réclamations ajoutées avec succès.', 'success');
                 setReclamations([{
-                    patient_id: '',
-                    docteur_id: '',
-                    sujet: '',
+                    user_id: '',
+                    titre: '',
                     description: '',
-                    statut: false
+                    statut: 'en_attente'
                 }]);
                 onClose();
             })
@@ -73,10 +69,6 @@ function Reclamation({ onClose }) {
                 Swal.fire('Erreur', 'Une erreur s\'est produite.', 'error');
             });
     };
-
-    // Filtrer les utilisateurs pour n'avoir que les patients et les docteurs
-    const patients = users.filter(user => user.role === 'patient');
-    const docteurs = users.filter(user => user.role === 'docteur');
 
     return (
         <div className="bg-white rounded-xl shadow-lg p-6">
@@ -100,43 +92,30 @@ function Reclamation({ onClose }) {
                         </button>
                     )}
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Patient</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Utilisateur</label>
                         <select
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={reclamation.patient_id}
-                            onChange={(e) => handleChange(index, 'patient_id', e.target.value)}
+                            value={reclamation.user_id}
+                            onChange={(e) => handleChange(index, 'user_id', e.target.value)}
+                            required
                         >
-                            <option value="">Sélectionnez un patient</option>
-                            {patients.map((patient) => (
-                                <option key={patient.id} value={patient.id}>
-                                    {patient.name}
+                            <option value="">Sélectionnez un utilisateur</option>
+                            {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                    {user.name} ({user.roles?.[0]?.name || 'Sans rôle'})
                                 </option>
                             ))}
                         </select>
                     </div>
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Docteur</label>
-                        <select
-                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={reclamation.docteur_id}
-                            onChange={(e) => handleChange(index, 'docteur_id', e.target.value)}
-                        >
-                            <option value="">Sélectionnez un docteur</option>
-                            {docteurs.map((docteur) => (
-                                <option key={docteur.id} value={docteur.id}>
-                                    {docteur.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Sujet</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Titre</label>
                         <input
                             type='text'
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={reclamation.sujet}
-                            onChange={(e) => handleChange(index, 'sujet', e.target.value)}
-                            placeholder='Entrez le sujet de la réclamation'
+                            value={reclamation.titre}
+                            onChange={(e) => handleChange(index, 'titre', e.target.value)}
+                            placeholder='Entrez le titre de la réclamation'
+                            required
                         />
                     </div>
                     <div className="mb-4 text-left">
@@ -147,6 +126,7 @@ function Reclamation({ onClose }) {
                             onChange={(e) => handleChange(index, 'description', e.target.value)}
                             placeholder='Entrez la description de la réclamation'
                             rows='4'
+                            required
                         />
                     </div>
                     <div className="mb-4 text-left">
@@ -155,8 +135,8 @@ function Reclamation({ onClose }) {
                             <input
                                 type="checkbox"
                                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                checked={reclamation.statut}
-                                onChange={(e) => handleChange(index, 'statut', e.target.checked)}
+                                checked={reclamation.statut === 'traité'}
+                                onChange={(e) => handleChange(index, 'statut', e.target.checked ? 'traité' : 'en_attente')}
                             />
                             <label className="ml-2 block text-sm text-gray-900">
                                 Réclamation traitée

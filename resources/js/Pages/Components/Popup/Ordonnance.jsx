@@ -8,8 +8,8 @@ import { X } from 'lucide-react';
 
 function Ordonnance({ onClose }) {
     const dispatch = useDispatch();
-    const { traitements } = useSelector((state) => state.traitements);
-    const { medicaments } = useSelector((state) => state.medicaments);
+    const traitements = useSelector((state) => state.traitements.items);
+    const medicaments = useSelector((state) => state.medicaments.items);
     const [ordonances, setOrdonances] = useState([{
         description: '',
         date_emission: '',

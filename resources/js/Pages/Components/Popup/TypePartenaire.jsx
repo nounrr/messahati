@@ -31,7 +31,7 @@ function TypePartenaire({ onClose }) {
             return;
         }
 
-        dispatch(createTypePartenaires(typePartenaires))
+        dispatch(createTypePartenaires({ types: typePartenaires }))
             .unwrap()
             .then((res) => {
                 console.log('Réponse reçue :', res);

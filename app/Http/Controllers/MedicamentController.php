@@ -31,27 +31,29 @@ class MedicamentController extends Controller
     {
         $validated = $request->validate([
             'medicaments' => 'required|array',
-            'medicaments.*.nom' => 'required|string',
-            'medicaments.*.prix' => 'required|numeric',
-            'medicaments.*.description' => 'nullable|string',
-            'medicaments.*.typemedicaments_id' => 'required|exists:typemedicaments,id',
-            'medicaments.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'medicaments.*.nom_medicament' => 'required|string',
+            'medicaments.*.quantite' => 'required|numeric',
+            'medicaments.*.date_expiration' => 'required|date',
+            'medicaments.*.typemedicaments_id' => 'required|exists:type_medicaments,id',
+            'medicaments.*.prix_unitaire' => 'required|numeric',
+            'medicaments.*.img_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $created = [];
 
         foreach ($validated['medicaments'] as $index => $data) {
             $medicament = new Medicament();
-            $medicament->nom = $data['nom'];
-            $medicament->prix = $data['prix'];
-            $medicament->description = $data['description'] ?? null;
+            $medicament->nom_medicament = $data['nom_medicament'];
+            $medicament->quantite = $data['quantite'];
+            $medicament->date_expiration = $data['date_expiration'];
             $medicament->typemedicaments_id = $data['typemedicaments_id'];
+            $medicament->prix_unitaire = $data['prix_unitaire'];
 
-            if ($request->hasFile("medicaments.$index.image")) {
-                $file = $request->file("medicaments.$index.image");
+            if ($request->hasFile("medicaments.$index.img_path")) {
+                $file = $request->file("medicaments.$index.img_path");
                 $filename = time() . '_' . $file->getClientOriginalName();
-                $file->storeAs('public/images', $filename);
-                $medicament->image = $filename;
+                $file->storeAs('public/img_path', $filename);
+                $medicament->img_path = $filename;
             }
 
             $medicament->save();
@@ -71,7 +73,7 @@ class MedicamentController extends Controller
     }
 
     /**
-     * Affiche le formulaire d’édition.
+     * Affiche le formulaire d'édition.
      */
     public function edit($id)
     {
@@ -91,7 +93,7 @@ class MedicamentController extends Controller
             'medicaments.*.prix' => 'required|numeric',
             'medicaments.*.description' => 'nullable|string',
             'medicaments.*.typemedicaments_id' => 'required|exists:typemedicaments,id',
-            'medicaments.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'medicaments.*.img_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $updated = [];
@@ -104,11 +106,11 @@ class MedicamentController extends Controller
             $medicament->description = $data['description'] ?? null;
             $medicament->typemedicaments_id = $data['typemedicaments_id'];
 
-            if ($request->hasFile("medicaments.$index.image")) {
-                $file = $request->file("medicaments.$index.image");
+            if ($request->hasFile("medicaments.$index.img_path")) {
+                $file = $request->file("medicaments.$index.img_path");
                 $filename = time() . '_' . $file->getClientOriginalName();
-                $file->storeAs('public/images', $filename);
-                $medicament->image = $filename;
+                $file->storeAs('public/img_path', $filename);
+                $medicament->img_path = $filename;
             }
 
             $medicament->save();

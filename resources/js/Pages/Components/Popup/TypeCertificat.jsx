@@ -6,10 +6,10 @@ import { X } from 'lucide-react';
 
 function TypeCertificat({ onClose }) {
     const dispatch = useDispatch();
-    const [typeCertificats, setTypeCertificats] = useState([{ nom: '', description: '' }]);
+    const [typeCertificats, setTypeCertificats] = useState([{ type_certificat: '', description: '' }]);
 
     const handleAddField = () => {
-        setTypeCertificats([...typeCertificats, { nom: '', description: '' }]);
+        setTypeCertificats([...typeCertificats, { type_certificat: '', description: '' }]);
     };
 
     const handleChange = (index, field, value) => {
@@ -25,7 +25,7 @@ function TypeCertificat({ onClose }) {
     };
 
     const handleSubmit = () => {
-        const isValid = typeCertificats.every(type => type.nom.trim() !== '');
+        const isValid = typeCertificats.every(type => type.type_certificat.trim() !== '');
         if (!isValid) {
             Swal.fire('Erreur', 'Chaque type de certificat doit avoir un libellé.', 'error');
             return;
@@ -36,7 +36,7 @@ function TypeCertificat({ onClose }) {
             .then((res) => {
                 console.log('Réponse reçue :', res);
                 Swal.fire('Succès', 'Types de certificats ajoutés avec succès.', 'success');
-                setTypeCertificats([{ nom: '', description: '' }]);
+                setTypeCertificats([{ type_certificat: '', description: '' }]);
                 onClose();
             })
             .catch((error) => {
@@ -72,8 +72,8 @@ function TypeCertificat({ onClose }) {
                             type='text'
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                             placeholder='Libellé'
-                            value={type.nom}
-                            onChange={(e) => handleChange(index, 'nom', e.target.value)}
+                            value={type.type_certificat}
+                            onChange={(e) => handleChange(index, 'type_certificat', e.target.value)}
                         />
                     </div>
                     <div className="mb-4 text-left">

@@ -7,14 +7,34 @@ import { X } from 'lucide-react';
 
 function Salaire({ onClose }) {
     const dispatch = useDispatch();
-    const { users } = useSelector((state) => state.users);
+    const users = useSelector((state) => state.users.items);
     const [salaires, setSalaires] = useState([{
         user_id: '',
         montant: '',
-        date_paiement: '',
-        periode: '',
+        primes: '',
+        date: '',
         statut: 'en_attente'
     }]);
+
+    // Liste des mois pour le sélecteur
+    const mois = [
+        { value: '01', label: 'Janvier' },
+        { value: '02', label: 'Février' },
+        { value: '03', label: 'Mars' },
+        { value: '04', label: 'Avril' },
+        { value: '05', label: 'Mai' },
+        { value: '06', label: 'Juin' },
+        { value: '07', label: 'Juillet' },
+        { value: '08', label: 'Août' },
+        { value: '09', label: 'Septembre' },
+        { value: '10', label: 'Octobre' },
+        { value: '11', label: 'Novembre' },
+        { value: '12', label: 'Décembre' }
+    ];
+
+    // Générer les années (de l'année actuelle à 5 ans en arrière)
+    const currentYear = new Date().getFullYear();
+    const annees = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
     useEffect(() => {
         dispatch(fetchUsers());
@@ -24,8 +44,8 @@ function Salaire({ onClose }) {
         setSalaires([...salaires, {
             user_id: '',
             montant: '',
-            date_paiement: '',
-            periode: '',
+            primes: '',
+            date: '',
             statut: 'en_attente'
         }]);
     };
@@ -46,8 +66,8 @@ function Salaire({ onClose }) {
         const isValid = salaires.every(salaire => 
             salaire.user_id !== '' && 
             salaire.montant !== '' &&
-            salaire.date_paiement !== '' &&
-            salaire.periode !== ''
+            salaire.primes !== '' &&
+            salaire.date !== ''
         );
 
         if (!isValid) {
@@ -55,15 +75,21 @@ function Salaire({ onClose }) {
             return;
         }
 
-        dispatch(createSalaires(salaires))
+        // Formater les dates pour inclure le jour (01) avant l'envoi
+        const formattedSalaires = salaires.map(salaire => ({
+            ...salaire,
+            date: `${salaire.date}-01` // Ajouter le jour 01 à la date
+        }));
+
+        dispatch(createSalaires(formattedSalaires))
             .unwrap()
             .then(() => {
                 Swal.fire('Succès', 'Salaires ajoutés avec succès.', 'success');
                 setSalaires([{
                     user_id: '',
                     montant: '',
-                    date_paiement: '',
-                    periode: '',
+                    primes: '',
+                    date: '',
                     statut: 'en_attente'
                 }]);
                 onClose();
@@ -101,6 +127,7 @@ function Salaire({ onClose }) {
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                             value={salaire.user_id}
                             onChange={(e) => handleChange(index, 'user_id', e.target.value)}
+                            required
                         >
                             <option value="">Sélectionnez un employé</option>
                             {users.map((user) => (
@@ -117,53 +144,68 @@ function Salaire({ onClose }) {
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                             value={salaire.montant}
                             onChange={(e) => handleChange(index, 'montant', e.target.value)}
-                            placeholder='Entrez le montant du salaire'
+                            required
                         />
                     </div>
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Date de paiement</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Primes</label>
                         <input
-                            type="date"
+                            type="number"
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={salaire.date_paiement}
-                            onChange={(e) => handleChange(index, 'date_paiement', e.target.value)}
+                            value={salaire.primes}
+                            onChange={(e) => handleChange(index, 'primes', e.target.value)}
+                            required
                         />
                     </div>
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Période</label>
-                        <input
-                            type="text"
-                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={salaire.periode}
-                            onChange={(e) => handleChange(index, 'periode', e.target.value)}
-                            placeholder='Entrez la période (ex: Janvier 2024)'
-                        />
-                    </div>
-                    <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                        <select
-                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={salaire.statut}
-                            onChange={(e) => handleChange(index, 'statut', e.target.value)}
-                        >
-                            <option value="en_attente">En attente</option>
-                            <option value="paye">Payé</option>
-                            <option value="annule">Annulé</option>
-                        </select>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Date (Mois/Année)</label>
+                        <div className="flex space-x-2">
+                            <select
+                                className='w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                value={salaire.date ? salaire.date.split('-')[1] : ''}
+                                onChange={(e) => {
+                                    const year = salaire.date ? salaire.date.split('-')[0] : new Date().getFullYear();
+                                    handleChange(index, 'date', `${year}-${e.target.value}`);
+                                }}
+                                required
+                            >
+                                <option value="">Mois</option>
+                                {mois.map((mois) => (
+                                    <option key={mois.value} value={mois.value}>
+                                        {mois.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                className='w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                value={salaire.date ? salaire.date.split('-')[0] : ''}
+                                onChange={(e) => {
+                                    const month = salaire.date ? salaire.date.split('-')[1] : '01';
+                                    handleChange(index, 'date', `${e.target.value}-${month}`);
+                                }}
+                                required
+                            >
+                                <option value="">Année</option>
+                                {annees.map((annee) => (
+                                    <option key={annee} value={annee}>
+                                        {annee}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
             ))}
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+            <div className="flex justify-between mt-4">
                 <button
-                    className='bg-green-600 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition'
                     onClick={handleAddField}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 >
                     Ajouter un autre salaire
                 </button>
                 <button
-                    className='bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition'
                     onClick={handleSubmit}
+                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
                 >
                     Enregistrer
                 </button>

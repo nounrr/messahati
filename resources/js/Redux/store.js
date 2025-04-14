@@ -18,6 +18,7 @@ import reclamationReducer from './reclamations/reclamationSlice';
 import notificationReducer from './notifications/notificationSlice';
 import mutuelReducer from './mutuels/mutuelSlice';
 import feedbackReducer from './feedbacks/feedbackSlice';
+import typeMedicamentReducer from './typeMedicaments/typeMedicamentSlice';
 
 const store = configureStore({
     reducer: {
@@ -40,6 +41,7 @@ const store = configureStore({
         notifications: notificationReducer,
         mutuels: mutuelReducer,
         feedbacks: feedbackReducer,
+        typeMedicaments: typeMedicamentReducer,
     },
 });
 

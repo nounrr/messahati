@@ -48,7 +48,7 @@ class TypemedicamentController extends Controller
         return response()->json($type);
     }
 
-    // Formulaire d’édition
+    // Formulaire d'édition
     public function edit($id)
     {
         $type = TypeMedicament::findOrFail($id);
@@ -60,7 +60,7 @@ class TypemedicamentController extends Controller
     {
         $validated = $request->validate([
             'typemedicaments' => 'required|array',
-            'typemedicaments.*.id' => 'required|exists:typemedicaments,id',
+            'typemedicaments.*.id' => 'required|exists:type_medicaments,id',
             'typemedicaments.*.nom' => 'required|string',
         ]);
 

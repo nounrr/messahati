@@ -7,7 +7,7 @@ import { X, Upload } from 'lucide-react';
 
 function Medicament({ onClose }) {
     const dispatch = useDispatch();
-    const { typeMedicaments } = useSelector((state) => state.typeMedicaments);
+    const typeMedicaments = useSelector((state) => state.typeMedicaments.typeMedicaments);
     const [medicaments, setMedicaments] = useState([{
         nom_medicament: '',
         quantite: '',
@@ -92,7 +92,7 @@ function Medicament({ onClose }) {
             }
         });
 
-        dispatch(createMedicaments(formData))
+        dispatch(createMedicaments({ medicaments: formData }))
             .unwrap()
             .then(() => {
                 Swal.fire('Succès', 'Médicaments ajoutés avec succès.', 'success');

@@ -12,7 +12,7 @@ class ReclamationController extends Controller
     public function index()
     {
         $reclamations = Reclamation::with('user')->get();
-        return view('reclamation.index', compact('reclamations'));
+        return response()->json($reclamations);
     }
 
     // Formulaire de création
@@ -21,32 +21,58 @@ class ReclamationController extends Controller
         return view('reclamation.create');
     }
 
-    // Enregistrement d'une réclamation (sans mass-assignement)
+    // Enregistrement d'une réclamation
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'titre' => 'required|string',
-            'description' => 'required|string',
-            'statut' => 'required|string|in:en_attente,traité,rejeté',
-            'date_reclamation' => 'required|date',
-        ]);
+        // Vérifier si la requête contient un tableau de réclamations
+        if ($request->isJson() && is_array($request->json()->all())) {
+            $reclamations = $request->json()->all();
+            $created = [];
+            
+            foreach ($reclamations as $data) {
+                $validated = validator($data, [
+                    'titre' => 'required|string',
+                    'description' => 'required|string',
+                    'statut' => 'required|string|in:en_attente,traité,rejeté',
+                    'user_id' => 'required|exists:users,id',
+                ])->validate();
+                
+                $reclamation = new Reclamation();
+                $reclamation->titre = $validated['titre'];
+                $reclamation->description = $validated['description'];
+                $reclamation->statut = $validated['statut'];
+                $reclamation->user_id = $validated['user_id'];
+                $reclamation->save();
+                
+                $created[] = $reclamation;
+            }
+            
+            return response()->json($created, 201);
+        } else {
+            // Traitement d'une seule réclamation
+            $validated = $request->validate([
+                'titre' => 'required|string',
+                'description' => 'required|string',
+                'statut' => 'required|string|in:en_attente,traité,rejeté',
+                'user_id' => 'required|exists:users,id',
+            ]);
 
-        $reclamation = new Reclamation();
-        $reclamation->titre = $validated['titre'];
-        $reclamation->description = $validated['description'];
-        $reclamation->statut = $validated['statut'];
-        $reclamation->date_reclamation = $validated['date_reclamation'];
-        $reclamation->user_id = Auth::id(); // Ajoute l'utilisateur connecté
-        $reclamation->save();
+            $reclamation = new Reclamation();
+            $reclamation->titre = $validated['titre'];
+            $reclamation->description = $validated['description'];
+            $reclamation->statut = $validated['statut'];
+            $reclamation->user_id = $validated['user_id'];
+            $reclamation->save();
 
-        return redirect()->route('reclamation.index')->with('success', 'Réclamation créée avec succès.');
+            return response()->json($reclamation, 201);
+        }
     }
 
     // Affiche une réclamation
     public function show($id)
     {
         $reclamation = Reclamation::with('user')->findOrFail($id);
-        return view('reclamation.show', compact('reclamation'));
+        return response()->json($reclamation);
     }
 
     // Formulaire d'édition
@@ -56,7 +82,7 @@ class ReclamationController extends Controller
         return view('reclamation.edit', compact('reclamation'));
     }
 
-    // Mise à jour d'une réclamation (sans mass-assignement)
+    // Mise à jour d'une réclamation
     public function update(Request $request, $id)
     {
         $reclamation = Reclamation::findOrFail($id);
@@ -65,22 +91,23 @@ class ReclamationController extends Controller
             'titre' => 'required|string',
             'description' => 'required|string',
             'statut' => 'required|string|in:en_attente,traité,rejeté',
-            'date_reclamation' => 'required|date',
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $reclamation->titre = $validated['titre'];
         $reclamation->description = $validated['description'];
         $reclamation->statut = $validated['statut'];
-        $reclamation->date_reclamation = $validated['date_reclamation'];
+        $reclamation->user_id = $validated['user_id'];
         $reclamation->save();
 
-        return redirect()->route('reclamation.index')->with('success', 'Réclamation mise à jour avec succès.');
+        return response()->json($reclamation);
     }
 
     // Suppression d'une réclamation
     public function destroy($id)
     {
-        Reclamation::findOrFail($id)->delete();
-        return redirect()->route('reclamation.index')->with('success', 'Réclamation supprimée avec succès.');
+        $reclamation = Reclamation::findOrFail($id);
+        $reclamation->delete();
+        return response()->json(null, 204);
     }
 }
