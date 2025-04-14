@@ -89,4 +89,31 @@ class CertificatsMedicaleController extends Controller
 
         return redirect()->route('certificats.index')->with('success', 'Certificat médical supprimé avec succès.');
     }
+
+    public function generateEditor($id)
+{
+    $typeCertificat = TypeCertificat::findOrFail($id);
+
+    // Analyse du contenu pour détecter les variables et les inputs
+    $description = $typeCertificat->description;
+
+    // Remplace (texte fixe) => <input>
+    $description = preg_replace_callback('/\((.*?)\)/', function ($matches) {
+        return '<input type="text" name="inputs[]" value="' . $matches[1] . '">';
+    }, $description);
+
+    // Remplace @variable => <select>
+    $description = preg_replace_callback('/@(\w+)/', function ($matches) {
+        $name = $matches[1];
+        return "<select name='{$name}'>" .
+            "<option value=''>-- Choisir {$name} --</option>" .
+            "</select>";
+    }, $description);
+
+    return response()->json([
+        'editor_html' => $description,
+        'type_certificat' => $typeCertificat->type_certificat
+    ]);
+}
+
 }

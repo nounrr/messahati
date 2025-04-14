@@ -88,4 +88,5 @@ class TypecertificatController extends Controller
 
         return response()->json(['message' => 'Type de certificat supprimé avec succès.'], 200);
     }
+    
 }

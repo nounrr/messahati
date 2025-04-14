@@ -103,3 +103,6 @@ Route::resource('attachements', AttachementController::class);
 
 // Routes pour les retours d'expérience
 Route::resource('feedbacks', feedbackController::class);
+
+Route::get('/typecertificats/{id}/editor', [TypecertificatController::class, 'generateEditor']);
+
