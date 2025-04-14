@@ -1,5 +1,4 @@
 import './bootstrap';
-import NotificationPopup from './components/NotificationPopup.vue';
 
 // Écoute des messages privés
 const userId = document.querySelector('meta[name="user-id"]')?.content;
@@ -16,28 +15,8 @@ if (userId) {
     window.Echo.private(`App.Models.User.${userId}`)
         .notification((notification) => {
             console.log('Nouvelle notification:', notification);
-            showNotificationPopup(notification);
+            showNotification(notification.message);
         });
-}
-
-function showNotificationPopup(notification) {
-    // Créer un élément div pour le popup
-    const popupContainer = document.createElement('div');
-    document.body.appendChild(popupContainer);
-
-    // Créer une instance du composant NotificationPopup
-    const app = createApp(NotificationPopup, {
-        notification: notification
-    });
-
-    // Monter le composant
-    app.mount(popupContainer);
-
-    // Supprimer le popup après sa fermeture
-    setTimeout(() => {
-        app.unmount();
-        document.body.removeChild(popupContainer);
-    }, 5000);
 }
 
 function showNotification(message) {
