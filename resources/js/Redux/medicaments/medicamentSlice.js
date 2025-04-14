@@ -132,20 +132,25 @@ const medicamentSlice = createSlice({
             })
             .addCase(fetchMedicaments.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.items = action.payload;
+                state.items = Array.isArray(action.payload) ? action.payload : [];
             })
             .addCase(fetchMedicaments.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
             .addCase(createMedicaments.fulfilled, (state, action) => {
-                state.items.push(...action.payload);
+                if (Array.isArray(action.payload)) {
+                    state.items = [...state.items, ...action.payload];
+                } else if (action.payload) {
+                    state.items.push(action.payload);
+                }
             })
             .addCase(createMedicaments.rejected, (state, action) => {
                 state.error = action.payload?.message || 'Erreur lors de la création';
             })
             .addCase(updateMedicaments.fulfilled, (state, action) => {
-                action.payload.forEach((updated) => {
+                const updatedItems = Array.isArray(action.payload) ? action.payload : [action.payload];
+                updatedItems.forEach((updated) => {
                     const index = state.items.findIndex((item) => item.id === updated.id);
                     if (index !== -1) {
                         state.items[index] = updated;
@@ -153,10 +158,15 @@ const medicamentSlice = createSlice({
                 });
             })
             .addCase(deleteMedicaments.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
+                const deletedIds = Array.isArray(action.payload?.ids) ? action.payload.ids : [];
+                state.items = state.items.filter((item) => !deletedIds.includes(item.id));
             })
             .addCase(importMedicaments.fulfilled, (state, action) => {
-                state.items.push(...action.payload);
+                if (Array.isArray(action.payload)) {
+                    state.items = [...state.items, ...action.payload];
+                } else if (action.payload) {
+                    state.items.push(action.payload);
+                }
             });
     },
 });

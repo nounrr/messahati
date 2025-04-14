@@ -14,8 +14,6 @@ class Departement extends Model
     public function users(){
         return $this->hasMany(User::class);
     }
-    public function clinique(){
-        return $this->belongsTo(Clinique::class);
-    }
+   
 
 }

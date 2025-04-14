@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\Departement;
 use App\Exports\DepartementExport;
 use App\Imports\DepartementImport;
-use App\Traits\ExcelExportImport;  // <-- Excel specific
 use Illuminate\Support\Facades\Storage;
 
 class DepartementController extends Controller
@@ -112,8 +111,6 @@ class DepartementController extends Controller
 
         return response()->json(['message' => 'Départements supprimés avec succès.']);
     }
-
-    use ExcelExportImport;
 
     public function export()
     {

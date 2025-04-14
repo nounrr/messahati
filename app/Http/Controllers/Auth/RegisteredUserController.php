@@ -28,11 +28,6 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    use Illuminate\Support\Facades\Hash;
-    use Illuminate\Auth\Events\Registered;
-    use Illuminate\Http\RedirectResponse;
-    use App\Models\User;
-    
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -84,6 +79,4 @@ class RegisteredUserController extends Controller
     
         return redirect()->back()->with('success', 'Utilisateurs enregistrés avec succès.');
     }
-    
-    
 }

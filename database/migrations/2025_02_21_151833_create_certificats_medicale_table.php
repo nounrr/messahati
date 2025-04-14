@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('certificats_medicale', function (Blueprint $table) {
             $table->id();
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->date('date_emission');
             $table->foreignId('typecertificat_id')->constrained()->onDelete('cascade');
             $table->foreignId('traitement_id')->constrained()->onDelete('cascade');

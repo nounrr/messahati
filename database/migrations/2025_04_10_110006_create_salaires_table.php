@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('salaires', function (Blueprint $table) {
             $table->id();
-            $table->float('montant');
-            $table->float('primes');
-            $table->date('date');
+            $table->float('montant')->nullable();
+            $table->float('primes')->nullable();
+            $table->date('date')->nullable();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

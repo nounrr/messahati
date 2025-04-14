@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TypeTraitement;
+use App\Traits\ExcelExportImport;
 
 class TypeTraitementController extends Controller
 {
@@ -71,7 +72,7 @@ class TypeTraitementController extends Controller
         return response()->json($updatedItems, 200);
     }
 
-    // Suppression d’un ou plusieurs types
+    // Suppression d'un ou plusieurs types
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {

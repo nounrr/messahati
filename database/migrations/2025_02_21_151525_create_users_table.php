@@ -22,7 +22,7 @@ return new class extends Migration
             $table->date('date_inscription');
             $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
             $table->string('password');
-            $table->string('img_path');
+            $table->string('img_path')->nullable();
             $table->boolean('status');
             $table->timestamp('email_verified_at')->nullable();  
             $table->rememberToken();

@@ -17,6 +17,7 @@ import salaireReducer from './salaires/salaireSlice';
 import reclamationReducer from './reclamations/reclamationSlice';
 import notificationReducer from './notifications/notificationSlice';
 import mutuelReducer from './mutuels/mutuelSlice';
+import feedbackReducer from './feedbacks/feedbackSlice';
 
 const store = configureStore({
     reducer: {
@@ -38,6 +39,7 @@ const store = configureStore({
         reclamations: reclamationReducer,
         notifications: notificationReducer,
         mutuels: mutuelReducer,
+        feedbacks: feedbackReducer,
     },
 });
 

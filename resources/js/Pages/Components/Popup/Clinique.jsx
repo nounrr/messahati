@@ -1,31 +1,45 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
-import { createDepartements } from '../../../Redux/departements/departementSlice';
+import { createCliniques } from '../../../Redux/cliniques/cliniqueSlice';
 import { X, Upload } from 'lucide-react';
 
-function Departement({ onClose }) {
+function Clinique({ onClose }) {
     const dispatch = useDispatch();
-    const [departements, setDepartements] = useState([{ nom: '', description: '', image: null }]);
+    const [cliniques, setCliniques] = useState([{ 
+        nom: '', 
+        adresse: '', 
+        email: '', 
+        site_web: '', 
+        description: '', 
+        logo: null 
+    }]);
     const [imagePreview, setImagePreview] = useState([null]);
 
     const handleAddField = () => {
-        setDepartements([...departements, { nom: '', description: '', image: null }]);
+        setCliniques([...cliniques, { 
+            nom: '', 
+            adresse: '', 
+            email: '', 
+            site_web: '', 
+            description: '', 
+            logo: null 
+        }]);
         setImagePreview([...imagePreview, null]);
     };
 
     const handleChange = (index, field, value) => {
-        const updated = [...departements];
+        const updated = [...cliniques];
         updated[index][field] = value;
-        setDepartements(updated);
+        setCliniques(updated);
     };
 
     const handleImageChange = (index, e) => {
         const file = e.target.files[0];
         if (file) {
-            const updated = [...departements];
-            updated[index].image = file;
-            setDepartements(updated);
+            const updated = [...cliniques];
+            updated[index].logo = file;
+            setCliniques(updated);
             
             // Create preview URL
             const reader = new FileReader();
@@ -39,9 +53,9 @@ function Departement({ onClose }) {
     };
 
     const handleRemoveField = (index) => {
-        const updated = [...departements];
+        const updated = [...cliniques];
         updated.splice(index, 1);
-        setDepartements(updated);
+        setCliniques(updated);
         
         const updatedPreviews = [...imagePreview];
         updatedPreviews.splice(index, 1);
@@ -49,28 +63,30 @@ function Departement({ onClose }) {
     };
 
     const handleSubmit = () => {
-        const isValid = departements.every(dep => dep.nom.trim() !== '');
+        const isValid = cliniques.every(clinique => 
+            clinique.nom.trim() !== '' && 
+            clinique.adresse.trim() !== '' && 
+            clinique.email.trim() !== ''
+        );
+        
         if (!isValid) {
-            Swal.fire('Erreur', 'Chaque département doit avoir un libellé.', 'error');
+            Swal.fire('Erreur', 'Veuillez remplir tous les champs obligatoires.', 'error');
             return;
         }
 
-        // Vérifier que toutes les images sont des objets File
-        const formData = new FormData();
-        departements.forEach((dep, index) => {
-            formData.append(`departements[${index}][nom]`, dep.nom);
-            formData.append(`departements[${index}][description]`, dep.description || '');
-            if (dep.image instanceof File) {
-                formData.append(`departements[${index}][image]`, dep.image);
-            }
-        });
-
-        dispatch(createDepartements(departements))
+        dispatch(createCliniques(cliniques))
             .unwrap()
             .then((res) => {
                 console.log('Réponse reçue :', res);
-                Swal.fire('Succès', 'Départements ajoutés avec succès.', 'success');
-                setDepartements([{ nom: '', description: '', image: null }]);
+                Swal.fire('Succès', 'Cliniques ajoutées avec succès.', 'success');
+                setCliniques([{ 
+                    nom: '', 
+                    adresse: '', 
+                    email: '', 
+                    site_web: '', 
+                    description: '', 
+                    logo: null 
+                }]);
                 setImagePreview([null]);
                 onClose();
             })
@@ -87,13 +103,13 @@ function Departement({ onClose }) {
             </button>
             <div className='text-center mb-6'>
                 <img src='assets/images/logo.png' alt='logo' className='mx-auto mb-4 w-28 h-auto' />
-                <h4 className='text-2xl font-semibold mb-1'>Ajoutez les différents Départements</h4>
+                <h4 className='text-2xl font-semibold mb-1'>Ajoutez les différentes Cliniques</h4>
                 <h6 className='text-gray-500 text-md'>Veuillez fournir les informations suivantes :</h6>
             </div>
 
-            {departements.map((dep, index) => (
+            {cliniques.map((clinique, index) => (
                 <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm relative">
-                    {departements.length > 1 && (
+                    {cliniques.length > 1 && (
                         <button
                             className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                             onClick={() => handleRemoveField(index)}
@@ -102,13 +118,43 @@ function Departement({ onClose }) {
                         </button>
                     )}
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Libellé</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nom de la clinique *</label>
                         <input
                             type='text'
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            placeholder='Libellé'
-                            value={dep.nom}
+                            placeholder='Nom de la clinique'
+                            value={clinique.nom}
                             onChange={(e) => handleChange(index, 'nom', e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-4 text-left">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Adresse *</label>
+                        <input
+                            type='text'
+                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                            placeholder='Adresse'
+                            value={clinique.adresse}
+                            onChange={(e) => handleChange(index, 'adresse', e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-4 text-left">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                        <input
+                            type='email'
+                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                            placeholder='Email'
+                            value={clinique.email}
+                            onChange={(e) => handleChange(index, 'email', e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-4 text-left">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Site web</label>
+                        <input
+                            type='text'
+                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                            placeholder='Site web'
+                            value={clinique.site_web}
+                            onChange={(e) => handleChange(index, 'site_web', e.target.value)}
                         />
                     </div>
                     <div className="mb-4 text-left">
@@ -117,12 +163,12 @@ function Departement({ onClose }) {
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                             placeholder='Description'
                             rows="3"
-                            value={dep.description}
+                            value={clinique.description}
                             onChange={(e) => handleChange(index, 'description', e.target.value)}
                         ></textarea>
                     </div>
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Logo</label>
                         <div className="flex items-center justify-center w-full">
                             <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -154,10 +200,10 @@ function Departement({ onClose }) {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
                 <button
-                    className='bg-green-600 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition'
+                    className='bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition'
                     onClick={handleAddField}
                 >
-                    Ajouter un autre département
+                    Ajouter une autre clinique
                 </button>
                 <button
                     className='bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition'
@@ -170,4 +216,4 @@ function Departement({ onClose }) {
     );
 }
 
-export default Departement;
+export default Clinique; 

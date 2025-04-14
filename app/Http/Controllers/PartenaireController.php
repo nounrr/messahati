@@ -25,24 +25,21 @@ class PartenaireController extends Controller
     {
         $validated = $request->validate([
             'partenaires' => 'required|array',
-            'partenaires.*.clinique_id' => 'required|exists:cliniques,id',
             'partenaires.*.nom' => 'required|string',
-            'partenaires.*.adress' => 'required|string',
+            'partenaires.*.adress' => 'nullable|string',
             'partenaires.*.typepartenaires_id' => 'required|exists:typepartenairess,id',
-            'partenaires.*.telephone' => 'required|string'
+            'partenaires.*.telephone' => 'nullable|string'
         ]);
 
         $createdItems = [];
 
         foreach ($validated['partenaires'] as $data) {
             $partenaire = new Partenaire();
-            $partenaire->clinique_id = $data['clinique_id'];
             $partenaire->nom = $data['nom'];
-            $partenaire->adress = $data['adress'];
+            $partenaire->adress = $data['adress'] ?? null;
             $partenaire->typepartenaires_id = $data['typepartenaires_id'];
-            $partenaire->telephone = $data['telephone'];
+            $partenaire->telephone = $data['telephone'] ?? null;
             $partenaire->save();
-
             $createdItems[] = $partenaire;
         }
 
@@ -56,7 +53,7 @@ class PartenaireController extends Controller
         return response()->json($partenaire);
     }
 
-    // Formulaire d’édition
+    // Formulaire d'édition
     public function edit(string $id)
     {
         $partenaire = Partenaire::findOrFail($id);
@@ -69,31 +66,28 @@ class PartenaireController extends Controller
         $validated = $request->validate([
             'updates' => 'required|array',
             'updates.*.id' => 'required|exists:partenaires,id',
-            'updates.*.clinique_id' => 'required|exists:cliniques,id',
             'updates.*.nom' => 'required|string',
-            'updates.*.adress' => 'required|string',
+            'updates.*.adress' => 'nullable|string',
             'updates.*.typepartenaires_id' => 'required|exists:typepartenairess,id',
-            'updates.*.telephone' => 'required|string'
+            'updates.*.telephone' => 'nullable|string'
         ]);
 
         $updatedItems = [];
 
         foreach ($validated['updates'] as $data) {
-            $partenaire = Partenaire::findOrFail($data['id']);
-            $partenaire->clinique_id = $data['clinique_id'];
+            $partenaire = Partenaire::find($data['id']);
             $partenaire->nom = $data['nom'];
-            $partenaire->adress = $data['adress'];
+            $partenaire->adress = $data['adress'] ?? null;
             $partenaire->typepartenaires_id = $data['typepartenaires_id'];
-            $partenaire->telephone = $data['telephone'];
+            $partenaire->telephone = $data['telephone'] ?? null;
             $partenaire->save();
-
             $updatedItems[] = $partenaire;
         }
 
         return response()->json($updatedItems, 200);
     }
 
-    // Suppression d’un ou plusieurs partenaires
+    // Suppression d'un ou plusieurs partenaires
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {

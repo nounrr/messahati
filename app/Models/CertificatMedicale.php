@@ -11,7 +11,7 @@ class CertificatMedicale extends Model
     public function traitement(){
         return $this->belongsTo(Traitement::class);
     }
-    public function Typecertificat(){
+    public function typeCertificat(){
         return $this->belongsTo(TypeCertificat::class);
     }
 }

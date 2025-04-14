@@ -60,17 +60,22 @@ const typePartenaireSlice = createSlice({
             })
             .addCase(fetchTypePartenaires.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.items = action.payload;
+                state.items = Array.isArray(action.payload) ? action.payload : [];
             })
             .addCase(fetchTypePartenaires.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
             .addCase(createTypePartenaires.fulfilled, (state, action) => {
-                state.items.push(...action.payload);
+                if (Array.isArray(action.payload)) {
+                    state.items = [...state.items, ...action.payload];
+                } else if (action.payload) {
+                    state.items.push(action.payload);
+                }
             })
             .addCase(updateTypePartenaires.fulfilled, (state, action) => {
-                action.payload.forEach((updated) => {
+                const updatedItems = Array.isArray(action.payload) ? action.payload : [action.payload];
+                updatedItems.forEach((updated) => {
                     const index = state.items.findIndex((item) => item.id === updated.id);
                     if (index !== -1) {
                         state.items[index] = updated;
@@ -78,7 +83,8 @@ const typePartenaireSlice = createSlice({
                 });
             })
             .addCase(deleteTypePartenaires.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
+                const deletedIds = Array.isArray(action.payload?.ids) ? action.payload.ids : [];
+                state.items = state.items.filter((item) => !deletedIds.includes(item.id));
             });
     },
 });

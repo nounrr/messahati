@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('traitements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('typetraitement_id')->references('id')->on('typetraitements')->onDelete('cascade');
-            $table->text('description');
+            $table->foreignId('typetraitement_id')->references('id')->on('type_traitements')->onDelete('cascade');
+            $table->text('description')->nullable();
             $table->date('date_debut');
-            $table->date('date_fin');
+            $table->date('date_fin')->nullable();
 
             $table->timestamps();
         });

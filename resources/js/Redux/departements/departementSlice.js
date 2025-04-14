@@ -17,17 +17,18 @@ export const createDepartements = createAsyncThunk(
         try {
             const formData = new FormData();
             departements.forEach((departement, index) => {
-                Object.entries(departement).forEach(([key, value]) => {
-                    if (key === 'image' && value instanceof File) {
-                        formData.append(`departements[${index}][image]`, value);
-                    } else {
-                        formData.append(`departements[${index}][${key}]`, value);
-                    }
-                });
+                formData.append(`departements[${index}][nom]`, departement.nom);
+                formData.append(`departements[${index}][description]`, departement.description || '');
+                if (departement.image instanceof File) {
+                    formData.append(`departements[${index}][image]`, departement.image);
+                }
             });
 
             const response = await axiosInstance.post('/departements', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: { 
+                    'Content-Type': 'multipart/form-data',
+                    'Accept': 'application/json'
+                }
             });
             return response.data;
         } catch (error) {
@@ -130,7 +131,7 @@ const departementSlice = createSlice({
             })
             .addCase(fetchDepartements.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.items = action.payload;
+                state.items = Array.isArray(action.payload) ? action.payload : [];
             })
             .addCase(fetchDepartements.rejected, (state, action) => {
                 state.status = 'failed';
@@ -139,14 +140,20 @@ const departementSlice = createSlice({
 
             // ✅ On ajoute manuellement les départements qu'on a envoyés
             .addCase(createDepartements.fulfilled, (state, action) => {
-                state.items.push(...action.payload);
+                // Handle both array and single object responses
+                if (Array.isArray(action.payload)) {
+                    state.items = [...state.items, ...action.payload];
+                } else if (action.payload) {
+                    state.items.push(action.payload);
+                }
             })
             .addCase(createDepartements.rejected, (state, action) => {
                 state.error = action.payload?.message || 'Erreur lors de la création';
             })
 
             .addCase(updateDepartements.fulfilled, (state, action) => {
-                action.payload.forEach((updated) => {
+                const updatedItems = Array.isArray(action.payload) ? action.payload : [action.payload];
+                updatedItems.forEach((updated) => {
                     const index = state.items.findIndex((item) => item.id === updated.id);
                     if (index !== -1) {
                         state.items[index] = updated;
@@ -155,11 +162,16 @@ const departementSlice = createSlice({
             })
 
             .addCase(deleteDepartements.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
+                const deletedIds = Array.isArray(action.payload?.ids) ? action.payload.ids : [];
+                state.items = state.items.filter((item) => !deletedIds.includes(item.id));
             })
 
             .addCase(importDepartements.fulfilled, (state, action) => {
-                state.items.push(...action.payload);
+                if (Array.isArray(action.payload)) {
+                    state.items = [...state.items, ...action.payload];
+                } else if (action.payload) {
+                    state.items.push(action.payload);
+                }
             });
     },
 });
