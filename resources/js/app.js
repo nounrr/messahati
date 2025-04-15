@@ -8,42 +8,54 @@ if (userId) {
     window.Echo.private(`chat.${userId}`)
         .listen('message.sent', (e) => {
             console.log('Nouveau message reçu:', e);
-            showNotification(e.message);
+            showNotification(
+                'Nouveau message',
+                `${e.message.user_name}: ${e.message.content}`,
+                `/chat/${e.message.emetteur_id}` // URL de redirection
+            );
         });
 
     // Écoute des notifications
     window.Echo.private(`App.Models.User.${userId}`)
         .notification((notification) => {
             console.log('Nouvelle notification:', notification);
-            showNotification(notification.message);
+            if (notification.type === 'message') {
+                showNotification(
+                    'Nouveau message',
+                    `${notification.message.user_name}: ${notification.message.content}`,
+                    `/chat/${notification.message.emetteur_id}`
+                );
+            }
         });
 }
 
-function showNotification(message) {
+function showNotification(title, body, redirectUrl) {
     if (!("Notification" in window)) {
         console.log("Ce navigateur ne supporte pas les notifications");
         return;
     }
 
     if (Notification.permission === "granted") {
-        createNotification(message);
+        createNotification(title, body, redirectUrl);
     } else if (Notification.permission !== "denied") {
         Notification.requestPermission().then(permission => {
             if (permission === "granted") {
-                createNotification(message);
+                createNotification(title, body, redirectUrl);
             }
         });
     }
 }
 
-function createNotification(message) {
-    const notification = new Notification("Nouveau message", {
-        body: `${message.user_name}: ${message.content}`,
+function createNotification(title, body, redirectUrl) {
+    const notification = new Notification(title, {
+        body: body,
         icon: "/images/notification-icon.png"
     });
 
     notification.onclick = function() {
-        window.focus();
+        // Redirection vers l'URL spécifiée
+        window.location.href = redirectUrl;
+        // Fermer la notification
         this.close();
     };
 } 

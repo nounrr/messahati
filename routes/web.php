@@ -60,6 +60,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Route::middleware(['auth'])->group(function () {
+    Route::get('/test-notifications', function () {
+        return Inertia::render('TestNotification');
+    })->name('test.notifications');
 
+    Route::get('/chat/{userId}', function ($userId) {
+        return Inertia::render('Chat', ['userId' => $userId]);
+    })->name('chat');
+// });
 
 require __DIR__.'/auth.php';
