@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Charge;
+use App\Exports\ChargeExport;
+use App\Traits\ExcelExportImport;
 
 class ChargeController extends Controller
 {
+    use ExcelExportImport;
+
     public function index()
     {
         $charges = Charge::all();
@@ -88,5 +92,10 @@ class ChargeController extends Controller
         $charge->delete();
 
         return redirect()->route('charges.index')->with('success', 'Charge deleted successfully.');
+    }
+
+    public function export()
+    {
+        return $this->exportExcel(ChargeExport::class, 'charges.xlsx', null);
     }
 }
