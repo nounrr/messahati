@@ -1,84 +1,48 @@
 <?php
+    {namespace App\Http\Controllers\Api;
 
-namespace Database\Seeders;
-
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-
-class RolesAndPermissionsSeeder extends Seeder
-{
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
-    {
-        // Réinitialiser les rôles et permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-
-
-        $permissions = [
-            
-            'create user', 'edit user', 'delete user', 'assign roles',
-
-            
-            'create patient', 'edit patient', 'delete patient', 'view patient',
-
-            
-            'create appointment', 'edit appointment', 'delete appointment', 'view appointment',
-
-            
-            'create consultation', 'edit consultation', 'delete consultation', 'view consultation',
-
-           
-            'access medical record', 'edit medical record', 'delete medical record',
-
-            
-            'create prescription', 'edit prescription', 'delete prescription', 'view prescription',
-
-            
-            'create invoice', 'edit invoice', 'delete invoice', 'view payments', 'manage refunds',
-
-           
-            'generate medical reports', 'generate financial reports', 'view statistics',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
-        }
-
+        use App\Http\Controllers\Controller;
+        use Illuminate\Http\Request;
+        use Spatie\Permission\Models\Role;
+        use Spatie\Permission\Models\Permission;
+        use App\Models\User;
         
-        $admin = Role::create(['name' => 'admin']);
-        $admin->givePermissionTo(Permission::all());
-
-        $doctor = Role::create(['name' => 'doctor']);
-        $doctor->givePermissionTo([
-            'view patient', 'create consultation', 'edit consultation', 'delete consultation',
-            'access medical record', 'edit medical record', 'view prescription', 'create prescription', 'edit prescription',
-            'generate medical reports'
-        ]);
-
-        $secretary = Role::create(['name' => 'secretary']);
-        $secretary->givePermissionTo([
-            'create patient', 'edit patient', 'view patient',
-            'create appointment', 'edit appointment', 'delete appointment', 'view appointment'
-        ]);
-
-        $nurse = Role::create(['name' => 'nurse']);
-        $nurse->givePermissionTo([
-            'view patient', 'access medical record'
-        ]);
-
-        $accountant = Role::create(['name' => 'accountant']);
-        $accountant->givePermissionTo([
-            'create invoice', 'edit invoice', 'delete invoice', 'view payments', 'manage refunds',
-            'generate financial reports'
-        ]);
-
-        $patient = Role::create(['name' => 'patient']);
-        $patient->givePermissionTo([
-            'view patient', 'view appointment', 'view prescription', 'view payments'
-        ]);
-    }
-}
+        class RolePermissionController extends Controller
+        {
+            public function roles()
+            {
+                return response()->json(Role::all());
+            }
+        
+            public function permissions()
+            {
+                return response()->json(Permission::all());
+            }
+        
+            public function assignRoleToUser(Request $request)
+            {
+                $request->validate([
+                    'user_id' => 'required|exists:users,id',
+                    'role' => 'required|exists:roles,name',
+                ]);
+        
+                $user = User::findOrFail($request->user_id);
+                $user->assignRole($request->role);
+        
+                return response()->json(['message' => 'Role assigned successfully.']);
+            }
+        
+            public function assignPermissionToUser(Request $request)
+            {
+                $request->validate([
+                    'user_id' => 'required|exists:users,id',
+                    'permission' => 'required|exists:permissions,name',
+                ]);
+        
+                $user = User::findOrFail($request->user_id);
+                $user->givePermissionTo($request->permission);
+        
+                return response()->json(['message' => 'Permission assigned successfully.']);
+            }
+        }
+        

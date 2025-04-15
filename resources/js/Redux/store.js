@@ -19,6 +19,7 @@ import notificationReducer from './notifications/notificationSlice';
 import mutuelReducer from './mutuels/mutuelSlice';
 import feedbackReducer from './feedbacks/feedbackSlice';
 import typeMedicamentReducer from './typeMedicaments/typeMedicamentSlice';
+import rolePermissionReducer from './rolePermissions/rolePermissionSlice';
 
 const store = configureStore({
     reducer: {
@@ -42,6 +43,7 @@ const store = configureStore({
         mutuels: mutuelReducer,
         feedbacks: feedbackReducer,
         typeMedicaments: typeMedicamentReducer,
+        rolePermissions: rolePermissionReducer,
     },
 });
 
