@@ -2,22 +2,27 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\ReclamationController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\MutuelController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
 
-Route::get('/export', [DepartementController::class, 'export'])->name('departements.export');
-
-
-Route::get('/typeTraitement', function () {return Inertia::render('Components/Forms/TypeTraitement');});
-Route::get('/AccesDenied', function () {return Inertia::render('AccesDenied/AccesDenied');});
-Route::get('/popup', function () {return Inertia::render('Home');});
-Route::get('/home', function () {return Inertia::render('Components/Popup/Departement');});
-Route::get('/Bienvenue', function () {return Inertia::render('Bienvenue/Bienvenue');});
-Route::get('/AddInfo', function () {return Inertia::render('Bienvenue/AddInfo');});
-Route::get('/Departement', function () {return Inertia::render('Components/Popup/Departement');});
-// Route::get('/Departement', function () {return Inertia::render('Components/DepartementCreate');});
+// Routes publiques
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -26,76 +31,58 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-// use App\Http\Controllers\RoleController;
 
+// Routes d'authentification
+Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-// Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-// Route::post('/roles/assign/{user}', [RoleController::class, 'assign'])->name('roles.assign');
-// Route::post('/roles/remove', [RoleController::class, 'removeRole'])->name('roles.remove');
-use App\Http\Controllers\RoleController;
-
-Route::get('/assign-roles', [RoleController::class, 'index'])->name('assign.index');
-Route::post('/assign-role/{userId}', [RoleController::class, 'assign'])->name('assign.role');
-Route::post('/remove-role', [RoleController::class, 'removeRole'])->name('remove.role');
-
-
-
-// // ✅ Route protégée par rôle
-// Route::middleware(['role:admin'])->get('/admin/dashboard', function () {
-//     return "Bienvenue, Admin";
-// });
-
-// // ✅ Route protégée par permission
-// Route::middleware(['permission:edit articles'])->get('/articles/edit', function () {
-//     return "Vous pouvez modifier des articles";
-// });
-
-// // ✅ Plusieurs rôles
-// Route::middleware(['role:admin,manager'])->get('/management', function () {
-//     return "Bienvenue, Admin ou Manager";
-// });
-
-// // ✅ Plusieurs permissions
-// Route::middleware(['permission:edit articles,delete articles'])->get('/articles/manage', function () {
-//     return "Vous pouvez modifier et supprimer des articles";
-// });
-Route::middleware(['role:admin,manager'])->get('/assign-role', [RoleController::class, 'index'])->name('roles.assign');
-Route::middleware(['role:admin,manager'])->post('/assign-role', [RoleController::class, 'assignRole']);
-Route::middleware(['role:admin,manager'])->post('/remove-role', [RoleController::class, 'removeRole'])->name('roles.remove');
-
+// Dashboard
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
+// Pages Inertia
+Route::get('/typeTraitement', function () {
+    return Inertia::render('Components/Forms/TypeTraitement');
 });
-use App\Http\Controllers\ReclamationController;
-use App\Http\Controllers\FeedbackController;
-use App\Http\Controllers\MutuelController;
+Route::get('/AccesDenied', function () {
+    return Inertia::render('AccesDenied/AccesDenied');
+});
+Route::get('/popup', function () {
+    return Inertia::render('Home');
+});
+Route::get('/home', function () {
+    return Inertia::render('Components/Popup/Departement');
+});
+Route::get('/Bienvenue', function () {
+    return Inertia::render('Bienvenue/Bienvenue');
+});
+Route::get('/AddInfo', function () {
+    return Inertia::render('Bienvenue/AddInfo');
+});
+Route::get('/Departement', function () {
+    return Inertia::render('Components/Popup/Departement');
+});
 
+// Routes pour les départements
+Route::get('/export', [DepartementController::class, 'export'])->name('departements.export');
+
+// Routes pour les réclamations, feedbacks et mutuels
 Route::resource('reclamation', ReclamationController::class);
-Route::resource('feedback', feedbackController::class);
+Route::resource('feedback', FeedbackController::class);
 Route::resource('mutuel', MutuelController::class);
 
+// Routes pour les vues des rôles et permissions
+Route::get('/roles', function () {
+    return Inertia::render('Components/RoleAccessLayer');
+})->name('roles.view');
 
-// Routes pour la gestion des rôles et permissions
+Route::get('/assign-roles', function () {
+    return Inertia::render('Components/AssignRoleLayer');
+})->name('assign-roles.view');
 
-    // Routes pour les rôles
-    Route::get('/roles', [App\Http\Controllers\RolePermissionController::class, 'roles'])->name('roles.index');
-    Route::post('/roles', [App\Http\Controllers\RolePermissionController::class, 'store'])->name('roles.store');
-    Route::put('/roles/{id}', [App\Http\Controllers\RolePermissionController::class, 'update'])->name('roles.update');
-    Route::delete('/roles/{id}', [App\Http\Controllers\RolePermissionController::class, 'destroy'])->name('roles.destroy');
-    
-    // Routes pour les permissions
-    Route::get('/permissions', [App\Http\Controllers\RolePermissionController::class, 'permissions'])->name('permissions.index');
-    
-    // Routes pour l'attribution des rôles et permissions
-    Route::post('/assign-role', [App\Http\Controllers\RolePermissionController::class, 'assignRoleToUser'])->name('roles.assign');
-    Route::post('/assign-permission', [App\Http\Controllers\RolePermissionController::class, 'assignPermissionToUser'])->name('permissions.assign');
-    Route::post('/remove-role', [App\Http\Controllers\RoleController::class, 'removeRole'])->name('roles.remove');
+// Routes pour l'attribution des rôles (vues)
+Route::get('/assign-role', [RoleController::class, 'index'])->name('roles.assign');
 
 require __DIR__.'/auth.php';

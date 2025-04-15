@@ -5,29 +5,49 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchRoles, assignRoleToUser } from '../../Redux/rolePermissions/rolePermissionSlice';
 import { fetchUsers } from '../../Redux/users/userSlice';
 import { clearError } from '../../Redux/rolePermissions/rolePermissionSlice';
+import { Dropdown } from 'bootstrap';
 
 const AssignRoleLayer = () => {
     const dispatch = useDispatch();
     const { roles, status: roleStatus, error: roleError } = useSelector((state) => state.rolePermissions);
-    const { users, status: userStatus } = useSelector((state) => state.users);
+    const { users, status: userStatus, error: userError } = useSelector((state) => state.users);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('Status');
     const [showCount, setShowCount] = useState(10);
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedRole, setSelectedRole] = useState('');
+    const [dropdowns, setDropdowns] = useState({});
 
     useEffect(() => {
         dispatch(fetchRoles());
         dispatch(fetchUsers());
     }, [dispatch]);
 
-    const handleAssignRole = async (userId, role) => {
+    useEffect(() => {
+        // Initialiser les dropdowns Bootstrap
+        const dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+        dropdownElements.forEach(element => {
+            const dropdown = new Dropdown(element);
+            setDropdowns(prev => ({
+                ...prev,
+                [element.id]: dropdown
+            }));
+        });
+
+        return () => {
+            // Nettoyer les dropdowns lors du démontage
+            Object.values(dropdowns).forEach(dropdown => {
+                dropdown.dispose();
+            });
+        };
+    }, [users]); // Réinitialiser quand les utilisateurs changent
+
+    const handleAssignRole = async (userId, roleId) => {
         try {
-            await dispatch(assignRoleToUser({ userId, role })).unwrap();
-            // Rafraîchir les données après l'attribution
-            dispatch(fetchUsers());
+            await dispatch(assignRoleToUser({ userId, roleId })).unwrap();
+            dispatch(fetchUsers()); // Rafraîchir la liste des utilisateurs
         } catch (error) {
-            console.error('Erreur lors de l\'attribution du rôle:', error);
+            console.error('Error assigning role:', error);
         }
     };
 
@@ -171,12 +191,13 @@ const AssignRoleLayer = () => {
                                                 <button
                                                     className="btn btn-outline-primary-600 not-active px-18 py-11 dropdown-toggle toggle-icon"
                                                     type="button"
+                                                    id={`dropdown-${user.id}`}
                                                     data-bs-toggle="dropdown"
                                                     aria-expanded="false"
                                                 >
                                                     Assign Role
                                                 </button>
-                                                <ul className="dropdown-menu">
+                                                <ul className="dropdown-menu" aria-labelledby={`dropdown-${user.id}`}>
                                                     {roleStatus === 'loading' ? (
                                                         <li><span className="dropdown-item">Chargement des rôles...</span></li>
                                                     ) : roles.length === 0 ? (
@@ -186,7 +207,7 @@ const AssignRoleLayer = () => {
                                                             <li key={role.id}>
                                                                 <button
                                                                     className="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900"
-                                                                    onClick={() => handleAssignRole(user.id, role.name)}
+                                                                    onClick={() => handleAssignRole(user.id, role.id)}
                                                                 >
                                                                     {role.name}
                                                                 </button>

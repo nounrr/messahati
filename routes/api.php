@@ -28,6 +28,8 @@ use App\Http\Controllers\TypeMedicamentController;
 use App\Http\Controllers\TypePartenaireController;
 use App\Http\Controllers\TypeTraitementController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\RoleController;
 
 // Route pour obtenir l'utilisateur authentifié
 Route::get('/user', function (Request $request) {
@@ -111,8 +113,22 @@ Route::resource('attachements', AttachementController::class);
 // Routes pour les retours d'expérience
 Route::resource('feedbacks', feedbackController::class);
 
-    Route::get('/roles', [RolePermissionController::class, 'roles']);
-    Route::get('/permissions', [RolePermissionController::class, 'permissions']);
+// Routes API pour les rôles et permissions
+Route::prefix('roles')->group(function () {
+    // Routes pour les rôles
+    Route::get('/', [RolePermissionController::class, 'roles'])->name('api.roles.index');
+    Route::post('/', [RolePermissionController::class, 'store'])->name('api.roles.store');
+    Route::put('/{id}', [RolePermissionController::class, 'update'])->name('api.roles.update');
+    Route::delete('/{id}', [RolePermissionController::class, 'destroy'])->name('api.roles.destroy');
+});
 
-    Route::post('/assign-role', [RolePermissionController::class, 'assignRoleToUser']);
-    Route::post('/assign-permission', [RolePermissionController::class, 'assignPermissionToUser']);
+Route::prefix('permissions')->group(function () {
+    // Routes pour les permissions
+    Route::get('/', [RolePermissionController::class, 'permissions'])->name('api.permissions.index');
+});
+
+// Routes pour l'attribution des rôles et permissions
+Route::post('/assign-role', [RolePermissionController::class, 'assignRoleToUser'])->name('api.roles.assign');
+Route::post('/assign-permission', [RolePermissionController::class, 'assignPermissionToUser'])->name('api.permissions.assign');
+Route::post('/remove-role', [RoleController::class, 'removeRole'])->name('api.roles.remove');
+Route::post('/assign-role/{userId}', [RoleController::class, 'assign'])->name('api.assign.role');

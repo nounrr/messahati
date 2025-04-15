@@ -10,6 +10,24 @@ export const fetchRoles = createAsyncThunk(
     }
 );
 
+// Create new role
+export const createRole = createAsyncThunk(
+    'rolePermissions/createRole',
+    async (roleData) => {
+        const response = await axiosInstance.post('/roles', roleData);
+        return response.data;
+    }
+);
+
+// Update role
+export const updateRole = createAsyncThunk(
+    'rolePermissions/updateRole',
+    async ({ id, roleData }) => {
+        const response = await axiosInstance.put(`/roles/${id}`, roleData);
+        return response.data;
+    }
+);
+
 // Fetch all permissions
 export const fetchPermissions = createAsyncThunk(
     'rolePermissions/fetchPermissions',
@@ -61,6 +79,33 @@ const rolePermissionSlice = createSlice({
                 state.roles = action.payload;
             })
             .addCase(fetchRoles.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            // Create role
+            .addCase(createRole.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(createRole.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.roles.push(action.payload.role);
+            })
+            .addCase(createRole.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            // Update role
+            .addCase(updateRole.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateRole.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                const index = state.roles.findIndex(role => role.id === action.payload.role.id);
+                if (index !== -1) {
+                    state.roles[index] = action.payload.role;
+                }
+            })
+            .addCase(updateRole.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })

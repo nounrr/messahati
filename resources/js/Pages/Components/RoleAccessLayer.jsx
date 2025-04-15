@@ -2,7 +2,8 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchRoles, clearError } from '../../Redux/rolePermissions/rolePermissionSlice';
+import { fetchRoles, createRole, updateRole } from '../../Redux/rolePermissions/rolePermissionSlice';
+import { Modal } from 'bootstrap';
 
 const RoleAccessLayer = () => {
     const dispatch = useDispatch();
@@ -13,12 +14,20 @@ const RoleAccessLayer = () => {
     const [newRole, setNewRole] = useState({
         name: '',
         description: '',
-        status: 'Active'
+        status: 'active'
     });
-    const [showModal, setShowModal] = useState(false);
+    const [modal, setModal] = useState(null);
+    const [editingRole, setEditingRole] = useState(null);
 
     useEffect(() => {
         dispatch(fetchRoles());
+        
+        // Initialize Bootstrap modal
+        const modalElement = document.getElementById('roleModal');
+        if (modalElement) {
+            const modalInstance = new Modal(modalElement);
+            setModal(modalInstance);
+        }
     }, [dispatch]);
 
     const handleInputChange = (e) => {
@@ -29,16 +38,41 @@ const RoleAccessLayer = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Ici, vous pouvez ajouter la logique pour créer un nouveau rôle
-        // Par exemple: dispatch(createRole(newRole));
-        setShowModal(false);
-        setNewRole({
-            name: '',
-            description: '',
-            status: 'Active'
-        });
+        try {
+            if (editingRole) {
+                await dispatch(updateRole({ id: editingRole.id, roleData: newRole })).unwrap();
+            } else {
+                await dispatch(createRole(newRole)).unwrap();
+            }
+            modal.hide();
+            setNewRole({ name: '', description: '', status: 'active' });
+            setEditingRole(null);
+        } catch (err) {
+            console.error('Failed to save role:', err);
+        }
+    };
+
+    const openModal = (role = null) => {
+        if (role) {
+            setEditingRole(role);
+            setNewRole({
+                name: role.name,
+                description: role.description,
+                status: role.status
+            });
+        } else {
+            setEditingRole(null);
+            setNewRole({ name: '', description: '', status: 'active' });
+        }
+        modal.show();
+    };
+
+    const closeModal = () => {
+        modal.hide();
+        setNewRole({ name: '', description: '', status: 'active' });
+        setEditingRole(null);
     };
 
     const filteredRoles = roles.filter(role => {
@@ -50,6 +84,14 @@ const RoleAccessLayer = () => {
     });
 
     const displayedRoles = filteredRoles.slice(0, showCount);
+
+    if (status === 'loading') {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
 
     return (
         <>
@@ -104,7 +146,7 @@ const RoleAccessLayer = () => {
                     <button
                         type="button"
                         className="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
-                        onClick={() => setShowModal(true)}
+                        onClick={() => openModal()}
                     >
                         <Icon
                             icon="ic:baseline-plus"
@@ -114,16 +156,6 @@ const RoleAccessLayer = () => {
                     </button>
                 </div>
                 <div className="card-body p-24">
-                    {error && (
-                        <div className="alert alert-danger" role="alert">
-                            {error}
-                            <button 
-                                type="button" 
-                                className="btn-close" 
-                                onClick={() => dispatch(clearError())}
-                            ></button>
-                        </div>
-                    )}
                     <div className="table-responsive scroll-sm">
                         <table className="table bordered-table sm-table mb-0">
                             <thead>
@@ -193,29 +225,9 @@ const RoleAccessLayer = () => {
                                                     <button
                                                         type="button"
                                                         className="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                                                        onClick={() => {
-                                                            setNewRole({
-                                                                name: role.name,
-                                                                description: role.description || '',
-                                                                status: role.status === 'active' ? 'Active' : 'Inactive'
-                                                            });
-                                                            setShowModal(true);
-                                                        }}
+                                                        onClick={() => openModal(role)}
                                                     >
                                                         <Icon icon="lucide:edit" className="menu-icon" />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                                                        onClick={() => {
-                                                            // Ici, vous pouvez ajouter la logique pour supprimer un rôle
-                                                            // Par exemple: dispatch(deleteRole(role.id));
-                                                        }}
-                                                    >
-                                                        <Icon
-                                                            icon="fluent:delete-24-regular"
-                                                            className="menu-icon"
-                                                        />
                                                     </button>
                                                 </div>
                                             </td>
@@ -290,129 +302,125 @@ const RoleAccessLayer = () => {
                 </div>
             </div>
             {/* Modal Start */}
-            {showModal && (
-                <div
-                    className="modal fade show"
-                    id="exampleModal"
-                    tabIndex={-1}
-                    aria-labelledby="exampleModalLabel"
-                    aria-hidden="false"
-                    style={{ display: 'block' }}
-                >
-                    <div className="modal-dialog modal-lg modal-dialog modal-dialog-centered">
-                        <div className="modal-content radius-16 bg-base">
-                            <div className="modal-header py-16 px-24 border border-top-0 border-start-0 border-end-0">
-                                <h1 className="modal-title fs-5" id="exampleModalLabel">
-                                    {newRole.id ? 'Edit Role' : 'Add New Role'}
-                                </h1>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => setShowModal(false)}
-                                    aria-label="Close"
-                                />
-                            </div>
-                            <div className="modal-body p-24">
-                                <form onSubmit={handleSubmit}>
-                                    <div className="row">
-                                        <div className="col-12 mb-20">
-                                            <label className="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                Role Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className="form-control radius-8"
-                                                placeholder="Enter Role Name"
-                                                name="name"
-                                                value={newRole.name}
-                                                onChange={handleInputChange}
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-12 mb-20">
-                                            <label
-                                                htmlFor="desc"
-                                                className="form-label fw-semibold text-primary-light text-sm mb-8"
-                                            >
-                                                Description
-                                            </label>
-                                            <textarea
-                                                className="form-control"
-                                                id="desc"
-                                                rows={4}
-                                                cols={50}
-                                                placeholder="Write some text"
-                                                name="description"
-                                                value={newRole.description}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                        <div className="col-12 mb-20">
-                                            <label className="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                Status{" "}
-                                            </label>
-                                            <div className="d-flex align-items-center flex-wrap gap-28">
-                                                <div className="form-check checked-success d-flex align-items-center gap-2">
-                                                    <input
-                                                        className="form-check-input"
-                                                        type="radio"
-                                                        name="status"
-                                                        id="Active"
-                                                        value="Active"
-                                                        checked={newRole.status === 'Active'}
-                                                        onChange={handleInputChange}
-                                                    />
-                                                    <label
-                                                        className="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1"
-                                                        htmlFor="Active"
-                                                    >
-                                                        <span className="w-8-px h-8-px bg-success-600 rounded-circle" />
-                                                        Active
-                                                    </label>
-                                                </div>
-                                                <div className="form-check checked-danger d-flex align-items-center gap-2">
-                                                    <input
-                                                        className="form-check-input"
-                                                        type="radio"
-                                                        name="status"
-                                                        id="Inactive"
-                                                        value="Inactive"
-                                                        checked={newRole.status === 'Inactive'}
-                                                        onChange={handleInputChange}
-                                                    />
-                                                    <label
-                                                        className="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1"
-                                                        htmlFor="Inactive"
-                                                    >
-                                                        <span className="w-8-px h-8-px bg-danger-600 rounded-circle" />
-                                                        Inactive
-                                                    </label>
-                                                </div>
+            <div
+                className="modal fade"
+                id="roleModal"
+                tabIndex={-1}
+                aria-labelledby="roleModalLabel"
+                aria-hidden="true"
+            >
+                <div className="modal-dialog modal-lg modal-dialog-centered">
+                    <div className="modal-content radius-16 bg-base">
+                        <div className="modal-header py-16 px-24 border border-top-0 border-start-0 border-end-0">
+                            <h1 className="modal-title fs-5" id="roleModalLabel">
+                                {editingRole ? 'Edit Role' : 'Add New Role'}
+                            </h1>
+                            <button
+                                type="button"
+                                className="btn-close"
+                                onClick={closeModal}
+                                aria-label="Close"
+                            />
+                        </div>
+                        <div className="modal-body p-24">
+                            <form onSubmit={handleSubmit}>
+                                <div className="row">
+                                    <div className="col-12 mb-20">
+                                        <label className="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            Role Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="form-control radius-8"
+                                            placeholder="Enter Role Name"
+                                            name="name"
+                                            value={newRole.name}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-12 mb-20">
+                                        <label
+                                            htmlFor="desc"
+                                            className="form-label fw-semibold text-primary-light text-sm mb-8"
+                                        >
+                                            Description
+                                        </label>
+                                        <textarea
+                                            className="form-control"
+                                            id="desc"
+                                            rows={4}
+                                            cols={50}
+                                            placeholder="Write some text"
+                                            name="description"
+                                            value={newRole.description}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                    <div className="col-12 mb-20">
+                                        <label className="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            Status{" "}
+                                        </label>
+                                        <div className="d-flex align-items-center flex-wrap gap-28">
+                                            <div className="form-check checked-success d-flex align-items-center gap-2">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="radio"
+                                                    name="status"
+                                                    id="Active"
+                                                    value="active"
+                                                    checked={newRole.status === 'active'}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <label
+                                                    className="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1"
+                                                    htmlFor="Active"
+                                                >
+                                                    <span className="w-8-px h-8-px bg-success-600 rounded-circle" />
+                                                    Active
+                                                </label>
+                                            </div>
+                                            <div className="form-check checked-danger d-flex align-items-center gap-2">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="radio"
+                                                    name="status"
+                                                    id="Inactive"
+                                                    value="inactive"
+                                                    checked={newRole.status === 'inactive'}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <label
+                                                    className="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1"
+                                                    htmlFor="Inactive"
+                                                >
+                                                    <span className="w-8-px h-8-px bg-danger-600 rounded-circle" />
+                                                    Inactive
+                                                </label>
                                             </div>
                                         </div>
-                                        <div className="d-flex align-items-center justify-content-center gap-3 mt-24">
-                                            <button
-                                                type="button"
-                                                className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8"
-                                                onClick={() => setShowModal(false)}
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                className="btn btn-primary border border-primary-600 text-md px-48 py-12 radius-8"
-                                            >
-                                                Save
-                                            </button>
-                                        </div>
                                     </div>
-                                </form>
-                            </div>
+                                    <div className="d-flex align-items-center justify-content-center gap-3 mt-24">
+                                        <button
+                                            type="button"
+                                            className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8"
+                                            onClick={closeModal}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary border border-primary-600 text-md px-48 py-12 radius-8"
+                                        >
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    <div className="modal-backdrop fade show"></div>
                 </div>
-            )}
+            </div>
             {/* Modal End */}
         </>
     );
