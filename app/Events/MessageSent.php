@@ -7,10 +7,10 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Support\Facades\Log;
-class MessageSent implements ShouldBroadcast
 
+class MessageSent implements ShouldBroadcast
 {
-    use Dispatchable, SerializesModels,InteractsWithSockets;
+    use Dispatchable, SerializesModels, InteractsWithSockets;
 
     public $message;
     public $user;
@@ -36,12 +36,12 @@ class MessageSent implements ShouldBroadcast
     {
         return new Channel('chat-channel');
     }
+
     public function broadcastAs()
     {
         return 'message.sent';
     }
 
-    
     /**
      * Les données à diffuser avec l'événement.
      *
@@ -49,12 +49,13 @@ class MessageSent implements ShouldBroadcast
      */
     public function broadcastWith()
     {
-        Log::info('Broadcasting message: ', ['message' => $this->message, 'user' => $this->user]);
-
-
         return [
-            'message' => $this->message,
-            'user' => $this->user,
+            'id' => $this->message->id,
+            'content' => $this->message->contenu,
+            'sender_id' => $this->message->emetteure_id,
+            'receiver_id' => $this->message->destinataire_id,
+            'sender_name' => $this->user->name,
+            'created_at' => $this->message->created_at->toDateTimeString()
         ];
     }
 }

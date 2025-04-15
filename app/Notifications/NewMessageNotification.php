@@ -6,13 +6,14 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
-use Illuminate\Notifications\Messages\DatabaseMessage;
 use Illuminate\Notifications\Notification;
 
 class NewMessageNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
     protected $message;
+
     /**
      * Create a new notification instance.
      */
@@ -26,9 +27,9 @@ class NewMessageNotification extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'broadcast'];
+        return ['database', 'broadcast'];
     }
 
     /**
@@ -41,12 +42,15 @@ class NewMessageNotification extends Notification implements ShouldQueue
                     ->action('Notification Action', url('/'))
                     ->line('Thank you for using our application!');
     }
+
     public function toBroadcast($notifiable)
     {
         return new BroadcastMessage([
-            'message_id' => $this->message->id,
-            'from_user_id' => $this->message->user_id,
-            'content' => $this->message->content,
+            'id' => $this->message->id,
+            'content' => $this->message->contenu,
+            'sender_id' => $this->message->emetteure_id,
+            'sender_name' => $this->message->emetteure->name,
+            'created_at' => $this->message->created_at->toDateTimeString()
         ]);
     }
 
@@ -59,10 +63,15 @@ class NewMessageNotification extends Notification implements ShouldQueue
     {
         return 'new.message';
     }
-    public function toArray(object $notifiable): array
+
+    public function toArray($notifiable)
     {
         return [
-            //
+            'id' => $this->message->id,
+            'content' => $this->message->contenu,
+            'sender_id' => $this->message->emetteure_id,
+            'sender_name' => $this->message->emetteure->name,
+            'created_at' => $this->message->created_at->toDateTimeString()
         ];
     }
 }
