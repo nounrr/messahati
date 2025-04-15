@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Providers;
+
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,7 +12,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // ...existing code...
     }
 
     /**
@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Vite::prefetch(concurrency: 3);
+        // Définit la longueur par défaut des chaînes pour éviter les erreurs de migration
         Schema::defaultStringLength(191);
     }
 }
