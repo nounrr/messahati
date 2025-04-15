@@ -58,7 +58,30 @@ class ChatController extends Controller
     public function getMessages($userId)
     {
         $messages = Message::where('emetteure_id', $userId)
-            ->orWhere('destinataire_id', $userId)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'messages' => $messages
+        ]);
+    }
+
+    public function getSentMessages($userId)
+    {
+        $messages = Message::where('emetteure_id', $userId)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'messages' => $messages
+        ]);
+    }
+
+    public function getReceivedMessages($userId)
+    {
+        $messages = Message::where('destinataire_id', $userId)
             ->orderBy('created_at', 'asc')
             ->get();
 
