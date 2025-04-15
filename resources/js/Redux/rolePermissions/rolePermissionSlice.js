@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosInstance from '../../axios';
+import axiosInstance from '../../utils/axiosInstance';
 
 // Fetch all roles
 export const fetchRoles = createAsyncThunk(
