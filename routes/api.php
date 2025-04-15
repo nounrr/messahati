@@ -26,6 +26,7 @@ use App\Http\Controllers\TypeCertificatController;
 use App\Http\Controllers\TypeMedicamentController;
 use App\Http\Controllers\TypePartenaireController;
 use App\Http\Controllers\TypeTraitementController;
+use App\Http\Controllers\FactureController;
 
 // Route pour obtenir l'utilisateur authentifié
 Route::get('/user', function (Request $request) {
@@ -105,4 +106,8 @@ Route::resource('attachements', AttachementController::class);
 Route::resource('feedbacks', feedbackController::class);
 
 Route::get('/typecertificats/{id}/editor', [TypecertificatController::class, 'generateEditor']);
+
+// Route pour générer le PDF
+Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
+
 

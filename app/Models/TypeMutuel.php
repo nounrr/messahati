@@ -5,16 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
-
-class TypeMedicament extends Model
+class TypeMutuel extends Model
 {
     use HasFactory;
 
     protected $fillable = ['nom', 'description'];
 
-    public function medicaments()
+    public function mutuels()
     {
-        return $this->hasMany(Medicament::class);
+        return $this->hasMany(Mutuel::class);
     }
+
+ 
 }

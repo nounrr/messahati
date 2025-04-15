@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TypeTraitement extends Model
 {
-    protected $fillable=['nom','prix-default'];
+    use HasFactory;
 
-    public function traitements(){
+    protected $fillable = ['nom', 'description'];
+
+    public function traitements()
+    {
         return $this->hasMany(Traitement::class);
     }
 }
-

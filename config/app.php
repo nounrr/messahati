@@ -1,7 +1,7 @@
 <?php
 
 return [
-
+  
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -121,6 +121,38 @@ return [
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Service Providers
+    |--------------------------------------------------------------------------
+    |
+    | The service providers listed here will be automatically loaded on the
+    | request to your application. Feel free to add your own services to
+    | this array to grant expanded functionality to your applications.
+    |
+    */
+
+    'providers' => [
+        Barryvdh\DomPDF\ServiceProvider::class, // Ajout du service provider
+        Illuminate\Filesystem\FilesystemServiceProvider::class, // Ajout du FilesystemServiceProvider
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Class Aliases
+    |--------------------------------------------------------------------------
+    |
+    | This array of class aliases will be registered when this application
+    | is started. However, feel free to register as many as you wish as
+    | the aliases are "lazy" loaded so they don't hinder performance.
+    |
+    */
+
+    'aliases' => [
+        'PDF' => Barryvdh\DomPDF\Facade::class, // Ajout de l'alias
+        'File' => Illuminate\Support\Facades\File::class,
     ],
 
 ];
