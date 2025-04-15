@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TypeMedicament extends Model
 {
-    protected $fillable = ['nom'];
+    protected $table = 'type_medicaments';
 
     public function medicaments(){
         return $this->hasMany(Medicament::class);

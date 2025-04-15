@@ -15,20 +15,8 @@ export const createReclamations = createAsyncThunk(
     'reclamations/createReclamations',
     async (reclamations, { rejectWithValue }) => {
         try {
-            const formData = new FormData();
-            reclamations.forEach((reclamation, index) => {
-                Object.entries(reclamation).forEach(([key, value]) => {
-                    if (key === 'image' && value instanceof File) {
-                        formData.append(`reclamations[${index}][image]`, value);
-                    } else {
-                        formData.append(`reclamations[${index}][${key}]`, value);
-                    }
-                });
-            });
-
-            const response = await axiosInstance.post('/reclamations', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            // Envoyer les données directement au format JSON
+            const response = await axiosInstance.post('/reclamations', reclamations);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

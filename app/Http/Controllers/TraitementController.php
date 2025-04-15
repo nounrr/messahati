@@ -25,7 +25,7 @@ class TraitementController extends Controller
     {
         $validated = $request->validate([
             'traitements' => 'required|array',
-            'traitements.*.typetraitement_id' => 'required|exists:typetraitements,id',
+            'traitements.*.typetraitement_id' => 'required|exists:type_traitements,id',
             'traitements.*.description' => 'required|string',
             'traitements.*.date_debut' => 'required|date',
             'traitements.*.date_fin' => 'required|date',
@@ -54,7 +54,7 @@ class TraitementController extends Controller
         return response()->json($traitement);
     }
 
-    // Formulaire d’édition (vide si API)
+    // Formulaire d'édition (vide si API)
     public function edit(string $id)
     {
         // Peut être ignoré si API

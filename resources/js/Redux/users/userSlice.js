@@ -10,6 +10,15 @@ export const fetchUsers = createAsyncThunk(
     }
 );
 
+// Fetch users by role
+export const fetchUsersByRole = createAsyncThunk(
+    'users/fetchUsersByRole',
+    async (role) => {
+        const response = await axiosInstance.get(`/users/role/${role}`);
+        return response.data;
+    }
+);
+
 // Create new users
 export const createUsers = createAsyncThunk(
     'users/createUsers',
@@ -135,6 +144,9 @@ const userSlice = createSlice({
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
+            })
+            .addCase(fetchUsersByRole.fulfilled, (state, action) => {
+                state.items = action.payload;
             })
             .addCase(createUsers.fulfilled, (state, action) => {
                 state.items.push(...action.payload);

@@ -16,9 +16,9 @@ export const fetchTypeMedicaments = createAsyncThunk(
 
 export const createTypeMedicament = createAsyncThunk(
     'typeMedicaments/create',
-    async (typeMedicamentData, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            const response = await axios.post('/api/type-medicaments', typeMedicamentData);
+            const response = await axios.post('/api/type-medicaments', data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

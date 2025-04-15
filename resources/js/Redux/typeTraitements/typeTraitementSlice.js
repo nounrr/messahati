@@ -11,9 +11,9 @@ export const fetchTypeTraitements = createAsyncThunk(
 
 export const createTypeTraitements = createAsyncThunk(
     'typeTraitements/createTypeTraitements',
-    async (typeTraitements, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/type-traitements', { types: typeTraitements });
+            const response = await axiosInstance.post('/type-traitements', data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -23,9 +23,9 @@ export const createTypeTraitements = createAsyncThunk(
 
 export const updateTypeTraitements = createAsyncThunk(
     'typeTraitements/updateTypeTraitements',
-    async (typeTraitements, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/type-traitements', { types: typeTraitements });
+            const response = await axiosInstance.put('/type-traitements', data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

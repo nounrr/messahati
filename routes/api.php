@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AttachementController;
 use App\Http\Controllers\AuditLogCliniqueController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\TypeCertificatController;
 use App\Http\Controllers\TypeMedicamentController;
 use App\Http\Controllers\TypePartenaireController;
 use App\Http\Controllers\TypeTraitementController;
+use App\Http\Controllers\UserController;
 
 // Route pour obtenir l'utilisateur authentifié
 Route::get('/user', function (Request $request) {
@@ -34,6 +36,11 @@ Route::get('/user', function (Request $request) {
 
 // Routes d'authentification
 Route::post('/login', [LoginController::class, 'login']);
+
+// Routes pour les utilisateurs
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/users/role/{role}', [UserController::class, 'getUsersByRole']);
+Route::get('/roles', [UserController::class, 'getRoles']);
 
 // Routes pour les départements
 Route::resource('departements', DepartementController::class);
@@ -96,10 +103,16 @@ Route::resource('charges', ChargeController::class);
 Route::resource('certificats-medicaux', CertificatsMedicaleController::class);
 
 // Routes pour les logs d'audit des cliniques
-Route::resource('audit-logs-cliniques', AuditLogCliniqueController::class);
+Route::resource('audit-log-cliniques', AuditLogCliniqueController::class);
 
 // Routes pour les pièces jointes
 Route::resource('attachements', AttachementController::class);
 
 // Routes pour les retours d'expérience
 Route::resource('feedbacks', feedbackController::class);
+
+    Route::get('/roles', [RolePermissionController::class, 'roles']);
+    Route::get('/permissions', [RolePermissionController::class, 'permissions']);
+
+    Route::post('/assign-role', [RolePermissionController::class, 'assignRoleToUser']);
+    Route::post('/assign-permission', [RolePermissionController::class, 'assignPermissionToUser']);

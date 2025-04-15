@@ -6,10 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\Departement;
 use App\Exports\DepartementExport;
 use App\Imports\DepartementImport;
+use App\Traits\ExcelExportImport;  // <-- Excel specific
+
 use Illuminate\Support\Facades\Storage;
 
 class DepartementController extends Controller
 {
+    use ExcelExportImport;  // <-- Add this line to use the trait
+
     // Récupère et retourne tous les départements
     public function index()
     {

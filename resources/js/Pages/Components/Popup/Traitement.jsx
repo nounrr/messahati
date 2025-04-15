@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 
 function Traitement({ onClose }) {
     const dispatch = useDispatch();
-    const { typeTraitements } = useSelector((state) => state.typeTraitements);
+    const typeTraitements = useSelector((state) => state.typeTraitements.items);
     const [traitements, setTraitements] = useState([{
         typetraitement_id: '',
         description: '',
@@ -51,7 +51,7 @@ function Traitement({ onClose }) {
             return;
         }
 
-        dispatch(createTraitements(traitements))
+        dispatch(createTraitements({ traitements }))
             .unwrap()
             .then(() => {
                 Swal.fire('Succès', 'Traitements ajoutés avec succès.', 'success');

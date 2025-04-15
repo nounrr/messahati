@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 
 function Tache({ onClose }) {
     const dispatch = useDispatch();
-    const { users } = useSelector((state) => state.users);
+    const users = useSelector((state) => state.users.items);
     const [taches, setTaches] = useState([{
         title: '',
         user_id: '',

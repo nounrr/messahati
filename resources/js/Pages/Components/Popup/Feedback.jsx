@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 
 function Feedback({ onClose }) {
     const dispatch = useDispatch();
-    const { users } = useSelector((state) => state.users);
+    const users = useSelector((state) => state.users.items);
     const [feedbacks, setFeedbacks] = useState([{
         user_id: '',
         titre: '',

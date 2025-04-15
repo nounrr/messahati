@@ -11,9 +11,9 @@ export const fetchPartenaires = createAsyncThunk(
 
 export const createPartenaire = createAsyncThunk(
     'partenaires/createPartenaire',
-    async (partenaire, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/partenaires', { partenaire });
+            const response = await axiosInstance.post('/partenaires', data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

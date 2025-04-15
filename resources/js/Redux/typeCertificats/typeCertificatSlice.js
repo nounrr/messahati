@@ -13,18 +13,32 @@ export const fetchTypeCertificats = createAsyncThunk(
 // Create new type certificats
 export const createTypeCertificats = createAsyncThunk(
     'typeCertificats/createTypeCertificats',
-    async (typeCertificats, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
             const formData = new FormData();
-            typeCertificats.forEach((typeCertificat, index) => {
-                Object.entries(typeCertificat).forEach(([key, value]) => {
-                    if (key === 'image' && value instanceof File) {
-                        formData.append(`typeCertificats[${index}][image]`, value);
-                    } else {
-                        formData.append(`typeCertificats[${index}][${key}]`, value);
-                    }
+            
+            if (Array.isArray(data.typecertificats)) {
+                data.typecertificats.forEach((typeCertificat, index) => {
+                    Object.entries(typeCertificat).forEach(([key, value]) => {
+                        if (key === 'image' && value instanceof File) {
+                            formData.append(`typecertificats[${index}][image]`, value);
+                        } else {
+                            formData.append(`typecertificats[${index}][${key}]`, value);
+                        }
+                    });
                 });
-            });
+            } else {
+                // Fallback for backward compatibility
+                data.forEach((typeCertificat, index) => {
+                    Object.entries(typeCertificat).forEach(([key, value]) => {
+                        if (key === 'image' && value instanceof File) {
+                            formData.append(`typecertificats[${index}][image]`, value);
+                        } else {
+                            formData.append(`typecertificats[${index}][${key}]`, value);
+                        }
+                    });
+                });
+            }
 
             const response = await axiosInstance.post('/type-certificats', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
@@ -39,18 +53,32 @@ export const createTypeCertificats = createAsyncThunk(
 // Update existing type certificats
 export const updateTypeCertificats = createAsyncThunk(
     'typeCertificats/updateTypeCertificats',
-    async (typeCertificats, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
             const formData = new FormData();
-            typeCertificats.forEach((typeCertificat, index) => {
-                Object.entries(typeCertificat).forEach(([key, value]) => {
-                    if (key === 'image' && value instanceof File) {
-                        formData.append(`typeCertificats[${index}][image]`, value);
-                    } else {
-                        formData.append(`typeCertificats[${index}][${key}]`, value);
-                    }
+            
+            if (Array.isArray(data.typecertificats)) {
+                data.typecertificats.forEach((typeCertificat, index) => {
+                    Object.entries(typeCertificat).forEach(([key, value]) => {
+                        if (key === 'image' && value instanceof File) {
+                            formData.append(`typecertificats[${index}][image]`, value);
+                        } else {
+                            formData.append(`typecertificats[${index}][${key}]`, value);
+                        }
+                    });
                 });
-            });
+            } else {
+                // Fallback for backward compatibility
+                data.forEach((typeCertificat, index) => {
+                    Object.entries(typeCertificat).forEach(([key, value]) => {
+                        if (key === 'image' && value instanceof File) {
+                            formData.append(`typecertificats[${index}][image]`, value);
+                        } else {
+                            formData.append(`typecertificats[${index}][${key}]`, value);
+                        }
+                    });
+                });
+            }
 
             const response = await axiosInstance.put('/type-certificats', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }

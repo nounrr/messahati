@@ -1,25 +1,35 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
 import { createCharges } from '../../../Redux/charges/chargeSlice';
+import { fetchPartenaires } from '../../../Redux/partenaires/partenaireSlice';
 import { X } from 'lucide-react';
 
 function Charge({ onClose }) {
     const dispatch = useDispatch();
+    const partenaires = useSelector((state) => state.partenaires.items);
     const [charges, setCharges] = useState([{
-        titre: '',
+        nom: '',
+        prix_unitaire: '',
+        quantite: '',
+        partenaire_id: '',
         description: '',
-        montant: '',
         date_echeance: '',
         categorie: '',
         statut: 'en_attente'
     }]);
 
+    useEffect(() => {
+        dispatch(fetchPartenaires());
+    }, [dispatch]);
+
     const handleAddField = () => {
         setCharges([...charges, {
-            titre: '',
+            nom: '',
+            prix_unitaire: '',
+            quantite: '',
+            partenaire_id: '',
             description: '',
-            montant: '',
             date_echeance: '',
             categorie: '',
             statut: 'en_attente'
@@ -40,8 +50,10 @@ function Charge({ onClose }) {
 
     const handleSubmit = () => {
         const isValid = charges.every(charge => 
-            charge.titre !== '' && 
-            charge.montant !== '' &&
+            charge.nom !== '' && 
+            charge.prix_unitaire !== '' &&
+            charge.quantite !== '' &&
+            charge.partenaire_id !== '' &&
             charge.date_echeance !== '' &&
             charge.categorie !== ''
         );
@@ -56,9 +68,11 @@ function Charge({ onClose }) {
             .then(() => {
                 Swal.fire('Succès', 'Charges ajoutées avec succès.', 'success');
                 setCharges([{
-                    titre: '',
+                    nom: '',
+                    prix_unitaire: '',
+                    quantite: '',
+                    partenaire_id: '',
                     description: '',
-                    montant: '',
                     date_echeance: '',
                     categorie: '',
                     statut: 'en_attente'
@@ -93,14 +107,50 @@ function Charge({ onClose }) {
                         </button>
                     )}
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Titre</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
                         <input
                             type="text"
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={charge.titre}
-                            onChange={(e) => handleChange(index, 'titre', e.target.value)}
-                            placeholder='Entrez le titre de la charge'
+                            value={charge.nom}
+                            onChange={(e) => handleChange(index, 'nom', e.target.value)}
+                            required
                         />
+                    </div>
+                    <div className="mb-4 text-left">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Prix Unitaire</label>
+                        <input
+                            type="number"
+                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                            value={charge.prix_unitaire}
+                            onChange={(e) => handleChange(index, 'prix_unitaire', e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="mb-4 text-left">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Quantité</label>
+                        <input
+                            type="number"
+                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                            value={charge.quantite}
+                            onChange={(e) => handleChange(index, 'quantite', e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="mb-4 text-left">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Partenaire</label>
+                        <select
+                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                            value={charge.partenaire_id}
+                            onChange={(e) => handleChange(index, 'partenaire_id', e.target.value)}
+                            required
+                        >
+                            <option value="">Sélectionnez un partenaire</option>
+                            {partenaires.map((partenaire) => (
+                                <option key={partenaire.id} value={partenaire.id}>
+                                    {partenaire.nom}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="mb-4 text-left">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -110,16 +160,6 @@ function Charge({ onClose }) {
                             onChange={(e) => handleChange(index, 'description', e.target.value)}
                             placeholder='Entrez la description de la charge'
                             rows='3'
-                        />
-                    </div>
-                    <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Montant</label>
-                        <input
-                            type="number"
-                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={charge.montant}
-                            onChange={(e) => handleChange(index, 'montant', e.target.value)}
-                            placeholder='Entrez le montant de la charge'
                         />
                     </div>
                     <div className="mb-4 text-left">

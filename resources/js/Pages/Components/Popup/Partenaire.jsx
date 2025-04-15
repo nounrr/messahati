@@ -57,7 +57,7 @@ function Partenaire({ onClose }) {
             return;
         }
 
-        dispatch(createPartenaire(partenaires))
+        dispatch(createPartenaire({ partenaires }))
             .unwrap()
             .then((res) => {
                 console.log('Réponse reçue :', res);

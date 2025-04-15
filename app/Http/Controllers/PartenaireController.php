@@ -27,7 +27,7 @@ class PartenaireController extends Controller
             'partenaires' => 'required|array',
             'partenaires.*.nom' => 'required|string',
             'partenaires.*.adress' => 'nullable|string',
-            'partenaires.*.typepartenaires_id' => 'required|exists:typepartenairess,id',
+            'partenaires.*.typepartenaires_id' => 'required|exists:type_partenaires,id',
             'partenaires.*.telephone' => 'nullable|string'
         ]);
 

@@ -8,8 +8,8 @@ import { X } from 'lucide-react';
 
 function CertificatMedical({ onClose }) {
     const dispatch = useDispatch();
-    const { typeCertificats } = useSelector((state) => state.typeCertificats);
-    const { traitements } = useSelector((state) => state.traitements);
+    const typeCertificats = useSelector((state) => state.typeCertificats.items);
+    const traitements = useSelector((state) => state.traitements.items);
     const [certificats, setCertificats] = useState([{
         description: '',
         date_emission: '',
@@ -102,9 +102,9 @@ function CertificatMedical({ onClose }) {
                             onChange={(e) => handleChange(index, 'typecertificat_id', e.target.value)}
                         >
                             <option value="">Sélectionnez un type</option>
-                            {typeCertificats.map((type) => (
+                            {typeCertificats?.map((type) => (
                                 <option key={type.id} value={type.id}>
-                                    {type.nom}
+                                    {type.type_certificat}
                                 </option>
                             ))}
                         </select>
