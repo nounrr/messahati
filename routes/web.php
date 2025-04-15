@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 
+Route::get('/export', [DepartementController::class, 'export'])->name('departements.export');
 
 
 Route::get('/typeTraitement', function () {return Inertia::render('Components/Forms/TypeTraitement');});
@@ -80,6 +81,21 @@ Route::resource('reclamation', ReclamationController::class);
 Route::resource('feedback', feedbackController::class);
 Route::resource('mutuel', MutuelController::class);
 
-Route::get('/export', [DepartementController::class, 'export'])->name('departements.export');
+
+// Routes pour la gestion des rôles et permissions
+
+    // Routes pour les rôles
+    Route::get('/roles', [App\Http\Controllers\RolePermissionController::class, 'roles'])->name('roles.index');
+    Route::post('/roles', [App\Http\Controllers\RolePermissionController::class, 'store'])->name('roles.store');
+    Route::put('/roles/{id}', [App\Http\Controllers\RolePermissionController::class, 'update'])->name('roles.update');
+    Route::delete('/roles/{id}', [App\Http\Controllers\RolePermissionController::class, 'destroy'])->name('roles.destroy');
+    
+    // Routes pour les permissions
+    Route::get('/permissions', [App\Http\Controllers\RolePermissionController::class, 'permissions'])->name('permissions.index');
+    
+    // Routes pour l'attribution des rôles et permissions
+    Route::post('/assign-role', [App\Http\Controllers\RolePermissionController::class, 'assignRoleToUser'])->name('roles.assign');
+    Route::post('/assign-permission', [App\Http\Controllers\RolePermissionController::class, 'assignPermissionToUser'])->name('permissions.assign');
+    Route::post('/remove-role', [App\Http\Controllers\RoleController::class, 'removeRole'])->name('roles.remove');
 
 require __DIR__.'/auth.php';
