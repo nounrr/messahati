@@ -132,3 +132,4 @@ Route::post('/assign-role', [RolePermissionController::class, 'assignRoleToUser'
 Route::post('/assign-permission', [RolePermissionController::class, 'assignPermissionToUser'])->name('api.permissions.assign');
 Route::post('/remove-role', [RoleController::class, 'removeRole'])->name('api.roles.remove');
 Route::post('/assign-role/{userId}', [RoleController::class, 'assign'])->name('api.assign.role');
+Route::get('/user-permissions/{id}', [RolePermissionController::class, 'userPermissions'])->name('api.user.permissions');
