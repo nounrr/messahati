@@ -1,7 +1,11 @@
 import { Icon } from "@iconify/react/dist/iconify.js";
-import React from "react";
+import React, { useEffect } from "react";
 import { Head, Link, useForm } from '@inertiajs/react';
 import InputError from '@/Components/Child/InputError';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAuthUser, setToken, clearToken } from '../../Redux/auth/authSlice';
+
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -10,13 +14,35 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
     });
  
-    const submit = (e) => {
-        e.preventDefault();
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.auth.user);
 
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
-    };
+    // Vérifier si un token existe au chargement de la page
+    useEffect(() => {
+        // Supprimer tout token existant
+        localStorage.removeItem('auth_token');
+        dispatch(clearToken());
+    }, []);
+
+    const submit = (e) => {
+      e.preventDefault();
+  
+      post(route('login'), {
+          onSuccess: (response) => {
+              // Générer un token temporaire pour l'API
+              const tempToken = 'temp-' + Date.now();
+              
+              // Stocker le token dans Redux
+              dispatch(setToken(tempToken));
+              
+              // Appeler fetchAuthUser avec le token
+              dispatch(fetchAuthUser());
+          },
+          onFinish: () => reset('password'),
+      });
+  };
+  
+
   return (
     <section className='auth bg-base d-flex flex-wrap'>
       <div className='auth-left d-lg-block d-none'>

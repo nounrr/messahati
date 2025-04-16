@@ -20,6 +20,8 @@ import mutuelReducer from './mutuels/mutuelSlice';
 import feedbackReducer from './feedbacks/feedbackSlice';
 import typeMedicamentReducer from './typeMedicaments/typeMedicamentSlice';
 import rolePermissionReducer from './rolePermissions/rolePermissionSlice';
+import chatReducer from './chat/chatSlice';
+import authReducer from './auth/authSlice';
 
 const store = configureStore({
     reducer: {
@@ -44,6 +46,8 @@ const store = configureStore({
         feedbacks: feedbackReducer,
         typeMedicaments: typeMedicamentReducer,
         rolePermissions: rolePermissionReducer,
+        chat: chatReducer,
+        auth: authReducer,
     },
 });
 

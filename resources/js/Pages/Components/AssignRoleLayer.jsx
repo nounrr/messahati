@@ -298,91 +298,91 @@ const AssignRoleLayer = () => {
                         <tbody>
                             {paginatedUsers.map((user, index) => (
                                 <tr key={user.id}>
-                                    <td>
-                                        <div className="d-flex align-items-center gap-10">
-                                            <div className="form-check style-check d-flex align-items-center">
-                                                <input
-                                                    className="form-check-input radius-4 border border-neutral-400"
-                                                    type="checkbox"
+                                <td>
+                                    <div className="d-flex align-items-center gap-10">
+                                        <div className="form-check style-check d-flex align-items-center">
+                                            <input
+                                                className="form-check-input radius-4 border border-neutral-400"
+                                                type="checkbox"
                                                     checked={selectedUsers.includes(user.id)}
                                                     onChange={() => handleSelectUser(user.id)}
-                                                />
-                                            </div>
-                                            {startIndex + index + 1}
+                                            />
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div className="d-flex align-items-center">
+                                            {startIndex + index + 1}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="d-flex align-items-center">
                                             {user.avatar ? (
-                                                <img
+                                        <img
                                                     src={user.avatar}
                                                     alt={user.name}
-                                                    className="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden"
-                                                />
+                                            className="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden"
+                                        />
                                             ) : (
                                                 <div className="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden bg-primary d-flex align-items-center justify-content-center text-white">
                                                     {user.name?.charAt(0)}
-                                                </div>
-                                            )}
-                                            <div className="flex-grow-1">
-                                                <span className="text-md mb-0 fw-normal text-secondary-light">
-                                                    {user.name}
-                                                </span>
-                                            </div>
                                         </div>
-                                    </td>
-                                    <td className="text-center">
+                                            )}
+                                        <div className="flex-grow-1">
+                                            <span className="text-md mb-0 fw-normal text-secondary-light">
+                                                    {user.name}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="text-center">
                                         {userRoles[user.id]?.map(role => (
                                             <span key={role.id} className="badge bg-primary me-1">
                                                 {role.name}
                                             </span>
                                         )) || 'No Role'}
-                                    </td>
-                                    <td className="text-center">
+                                </td>
+                                <td className="text-center">
                                         <div className="d-flex justify-content-center gap-2">
-                                            <div className="dropdown">
-                                                <button
-                                                    className="btn btn-outline-primary-600 not-active px-18 py-11 dropdown-toggle toggle-icon"
-                                                    type="button"
-                                                    data-bs-toggle="dropdown"
-                                                    aria-expanded="false"
-                                                >
-                                                    Assign Role
-                                                </button>
+                                    <div className="dropdown">
+                                        <button
+                                            className="btn btn-outline-primary-600 not-active px-18 py-11 dropdown-toggle toggle-icon"
+                                            type="button"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
+                                        >
+                                            Assign Role
+                                        </button>
                                                 <ul className="dropdown-menu">
                                                     {roles.map(role => (
                                                         <li key={role.id}>
-                                                            <button
-                                                                className="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900"
+                                        <button
+                                                    className="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900"
                                                                 onClick={() => handleAssignRole(user.id, role.name)}
                                                             >
                                                                 {role.name}
-                                                            </button>
-                                                            <button
-                                                                className="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900"
+                                        </button>
+                                        <button
+                                                    className="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900"
                                                                 onClick={() => handleOpenPermissionModal(user)}
                                                             >
                                                                 View {role.name} Permissions
-                                                            </button>
-                                                        </li>
+                                        </button>
+                                            </li>
                                                     ))}
-                                                </ul>
-                                            </div>
-                                            <button
+                                        </ul>
+                                    </div>
+                                        <button
                                                 className="btn btn-outline-secondary-600 not-active px-18 py-11 d-flex align-items-center gap-2"
                                                 onClick={() => handleOpenPermissionModal(user)}
                                             >
                                                 <FaKey /> Permissions
-                                            </button>
-                                            <button
+                                        </button>
+                                        <button
                                                 className="btn btn-outline-danger-600 not-active px-18 py-11 d-flex align-items-center gap-2"
                                                 onClick={() => handleOpenRoleModal(user)}
                                             >
                                                 <FaTrash /> Manage Roles
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                             ))}
                         </tbody>
                     </table>
@@ -407,7 +407,7 @@ const AssignRoleLayer = () => {
                                 >
                                     {page}
                                 </button>
-                            </li>
+                        </li>
                         ))}
                         <li className="page-item">
                             <button

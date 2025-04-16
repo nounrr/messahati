@@ -214,157 +214,157 @@ const RoleAccessLayer = () => {
                         </div>
                     ) : (
                         <>
-                            <div className="table-responsive scroll-sm">
-                                <table className="table bordered-table sm-table mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">
-                                                <div className="d-flex align-items-center gap-10">
-                                                    <div className="form-check style-check d-flex align-items-center">
-                                                        <input
-                                                            className="form-check-input radius-4 border input-form-dark"
-                                                            type="checkbox"
-                                                            name="checkbox"
-                                                            id="selectAll"
-                                                        />
-                                                    </div>
-                                                    S.L
-                                                </div>
-                                            </th>
-                                            <th scope="col">Create Date</th>
-                                            <th scope="col">Role </th>
-                                            <th scope="col">Description</th>
-                                            <th scope="col" className="text-center">
-                                                Status
-                                            </th>
-                                            <th scope="col" className="text-center">
-                                                Action
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                    <div className="table-responsive scroll-sm">
+                        <table className="table bordered-table sm-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">
+                                        <div className="d-flex align-items-center gap-10">
+                                            <div className="form-check style-check d-flex align-items-center">
+                                                <input
+                                                    className="form-check-input radius-4 border input-form-dark"
+                                                    type="checkbox"
+                                                    name="checkbox"
+                                                    id="selectAll"
+                                                />
+                                            </div>
+                                            S.L
+                                        </div>
+                                    </th>
+                                    <th scope="col">Create Date</th>
+                                    <th scope="col">Role </th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col" className="text-center">
+                                        Status
+                                    </th>
+                                    <th scope="col" className="text-center">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                         {roles.length > 0 ? (
                                             roles.map((role, index) => (
                                                 <tr key={role.id}>
-                                                    <td>
-                                                        <div className="d-flex align-items-center gap-10">
-                                                            <div className="form-check style-check d-flex align-items-center">
-                                                                <input
-                                                                    className="form-check-input radius-4 border border-neutral-400"
-                                                                    type="checkbox"
-                                                                    name="checkbox"
-                                                                />
-                                                            </div>
+                                    <td>
+                                        <div className="d-flex align-items-center gap-10">
+                                            <div className="form-check style-check d-flex align-items-center">
+                                                <input
+                                                    className="form-check-input radius-4 border border-neutral-400"
+                                                    type="checkbox"
+                                                    name="checkbox"
+                                                />
+                                            </div>
                                                             {String(index + 1).padStart(2, '0')}
-                                                        </div>
-                                                    </td>
+                                        </div>
+                                    </td>
                                                     <td>{formatDate(role.created_at)}</td>
                                                     <td>{role.name}</td>
-                                                    <td>
-                                                        <p className="max-w-500-px">
+                                    <td>
+                                        <p className="max-w-500-px">
                                                             {role.description || 'No description provided'}
-                                                        </p>
-                                                    </td>
-                                                    <td className="text-center">
+                                        </p>
+                                    </td>
+                                    <td className="text-center">
                                                         <span className={`${role.status === 'active' ? 'bg-success-focus text-success-600 border border-success-main' : 'bg-danger-focus text-danger-600 border border-danger-main'} px-24 py-4 radius-4 fw-medium text-sm`}>
                                                             {role.status === 'active' ? 'Active' : 'Inactive'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="text-center">
-                                                        <div className="d-flex align-items-center gap-10 justify-content-center">
-                                                            <button
-                                                                type="button"
-                                                                className="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                                        </span>
+                                    </td>
+                                    <td className="text-center">
+                                        <div className="d-flex align-items-center gap-10 justify-content-center">
+                                            <button
+                                                type="button"
+                                                className="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
                                                                 onClick={() => handleEdit(role)}
-                                                            >
-                                                                <Icon icon="lucide:edit" className="menu-icon" />
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                className="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                                            >
+                                                <Icon icon="lucide:edit" className="menu-icon" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
                                                                 onClick={() => handleDelete(role.id)}
-                                                            >
-                                                                <Icon
-                                                                    icon="fluent:delete-24-regular"
-                                                                    className="menu-icon"
-                                                                />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                            >
+                                                <Icon
+                                                    icon="fluent:delete-24-regular"
+                                                    className="menu-icon"
+                                                />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
                                             ))
                                         ) : (
                                             <tr>
                                                 <td colSpan="6" className="text-center py-4">
                                                     No roles found
-                                                </td>
-                                            </tr>
+                                    </td>
+                                </tr>
                                         )}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
                                 <span>Showing 1 to {roles.length} of {roles.length} entries</span>
-                                <ul className="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
-                                    <li className="page-item">
-                                        <Link
-                                            className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                            to="#"
-                                        >
-                                            <Icon icon="ep:d-arrow-left" className="" />
-                                        </Link>
-                                    </li>
-                                    <li className="page-item">
-                                        <Link
-                                            className="page-link text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md bg-primary-600 text-white"
-                                            to="#"
-                                        >
-                                            1
-                                        </Link>
-                                    </li>
-                                    <li className="page-item">
-                                        <Link
-                                            className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px"
-                                            to="#"
-                                        >
-                                            2
-                                        </Link>
-                                    </li>
-                                    <li className="page-item">
-                                        <Link
-                                            className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                            to="#"
-                                        >
-                                            3
-                                        </Link>
-                                    </li>
-                                    <li className="page-item">
-                                        <Link
-                                            className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                            to="#"
-                                        >
-                                            4
-                                        </Link>
-                                    </li>
-                                    <li className="page-item">
-                                        <Link
-                                            className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                            to="#"
-                                        >
-                                            5
-                                        </Link>
-                                    </li>
-                                    <li className="page-item">
-                                        <Link
-                                            className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                            to="#"
-                                        >
-                                            {" "}
-                                            <Icon icon="ep:d-arrow-right" className="" />{" "}
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </div>
+                        <ul className="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
+                            <li className="page-item">
+                                <Link
+                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
+                                    to="#"
+                                >
+                                    <Icon icon="ep:d-arrow-left" className="" />
+                                </Link>
+                            </li>
+                            <li className="page-item">
+                                <Link
+                                    className="page-link text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md bg-primary-600 text-white"
+                                    to="#"
+                                >
+                                    1
+                                </Link>
+                            </li>
+                            <li className="page-item">
+                                <Link
+                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px"
+                                    to="#"
+                                >
+                                    2
+                                </Link>
+                            </li>
+                            <li className="page-item">
+                                <Link
+                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
+                                    to="#"
+                                >
+                                    3
+                                </Link>
+                            </li>
+                            <li className="page-item">
+                                <Link
+                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
+                                    to="#"
+                                >
+                                    4
+                                </Link>
+                            </li>
+                            <li className="page-item">
+                                <Link
+                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
+                                    to="#"
+                                >
+                                    5
+                                </Link>
+                            </li>
+                            <li className="page-item">
+                                <Link
+                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
+                                    to="#"
+                                >
+                                    {" "}
+                                    <Icon icon="ep:d-arrow-right" className="" />{" "}
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
                         </>
                     )}
                 </div>
