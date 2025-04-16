@@ -12,3 +12,4 @@ class TypeTraitement extends Model
         return $this->hasMany(Traitement::class);
     }
 }
+

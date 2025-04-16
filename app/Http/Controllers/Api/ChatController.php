@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\NewMessageNotification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
 
 class ChatController extends Controller
 {
@@ -42,30 +43,38 @@ class ChatController extends Controller
         $sender = User::find($request->sender_id);
         $message->load('emetteure');
 
+        // Création de la notification
+        $notification = Notification::create([
+            'date' => now()->toDateString(),
+            'statut' => true
+        ]);
+
+        // Association de la notification à l'utilisateur
+        $notification->users()->attach($request->destinataire_id, [
+            'message' => "Nouveau message de {$sender->name}: {$request->message}"
+        ]);
+
         // Diffusion de l'événement
         broadcast(new MessageSent($message, $sender))->toOthers();
 
-        // Envoi de la notification
-        $receiver = User::find($request->destinataire_id);
-        $receiver->notify(new NewMessageNotification($message));
-
         return response()->json([
             'status' => 'success',
-            'message' => 'Message sent successfully'
+            'message' => 'Message sent successfully',
+            'notification' => $notification
         ]);
     }
 
-    public function getMessages($userId)
-    {
-        $messages = Message::where('emetteure_id', $userId)
-            ->orderBy('created_at', 'asc')
-            ->get();
+    // public function getMessages($userId)
+    // {
+    //     $messages = Message::where('emetteure_id', $userId)
+    //         ->orderBy('created_at', 'asc')
+    //         ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'messages' => $messages
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'messages' => $messages
+    //     ]);
+    // }
 
     public function getSentMessages($userId)
     {

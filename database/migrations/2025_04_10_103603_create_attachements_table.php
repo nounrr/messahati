@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('filename');
             $table->foreignId('taches_id')->references('id')->on('taches')->onDelete('cascade');
             $table->timestamps();
-        });
+        }); 
     }
 
     /**

@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('typetraitements', function (Blueprint $table) {
+        Schema::create('type_traitements', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
-            $table->float('prix-default');
+            $table->float('prix-default')->nullable();
             $table->timestamps();
         });
     }

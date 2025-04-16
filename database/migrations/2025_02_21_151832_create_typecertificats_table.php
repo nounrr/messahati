@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('typecertificats', function (Blueprint $table) {
+        Schema::create('type_certificats', function (Blueprint $table) {
             $table->id();
             $table->string('type_certificat');
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }

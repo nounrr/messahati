@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->boolean('status');
             $table->string('priority');
             $table->date('date_debut');
-            $table->date('date_fin');
+            $table->date('date_fin')->nullable();
             $table->timestamps();
         });
     }
