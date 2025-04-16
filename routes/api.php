@@ -28,6 +28,13 @@ use App\Http\Controllers\TypeMedicamentController;
 use App\Http\Controllers\TypePartenaireController;
 use App\Http\Controllers\TypeTraitementController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StatistiqueRevenue;
+use App\Http\Controllers\StatestiqueAge;
+use App\Http\Controllers\StatistiquesTraitements;
+use App\Http\Controllers\StatistiquesDepartement;
+use App\Http\Controllers\StatistiquesConsultation;
+use App\Http\Controllers\StatistiquePayments;
+use App\Http\Controllers\StatistiqueHealthSituation;
 
 // Route pour obtenir l'utilisateur authentifié
 Route::get('/user', function (Request $request) {
@@ -116,3 +123,24 @@ Route::resource('feedbacks', feedbackController::class);
 
     Route::post('/assign-role', [RolePermissionController::class, 'assignRoleToUser']);
     Route::post('/assign-permission', [RolePermissionController::class, 'assignPermissionToUser']);
+//route pou les statestique de revenue 
+Route::get('/revenus', [StatistiqueRevenue::class, 'getRevenus']);
+//route pour statestique de age 
+Route::get('/patientsAge', [StatestiqueAge::class, 'repartitionPatients']);
+//pour les statestiques de traitements 
+Route::get('/rdv-par-heure-Traitemant', [StatistiquesTraitements::class, 'getStatistiquesParHeure']);
+//stat pour departement 
+Route::get('/departement', [StatistiquesDepartement::class, 'getPourcentageRendezVousParDepartement']);
+//state pour nbr consultation 
+Route::get('/consultations-par-jour', [StatistiquesConsultation::class, 'consultationsParJour']);
+// route pur  state de paiment 
+Route::get('/payements', [StatistiquePayments::class, 'paiementsParJour']);
+// route pour state de situation de health 
+
+Route::get('/HealthCore', [StatistiqueHealthSituation::class, 'statistiquesSante']);
+
+
+
+
+
+

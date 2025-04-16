@@ -4,18 +4,10 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use App\Models\Departement;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
-
     /**
      * Define the model's default state.
      *
@@ -24,22 +16,27 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'cin' => strtoupper(fake()->bothify('??######')),
-            'name' => fake()->lastName(),
-            'prenom' => fake()->firstName(),
-            'email' => fake()->unique()->safeEmail(),
-            'telephone' => fake()->phoneNumber(),
-            'adresse' => fake()->address(),
-            'date_inscription' => now(),
-            'departement_id' => fake()->numberBetween(1, 5), // à adapter selon tes départements
+            'cin' => strtoupper($this->faker->bothify('??######')),
+            'name' => $this->faker->lastName(),
+            'prenom' => $this->faker->firstName(),
+            'sexe' => $this->faker->randomElement(['femme', 'homme']),
+            'Age' => $this->faker->numberBetween(18, 90),
+            'email' => $this->faker->unique()->safeEmail(),
+            'telephone' => $this->faker->phoneNumber(),
+            'adresse' => $this->faker->address(),
+            'date_inscription' => $this->faker->date(),
+            'departement_id' => Departement::inRandomOrder()->first()->id ?? Departement::factory(),
             'password' => Hash::make('password'), // ou bcrypt('password')
-            'img_path' => 'default.png', // ou une image de test
-            'status' => fake()->boolean(), // à adapter si c'est booléen
+            'img_path' => 'default.png',
+            'status' => $this->faker->boolean(),
+            'status_maladie' => $this->faker->boolean(),
+            'email_verified_at' => now(),
+            'remember_token' => \Str::random(10),
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Indique un email non vérifié.
      */
     public function unverified(): static
     {

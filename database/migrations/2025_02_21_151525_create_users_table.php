@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('cin')->unique();
             $table->string('name');
             $table->string('prenom');
+            $table->enum('sexe', ['femme','homme']);
+            $table->float('Age');
             $table->string('email')->unique();
             $table->string('telephone');
             $table->string('adresse');
@@ -24,6 +26,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('img_path')->nullable();
             $table->boolean('status');
+            $table->boolean('status_maladie');
             $table->timestamp('email_verified_at')->nullable();  
             $table->rememberToken();
             $table->timestamps();

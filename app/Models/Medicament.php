@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Medicament extends Model
 {
+    use HasFactory;
     protected $fillable = ['nom_medicament','quantite','date_expiration','prix_unitaire','img_path'];
 
     public function ordonances(){
