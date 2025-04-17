@@ -57,5 +57,15 @@ class Medicament extends Model
     {
         return $this->hasMany(RemplacementMedicament::class, 'medicament_remplacement_id');
     }
+
+    /**
+     * Relation avec les utilisateurs via la table pharmacie_user.
+     */
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'pharmacie_user')
+                    ->withPivot('payment', 'statut', 'quantite')
+                    ->withTimestamps();
+    }
 }
 
