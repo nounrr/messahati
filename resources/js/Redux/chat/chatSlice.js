@@ -7,7 +7,7 @@ export const sendMessage = createAsyncThunk(
     'chat/sendMessage',
     async ({ receiver_id, message }, { getState }) => {
         const { auth } = getState();
-        const response = await axios.post('/api/send-message', {
+        const response = await axios.post('/api/messages', {
             message,
             destinataire_id: receiver_id,
             emetteure_id: auth.user.id
@@ -19,7 +19,7 @@ export const sendMessage = createAsyncThunk(
 export const fetchSentMessages = createAsyncThunk(
     'chat/fetchSentMessages',
     async (receiver_id) => {
-        const response = await axios.get(`/messages/sent/${receiver_id}`);
+        const response = await axios.get(`/api/messages/sent/${receiver_id}`);
         return response.data.messages;
     }
 );
@@ -27,7 +27,7 @@ export const fetchSentMessages = createAsyncThunk(
 export const fetchReceivedMessages = createAsyncThunk(
     'chat/fetchReceivedMessages',
     async (sender_id) => {
-        const response = await axios.get(`/messages/received/${sender_id}`);
+        const response = await axios.get(`/api/messages/received/${sender_id}`);
         return response.data.messages;
     }
 );
@@ -133,14 +133,25 @@ const chatSlice = createSlice({
 
 // Middleware pour la connexion WebSocket
 export const initializeWebSocket = () => (dispatch) => {
+    const token = localStorage.getItem('token');
+    
     const echo = new Echo({
         broadcaster: 'pusher',
         key: import.meta.env.VITE_PUSHER_APP_KEY,
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-        forceTLS: true
+        forceTLS: true,
+        authEndpoint: '/broadcasting/auth',
+        auth: {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }
     });
 
-    echo.private(`chat`)
+    // Écouter les messages privés
+    echo.private(`chat.${localStorage.getItem('user_id')}`)
         .listen('MessageSent', (e) => {
             dispatch(addMessage(e.message));
         });
@@ -148,7 +159,7 @@ export const initializeWebSocket = () => (dispatch) => {
     dispatch(setConnectionStatus(true));
 
     return () => {
-        echo.leave('chat');
+        echo.leave(`chat.${localStorage.getItem('user_id')}`);
         dispatch(setConnectionStatus(false));
     };
 };
