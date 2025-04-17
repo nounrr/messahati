@@ -17,7 +17,33 @@ function Reclamation({ onClose }) {
 
     useEffect(() => {
         dispatch(fetchUsers());
-    }, [dispatch]);
+
+        // S'abonner aux canaux de réclamation pour chaque utilisateur
+        users.forEach(user => {
+            window.Echo.private(`reclamations.${user.id}`)
+                .listen('ReclamationCreated', (e) => {
+                    Swal.fire({
+                        title: 'Nouvelle réclamation',
+                        text: `Une nouvelle réclamation a été créée pour ${user.name}`,
+                        icon: 'info'
+                    });
+                })
+                .listen('ReclamationUpdated', (e) => {
+                    Swal.fire({
+                        title: 'Réclamation mise à jour',
+                        text: `La réclamation "${e.titre}" a été mise à jour`,
+                        icon: 'info'
+                    });
+                });
+        });
+
+        // Nettoyage des abonnements
+        return () => {
+            users.forEach(user => {
+                window.Echo.leave(`reclamations.${user.id}`);
+            });
+        };
+    }, [dispatch, users]);
 
     const handleAddField = () => {
         setReclamations([...reclamations, {

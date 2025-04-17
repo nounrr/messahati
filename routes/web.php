@@ -77,7 +77,7 @@ use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\MutuelController;
 
-Route::resource('reclamation', ReclamationController::class);
+// Route::resource('reclamation', ReclamationController::class); // Supprimé car géré par l'API
 Route::resource('feedback', feedbackController::class);
 Route::resource('mutuel', MutuelController::class);
 

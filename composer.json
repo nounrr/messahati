@@ -12,11 +12,8 @@
         "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-<<<<<<< HEAD
         "pusher/pusher-php-server": "^7.2",
-=======
         "maatwebsite/excel": "^3.1",
->>>>>>> bd8d43a524b8673206d1cadfc2178cbe1f7efe40
         "spatie/laravel-permission": "^6.16",
         "tightenco/ziggy": "^2.0"
     },

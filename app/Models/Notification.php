@@ -8,8 +8,18 @@ class Notification extends Model
 {
     protected $fillable = [
         'date',
-        'statut'
+        'statut',
+        'type',
+        'data'
     ];
+
+    protected $casts = [
+        'data' => 'array',
+        'date' => 'datetime',
+        'statut' => 'boolean'
+    ];
+
+    public $timestamps = true;
 
     public function users()
     {

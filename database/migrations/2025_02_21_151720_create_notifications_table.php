@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->date('date');
             $table->boolean('statut');
+            $table->string('type');
+            $table->json('data')->nullable();
             $table->timestamps();
         });
     }

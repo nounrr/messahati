@@ -32,14 +32,28 @@ class NotificationController extends Controller
         $validatedData = $request->validate([
             'date' => 'required|date',
             'statut' => 'required|boolean',
+            'type' => 'required|string',
+            'data' => 'nullable|array',
+            'user_id' => 'required|exists:users,id',
+            'message' => 'required|string'
         ]);
 
         $notification = new Notification();
         $notification->date = $validatedData['date'];
         $notification->statut = $validatedData['statut'];
+        $notification->type = $validatedData['type'];
+        $notification->data = $validatedData['data'] ?? null;
         $notification->save();
 
-        return redirect()->route('notifications.index')->with('success', 'Notification créée avec succès.');
+        // Attacher la notification à l'utilisateur
+        $notification->users()->attach($validatedData['user_id'], [
+            'message' => $validatedData['message']
+        ]);
+
+        return response()->json([
+            'message' => 'Notification créée avec succès',
+            'notification' => $notification
+        ], 201);
     }
 
     /**
@@ -87,5 +101,19 @@ class NotificationController extends Controller
         $notification->delete();
 
         return redirect()->route('notifications.index')->with('success', 'Notification supprimée avec succès.');
+    }
+
+    public function getReclamationNotifications($userId)
+    {
+        $notifications = Notification::where('type', 'reclamation')
+            ->whereHas('users', function ($query) use ($userId) {
+                $query->where('users.id', $userId);
+            })
+            ->with(['users' => function ($query) {
+                $query->select('users.id', 'notification_users.message');
+            }])
+            ->get();
+
+        return response()->json($notifications);
     }
 }

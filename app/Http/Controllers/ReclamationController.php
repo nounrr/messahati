@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Auth;
+use App\Events\ReclamationCreated;
+use App\Events\ReclamationUpdated;
+use Illuminate\Support\Facades\Validator;
+use App\Models\User;
+use App\Models\Notification;
 
 class ReclamationController extends Controller
 {
@@ -24,48 +29,43 @@ class ReclamationController extends Controller
     // Enregistrement d'une réclamation
     public function store(Request $request)
     {
-        // Vérifier si la requête contient un tableau de réclamations
-        if ($request->isJson() && is_array($request->json()->all())) {
-            $reclamations = $request->json()->all();
-            $created = [];
-            
-            foreach ($reclamations as $data) {
-                $validated = validator($data, [
-                    'titre' => 'required|string',
-                    'description' => 'required|string',
-                    'statut' => 'required|string|in:en_attente,traité,rejeté',
-                    'user_id' => 'required|exists:users,id',
-                ])->validate();
-                
-                $reclamation = new Reclamation();
-                $reclamation->titre = $validated['titre'];
-                $reclamation->description = $validated['description'];
-                $reclamation->statut = $validated['statut'];
-                $reclamation->user_id = $validated['user_id'];
-                $reclamation->save();
-                
-                $created[] = $reclamation;
-            }
-            
-            return response()->json($created, 201);
-        } else {
-            // Traitement d'une seule réclamation
-            $validated = $request->validate([
-                'titre' => 'required|string',
-                'description' => 'required|string',
-                'statut' => 'required|string|in:en_attente,traité,rejeté',
-                'user_id' => 'required|exists:users,id',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'titre' => 'required|string',
+            'description' => 'required|string',
+            'statut' => 'required|string|in:en_attente,traité,rejeté',
+            'user_id' => 'required|exists:users,id',
+        ]);
 
-            $reclamation = new Reclamation();
-            $reclamation->titre = $validated['titre'];
-            $reclamation->description = $validated['description'];
-            $reclamation->statut = $validated['statut'];
-            $reclamation->user_id = $validated['user_id'];
-            $reclamation->save();
-
-            return response()->json($reclamation, 201);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
         }
+
+        $validated = $validator->validated();
+
+        $reclamation = new Reclamation();
+        $reclamation->titre = $validated['titre'];
+        $reclamation->description = $validated['description'];
+        $reclamation->statut = $validated['statut'];
+        $reclamation->user_id = $validated['user_id'];
+        $reclamation->save();
+
+        // Récupération de l'utilisateur
+        $user = User::find($validated['user_id']);
+
+        // Création de la notification
+        $notification = Notification::create([
+            'date' => now()->toDateString(),
+            'statut' => true
+        ]);
+
+        $notification->users()->attach($validated['user_id'], [
+            'message' => "Une nouvelle réclamation a été créée : {$reclamation->titre}"
+        ]);
+
+        // Émettre l'événement de création
+        event(new ReclamationCreated($reclamation));
+
+        return response()->json($reclamation, 201);
     }
 
     // Affiche une réclamation
@@ -94,11 +94,41 @@ class ReclamationController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
+        // Stocker les anciennes valeurs pour détecter les changements
+        $oldValues = $reclamation->getAttributes();
+
         $reclamation->titre = $validated['titre'];
         $reclamation->description = $validated['description'];
         $reclamation->statut = $validated['statut'];
         $reclamation->user_id = $validated['user_id'];
         $reclamation->save();
+
+        // Détecter les changements
+        $changes = [];
+        foreach ($validated as $key => $value) {
+            if ($oldValues[$key] != $value) {
+                $changes[$key] = [
+                    'old' => $oldValues[$key],
+                    'new' => $value
+                ];
+            }
+        }
+
+        // Récupération de l'utilisateur
+        $user = User::find($validated['user_id']);
+
+        // Création de la notification
+        $notification = Notification::create([
+            'date' => now()->toDateString(),
+            'statut' => true
+        ]);
+
+        $notification->users()->attach($validated['user_id'], [
+            'message' => "Votre réclamation a été mise à jour : {$reclamation->titre}"
+        ]);
+
+        // Émettre l'événement de mise à jour
+        event(new ReclamationUpdated($reclamation));
 
         return response()->json($reclamation);
     }
@@ -107,6 +137,20 @@ class ReclamationController extends Controller
     public function destroy($id)
     {
         $reclamation = Reclamation::findOrFail($id);
+        
+        // Récupération de l'utilisateur
+        $user = User::find($reclamation->user_id);
+
+        // Création de la notification
+        $notification = Notification::create([
+            'date' => now()->toDateString(),
+            'statut' => true
+        ]);
+
+        $notification->users()->attach($reclamation->user_id, [
+            'message' => "Votre réclamation a été supprimée : {$reclamation->titre}"
+        ]);
+
         $reclamation->delete();
         return response()->json(null, 204);
     }
