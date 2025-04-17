@@ -101,4 +101,9 @@ Route::get('/chat', function () {
 
 // Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);
 
+// Route pour les types de partenaires
+Route::get('/type-partenaires', function () {
+    return Inertia::render('TypePartenaires/ListeTypePartenaires');
+})->name('type-partenaires.view');
+
 require __DIR__.'/auth.php';

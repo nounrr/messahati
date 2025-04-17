@@ -115,8 +115,8 @@ const ChatMessageLayer = () => {
                                     <p className="text-sm text-gray-500">
                                         {user.status || 'En ligne'}
                                     </p>
-                                </div>
-                            </div>
+                    </div>
+                </div>
                         </div>
                     ))}
                 </div>
@@ -139,8 +139,8 @@ const ChatMessageLayer = () => {
                                     <p className="text-sm text-gray-500">
                                         {selectedUser.status || 'En ligne'}
                                     </p>
-                                </div>
-                            </div>
+                    </div>
+                    </div>
                             <button
                                 onClick={handleToggleProfile}
                                 className="text-gray-500 hover:text-gray-700"
@@ -196,7 +196,7 @@ const ChatMessageLayer = () => {
                         <p>Sélectionnez une conversation pour commencer</p>
                     </div>
                 )}
-            </div>
+                </div>
 
             {/* Profil utilisateur */}
             {showProfile && selectedUser && (

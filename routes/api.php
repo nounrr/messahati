@@ -7,6 +7,7 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\TypePartenaireController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user(); // Retourne l'utilisateur authentifié
