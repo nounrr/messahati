@@ -29,6 +29,7 @@ class Medicament extends Model
         'date_expiration',
         'typemedicaments_id',
         'img_path',
+        'remplacement', // Nouveau champ ajouté
     ];
 
     public function ordonances()
@@ -39,6 +40,22 @@ class Medicament extends Model
     public function typemedicament()
     {
         return $this->belongsTo(TypeMedicament::class);
+    }
+
+    /**
+     * Relation avec les médicaments de remplacement.
+     */
+    public function remplacements()
+    {
+        return $this->hasMany(RemplacementMedicament::class, 'medicament_id');
+    }
+
+    /**
+     * Relation avec les médicaments qui remplacent celui-ci.
+     */
+    public function remplacePar()
+    {
+        return $this->hasMany(RemplacementMedicament::class, 'medicament_remplacement_id');
     }
 }
 

@@ -34,6 +34,7 @@ class MedicamentController extends Controller
             'medicaments.*.prix_pfht' => 'nullable|numeric',
             'medicaments.*.typemedicaments_id' => 'required|exists:type_medicaments,id',
             'medicaments.*.img_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'medicaments.*.remplacement' => 'required|boolean', // Validation pour le champ remplacement
         ]);
 
         $created = [];
@@ -84,6 +85,7 @@ class MedicamentController extends Controller
             'medicaments.*.prix_pfht' => 'nullable|numeric',
             'medicaments.*.typemedicaments_id' => 'required|exists:type_medicaments,id',
             'medicaments.*.img_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'medicaments.*.remplacement' => 'sometimes|boolean', // Validation pour le champ remplacement
         ]);
 
         $updated = [];
