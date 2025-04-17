@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Partenaire;
+use App\Imports\PartenaireImport;
+use App\Traits\ExcelExportImport;
 
 class PartenaireController extends Controller
 {
@@ -103,5 +105,18 @@ class PartenaireController extends Controller
         }
 
         return response()->json(['message' => 'Partenaires supprimés avec succès.']);
+    }
+
+    use ExcelExportImport;
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx',
+        ]);
+    
+        $this->importExcel($request->file('file'), PartenaireImport::class);
+    
+        return response()->json(['message' => 'Partenaires importés avec succès.']);
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use App\Exports\UserExport;
+use App\Traits\ExcelExportImport;
 
 class UserController extends Controller
 {
@@ -34,4 +36,12 @@ class UserController extends Controller
         $roles = Role::all();
         return response()->json($roles);
     }
+
+    use ExcelExportImport;
+
+    public function export()
+    {
+        return $this->exportExcel(UserExport::class, 'users.xlsx', null);
+    }
+
 } 

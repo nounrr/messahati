@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Payment;
+use App\Models\Rendezvous;
+use App\Exports\PaymentExport;
+use App\Traits\ExcelExportImport;
 
 class PaymentController extends Controller
 {
@@ -96,5 +99,12 @@ class PaymentController extends Controller
         $payment->delete();
 
         return redirect()->route('payments.index')->with('success', 'Paiement supprimé avec succès.');
+    }
+
+    use ExcelExportImport;
+
+    public function export()
+    {
+        return $this->exportExcel(PaymentExport::class, 'payments.xlsx', null);
     }
 }

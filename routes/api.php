@@ -29,6 +29,11 @@ use App\Http\Controllers\TypePartenaireController;
 use App\Http\Controllers\TypeTraitementController;
 use App\Http\Controllers\UserController;
 
+// Route for importing partenaires
+Route::post('/partenaires/import', [PartenaireController::class, 'import'])->name('partenaires.import');
+Route::post('/departements/import', [DepartementController::class, 'import'])->name('departements.import');
+Route::post('/type-traitements/import', [TypeTraitementController::class, 'import'])->name('type_traitements.import');
+
 // Route pour obtenir l'utilisateur authentifié
 Route::get('/user', function (Request $request) {
     return $request->user();

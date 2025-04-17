@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Charge extends Model
 {
-    protected $fillable=['nom','prix_unitaire','quantite'];
+    protected $fillable = ['nom', 'prix_unitaire', 'quantite', 'partenaire_id'];
 
-    public function partenaire(){
+    public function partenaire()
+    {
         return $this->belongsTo(Partenaire::class);
     }
 }
