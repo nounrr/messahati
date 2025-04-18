@@ -17,8 +17,7 @@ class DepartementController extends Controller
     // Récupère et retourne tous les départements
     public function index()
     {
-        $clinique_id = auth()->user()->clinique_id;
-        $departements = Departement::where('clinique_id', $clinique_id)->get();
+        $departements = Departement::all();
         return response()->json($departements);
     }
 
@@ -38,11 +37,9 @@ class DepartementController extends Controller
             'departements.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $clinique_id = auth()->user()->clinique_id;
 
         foreach ($validatedData['departements'] as $key => $data) {
             $departement = new Departement();
-            $departement->clinique_id = $clinique_id;
             $departement->nom = $data['nom'];
             $departement->description = $data['description'] ?? null;
 

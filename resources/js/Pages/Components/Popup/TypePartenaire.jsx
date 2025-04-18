@@ -6,7 +6,7 @@ import { X } from 'lucide-react';
 
 const TypePartenaire = ({ onClose, typePartenaire = null }) => {
     const dispatch = useDispatch();
-    const [typePartenaires, setTypePartenaires] = useState([{ 
+    const [typePartenaires, setTypePartenaires] = useState([{
         nom: '', 
         description: '' 
     }]);
@@ -54,11 +54,11 @@ const TypePartenaire = ({ onClose, typePartenaire = null }) => {
 
         try {
             if (typePartenaire) {
+                
                 // Mode modification - Format attendu par le contrôleur
                 await dispatch(updateTypePartenaire({ 
-                    id: typePartenaire.id, 
                     types: [{
-                        id: typePartenaire.id,
+                        id: typePartenaires[0].id, 
                         nom: typePartenaires[0].nom,
                         description: typePartenaires[0].description
                     }]

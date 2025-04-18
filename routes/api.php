@@ -81,6 +81,7 @@ Route::resource('payments', PaymentController::class);
 
 // Routes pour les partenaires
 Route::resource('partenaires', PartenaireController::class);
+Route::delete('/partenaires', [PartenaireController::class, 'destroy'])->name('partenaires.destroy.multiple');
 
 // Routes pour les ordonnances
 Route::resource('ordonances', OrdonanceController::class);
@@ -99,6 +100,7 @@ Route::resource('messages', MessageController::class);
 
 // Routes pour les charges
 Route::resource('charges', ChargeController::class);
+Route::delete('/charges', [ChargeController::class, 'destroy'])->name('charges.destroy.multiple');
 
 // Routes pour les certificats médicaux
 Route::resource('certificats-medicaux', CertificatsMedicaleController::class);

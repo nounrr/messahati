@@ -42,7 +42,7 @@ export const deleteCharges = createAsyncThunk(
     async (ids, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.delete('/charges', { data: { ids } });
-            return response.data;
+            return { ids };
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -124,7 +124,7 @@ const chargeSlice = createSlice({
                 }
             })
             .addCase(deleteCharges.fulfilled, (state, action) => {
-                state.items = state.items.filter(item => !action.payload.includes(item.id));
+                state.items = state.items.filter(item => !action.payload.ids.includes(item.id));
             })
             .addCase(importCharges.fulfilled, (state, action) => {
                 state.items.push(...action.payload);

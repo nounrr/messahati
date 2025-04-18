@@ -144,19 +144,7 @@ const ListeTypeMedicaments = () => {
             sortable: true,
             grow: 2
         },
-        {
-            name: 'Description',
-            selector: row => row.description,
-            sortable: true,
-            grow: 3
-        },
-        {
-            name: 'Nombre de Médicaments',
-            selector: row => row.medicaments?.length || 0,
-            sortable: true,
-            right: true,
-            width: '200px'
-        }
+      
     ];
 
     return (

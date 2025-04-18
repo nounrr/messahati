@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import axiosInstance from '../../utils/axiosInstance';
+
 
 // Actions asynchrones
 export const fetchTypePartenaires = createAsyncThunk(
@@ -30,8 +32,8 @@ export const updateTypePartenaire = createAsyncThunk(
             }]
         };
         
-        const response = await axios.put(`/api/type-partenaires/${typePartenaire.id}`, formattedData);
-        return response.data;
+        const response = await axiosInstance.put(`/type-partenaires/${id}`, data);
+            return response.data;
     }
 );
 

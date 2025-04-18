@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDepartements, deleteDepartements } from '../../Redux/departements/departementSlice';
-import TableDataLayer from '../../Components/TableDataLayer';
+import TableDataLayer from '../Components/tables/TableDataLayer';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Swal from 'sweetalert2';
@@ -17,6 +17,8 @@ const ListeDepartements = () => {
         if (status === 'idle') {
             dispatch(fetchDepartements());
         }
+            dispatch(fetchDepartements());
+
     }, [status, dispatch]);
 
     const handleAdd = () => {
@@ -61,12 +63,12 @@ const ListeDepartements = () => {
 
     const columns = [
         {
-            Header: 'Nom',
-            accessor: 'nom',
+            name: 'Nom',
+            selector:row => row.nom,
         },
         {
-            Header: 'Description',
-            accessor: 'description',
+            name: 'Description',
+            selector:row => row.description,
         },
         {
             Header: 'Image',
@@ -132,7 +134,13 @@ const ListeDepartements = () => {
 
             <TableDataLayer
                 columns={columns}
-                data={departements}
+                    onSelectedRowsChange={handleRowSelected}
+                    selectedRows={selectedRows}
+                    isLoading={isLoading || status === 'loading'}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    showCheckbox={true}
+                    pageLength={10}
             />
 
             {showPopup && (

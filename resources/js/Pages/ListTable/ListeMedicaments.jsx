@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMedicaments, deleteMedicament } from '../../Redux/medicaments/medicamentSlice';
-import TableDataLayer from '../../Components/TableDataLayer';
+import TableDataLayer from '../Components/tables/TableDataLayer';
 import Medicament from '../Components/Popup/Medicament';
 import Swal from 'sweetalert2';
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
