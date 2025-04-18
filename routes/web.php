@@ -104,7 +104,7 @@ Route::get('/chat', function () {
 // Route pour les types de partenaires
 Route::get('/type-partenaires', function () {
     return Inertia::render('ListTable/ListeTypePartenaires');
-})->name('type-partenaires.view'); //modification
+})->name('type-partenaires.view'); //done
 
 Route::get('/type-medicaments', function () {
     return Inertia::render('ListTable/ListeTypeMedicaments');
@@ -131,12 +131,12 @@ Route::get('/departement-table', function () {
 })->name('departement.view');
 
 Route::get('/feedbacks', function () {
-    return Inertia::render('ListTable/ListeFeedback');
+    return Inertia::render('ListTable/ListeFeedbacks');
 })->name('feedback.view');
 
 Route::get('/mutuels', function () {
-    return Inertia::render('ListTable/ListeMutuel');
-})->name('mutuel.view');
+    return Inertia::render('ListTable/ListeMutuels');
+})->name('mutuels.view'); //done
 
 Route::get('/partenaires', function () {
     return Inertia::render('ListTable/ListePartenaires'); //done

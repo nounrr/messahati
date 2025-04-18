@@ -23,17 +23,22 @@ export const createTypePartenaire = createAsyncThunk(
 export const updateTypePartenaire = createAsyncThunk(
     'typePartenaires/update',
     async (typePartenaire) => {
-        // Formatage des données pour correspondre à ce qu'attend le contrôleur
-        const formattedData = {
-            types: [{
+        try {
+            // Formatage des données pour correspondre à ce qu'attend le contrôleur
+            const formattedData = {
                 id: typePartenaire.id,
                 nom: typePartenaire.nom,
                 description: typePartenaire.description
-            }]
-        };
-        
-        const response = await axiosInstance.put(`/type-partenaires/${id}`, data);
+            };
+            
+            console.log('Sending update request with data:', formattedData);
+            const response = await axiosInstance.put(`/type-partenaires/${typePartenaire.id}`, formattedData);
+            console.log('Update response:', response.data);
             return response.data;
+        } catch (error) {
+            console.error('Error updating type partenaire:', error);
+            throw error;
+        }
     }
 );
 

@@ -54,14 +54,11 @@ const TypePartenaire = ({ onClose, typePartenaire = null }) => {
 
         try {
             if (typePartenaire) {
-                
-                // Mode modification - Format attendu par le contrôleur
+                // Mode modification
                 await dispatch(updateTypePartenaire({ 
-                    types: [{
-                        id: typePartenaires[0].id, 
-                        nom: typePartenaires[0].nom,
-                        description: typePartenaires[0].description
-                    }]
+                    id: typePartenaires[0].id, 
+                    nom: typePartenaires[0].nom,
+                    description: typePartenaires[0].description
                 })).unwrap();
                 
                 Swal.fire({
