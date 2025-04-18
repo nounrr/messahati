@@ -3,7 +3,7 @@
 return [
 
     'providers' => [
-        // ...existing code...
+        // ...existing providers...
         Barryvdh\DomPDF\ServiceProvider::class,
         Illuminate\Filesystem\FilesystemServiceProvider::class,
     ],
