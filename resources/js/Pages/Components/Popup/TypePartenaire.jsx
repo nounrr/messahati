@@ -15,6 +15,7 @@ const TypePartenaire = ({ onClose, typePartenaire = null }) => {
     useEffect(() => {
         if (typePartenaire) {
             setTypePartenaires([{
+                id: typePartenaire.id,
                 nom: typePartenaire.nom || '',
                 description: typePartenaire.description || ''
             }]);
@@ -53,11 +54,14 @@ const TypePartenaire = ({ onClose, typePartenaire = null }) => {
 
         try {
             if (typePartenaire) {
-                // Mode modification
+                // Mode modification - Format attendu par le contrôleur
                 await dispatch(updateTypePartenaire({ 
                     id: typePartenaire.id, 
-                    nom: typePartenaires[0].nom,
-                    description: typePartenaires[0].description
+                    types: [{
+                        id: typePartenaire.id,
+                        nom: typePartenaires[0].nom,
+                        description: typePartenaires[0].description
+                    }]
                 })).unwrap();
                 
                 Swal.fire({

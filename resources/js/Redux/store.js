@@ -22,6 +22,7 @@ import typeMedicamentReducer from './typeMedicaments/typeMedicamentSlice';
 import rolePermissionReducer from './rolePermissions/rolePermissionSlice';
 import chatReducer from './chat/chatSlice';
 import authReducer from './auth/authSlice';
+import chargeReducer from './charges/chargeSlice';
 
 const store = configureStore({
     reducer: {
@@ -48,6 +49,7 @@ const store = configureStore({
         rolePermissions: rolePermissionReducer,
         chat: chatReducer,
         auth: authReducer,
+        charges: chargeReducer,
     },
 });
 

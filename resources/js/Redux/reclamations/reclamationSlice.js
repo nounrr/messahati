@@ -1,22 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosInstance from '../../utils/axiosInstance';
+import axios from 'axios';
 
-// Fetch all reclamations
+// Actions asynchrones
 export const fetchReclamations = createAsyncThunk(
     'reclamations/fetchReclamations',
-    async () => {
-        const response = await axiosInstance.get('/reclamations');
-        return response.data;
-    }
-);
-
-// Create new reclamations
-export const createReclamations = createAsyncThunk(
-    'reclamations/createReclamations',
-    async (reclamations, { rejectWithValue }) => {
+    async (_, { rejectWithValue }) => {
         try {
-            // Envoyer les données directement au format JSON
-            const response = await axiosInstance.post('/reclamations', reclamations);
+            const response = await axios.get('/api/reclamations');
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -24,25 +14,11 @@ export const createReclamations = createAsyncThunk(
     }
 );
 
-// Update existing reclamations
-export const updateReclamations = createAsyncThunk(
-    'reclamations/updateReclamations',
-    async (reclamations, { rejectWithValue }) => {
+export const createReclamation = createAsyncThunk(
+    'reclamations/createReclamation',
+    async (reclamationData, { rejectWithValue }) => {
         try {
-            const formData = new FormData();
-            reclamations.forEach((reclamation, index) => {
-                Object.entries(reclamation).forEach(([key, value]) => {
-                    if (key === 'image' && value instanceof File) {
-                        formData.append(`reclamations[${index}][image]`, value);
-                    } else {
-                        formData.append(`reclamations[${index}][${key}]`, value);
-                    }
-                });
-            });
-
-            const response = await axiosInstance.put('/reclamations', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const response = await axios.post('/api/reclamations', reclamationData);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -50,13 +26,24 @@ export const updateReclamations = createAsyncThunk(
     }
 );
 
-// Delete reclamations
-export const deleteReclamations = createAsyncThunk(
-    'reclamations/deleteReclamations',
-    async (ids, { rejectWithValue }) => {
+export const updateReclamation = createAsyncThunk(
+    'reclamations/updateReclamation',
+    async ({ id, ...reclamationData }, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.delete('/reclamations', { data: { ids } });
+            const response = await axios.put(`/api/reclamations/${id}`, reclamationData);
             return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const deleteReclamation = createAsyncThunk(
+    'reclamations/deleteReclamation',
+    async (id, { rejectWithValue }) => {
+        try {
+            await axios.delete(`/api/reclamations/${id}`);
+            return id;
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -68,7 +55,7 @@ export const exportReclamations = createAsyncThunk(
     'reclamations/exportReclamations',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.get('/reclamations/export', {
+            const response = await axios.get('/reclamations/export', {
                 responseType: 'blob',
             });
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -91,7 +78,7 @@ export const importReclamations = createAsyncThunk(
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const response = await axiosInstance.post('/reclamations/import', formData, {
+            const response = await axios.post('/reclamations/import', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -103,18 +90,21 @@ export const importReclamations = createAsyncThunk(
     }
 );
 
+// Slice
 const reclamationSlice = createSlice({
     name: 'reclamations',
     initialState: {
         items: [],
-        status: 'idle',
-        error: null,
+        status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+        error: null
     },
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // Fetch reclamations
             .addCase(fetchReclamations.pending, (state) => {
                 state.status = 'loading';
+                state.error = null;
             })
             .addCase(fetchReclamations.fulfilled, (state, action) => {
                 state.status = 'succeeded';
@@ -122,29 +112,28 @@ const reclamationSlice = createSlice({
             })
             .addCase(fetchReclamations.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.error.message;
+                state.error = action.payload?.message || 'Une erreur est survenue';
             })
-            .addCase(createReclamations.fulfilled, (state, action) => {
-                state.items.push(...action.payload);
+            // Create reclamation
+            .addCase(createReclamation.fulfilled, (state, action) => {
+                state.items.push(action.payload);
             })
-            .addCase(createReclamations.rejected, (state, action) => {
-                state.error = action.payload?.message || 'Erreur lors de la création';
+            // Update reclamation
+            .addCase(updateReclamation.fulfilled, (state, action) => {
+                const index = state.items.findIndex(item => item.id === action.payload.id);
+                if (index !== -1) {
+                    state.items[index] = action.payload;
+                }
             })
-            .addCase(updateReclamations.fulfilled, (state, action) => {
-                action.payload.forEach((updated) => {
-                    const index = state.items.findIndex((item) => item.id === updated.id);
-                    if (index !== -1) {
-                        state.items[index] = updated;
-                    }
-                });
+            // Delete reclamation
+            .addCase(deleteReclamation.fulfilled, (state, action) => {
+                state.items = state.items.filter(item => item.id !== action.payload);
             })
-            .addCase(deleteReclamations.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
-            })
+            // Import reclamations
             .addCase(importReclamations.fulfilled, (state, action) => {
                 state.items.push(...action.payload);
             });
-    },
+    }
 });
 
 export default reclamationSlice.reducer; 

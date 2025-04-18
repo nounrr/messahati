@@ -101,6 +101,7 @@ const chargeSlice = createSlice({
         builder
             .addCase(fetchCharges.pending, (state) => {
                 state.status = 'loading';
+                state.error = null;
             })
             .addCase(fetchCharges.fulfilled, (state, action) => {
                 state.status = 'succeeded';
@@ -117,15 +118,13 @@ const chargeSlice = createSlice({
                 state.error = action.payload?.message || 'Erreur lors de la création';
             })
             .addCase(updateCharges.fulfilled, (state, action) => {
-                action.payload.forEach((updated) => {
-                    const index = state.items.findIndex((item) => item.id === updated.id);
-                    if (index !== -1) {
-                        state.items[index] = updated;
-                    }
-                });
+                const index = state.items.findIndex(item => item.id === action.payload.id);
+                if (index !== -1) {
+                    state.items[index] = action.payload;
+                }
             })
             .addCase(deleteCharges.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
+                state.items = state.items.filter(item => !action.payload.includes(item.id));
             })
             .addCase(importCharges.fulfilled, (state, action) => {
                 state.items.push(...action.payload);

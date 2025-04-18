@@ -105,6 +105,8 @@ const TableDataLayer = ({
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
+            width: '200px',
+            grow:1
         },
     ];
 

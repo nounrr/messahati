@@ -11,7 +11,7 @@ class MutuelController extends Controller
     public function index()
     {
         $mutuels = Mutuel::with('user')->get();
-        return view('mutuel.index', compact('mutuels'));
+        return response()->json($mutuels);
     }
 
     // Affiche le formulaire de création

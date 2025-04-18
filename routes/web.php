@@ -103,7 +103,58 @@ Route::get('/chat', function () {
 
 // Route pour les types de partenaires
 Route::get('/type-partenaires', function () {
-    return Inertia::render('TypePartenaires/ListeTypePartenaires');
+    return Inertia::render('ListTable/ListeTypePartenaires');
 })->name('type-partenaires.view');
+
+Route::get('/type-medicaments', function () {
+    return Inertia::render('ListTable/ListeTypeMedicaments');
+})->name('type-medicaments.view');
+
+Route::get('/type-traitements', function () {
+    return Inertia::render('ListTable/ListeTypeTraitements');
+})->name('type-traitements.view');
+Route::get('/reclamations', function () {
+    return Inertia::render('ListTable/ListeReclamations');
+})->name('reclamations.view');
+
+Route::get('/Audit', function () {
+    return Inertia::render('ListTable/ListeAudit');
+})->name('audit.view');
+
+Route::get('/Certificat', function () {
+    return Inertia::render('ListTable/ListeCertificat');
+})->name('certificat.view');
+
+Route::get('/departement', function () {
+    return Inertia::render('ListTable/ListeDepartement');
+})->name('departement.view');
+
+Route::get('/feedback', function () {
+    return Inertia::render('ListTable/ListeFeedback');
+})->name('feedback.view');
+
+Route::get('/mutuel', function () {
+    return Inertia::render('ListTable/ListeMutuel');
+})->name('mutuel.view');
+
+Route::get('/partenaire', function () {
+    return Inertia::render('ListTable/ListePartenaire');
+})->name('partenaire.view');
+
+Route::get('/ordonnance', function () {
+    return Inertia::render('ListTable/ListeOrdonnance');
+})->name('ordonnance.view');
+
+Route::get('/payment', function () {
+    return Inertia::render('ListTable/ListePayment');
+})->name('payment.view');
+
+Route::get('/salaire', function () {
+    return Inertia::render('ListTable/ListeSalaires');
+})->name('salaire.view');
+Route::get('/charges', function () {
+    return Inertia::render('ListTable/ListeCharges');
+})->name('charges.view');
+
 
 require __DIR__.'/auth.php';

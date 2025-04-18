@@ -8,6 +8,28 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\TypePartenaireController;
+use App\Http\Controllers\TypeTraitementController;
+use App\Http\Controllers\TypeMedicamentController;
+use App\Http\Controllers\TypeCertificatController;
+use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\CliniqueController;
+use App\Http\Controllers\TraitementController;
+use App\Http\Controllers\TachController;
+use App\Http\Controllers\SalaireController;
+use App\Http\Controllers\RendezVousController;
+use App\Http\Controllers\ReclamationController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PartenaireController;
+use App\Http\Controllers\OrdonanceController;
+use App\Http\Controllers\MedicamentController;
+use App\Http\Controllers\MutuelController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ChargeController;
+use App\Http\Controllers\CertificatsMedicaleController;
+use App\Http\Controllers\AuditLogCliniqueController;
+use App\Http\Controllers\AttachementController;
+use App\Http\Controllers\FeedbackController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user(); // Retourne l'utilisateur authentifié
@@ -88,7 +110,7 @@ Route::resource('audit-log-cliniques', AuditLogCliniqueController::class);
 Route::resource('attachements', AttachementController::class);
 
 // Routes pour les retours d'expérience
-Route::resource('feedbacks', feedbackController::class);
+Route::resource('feedbacks', FeedbackController::class);
 
 // Routes API pour les rôles et permissions
 Route::prefix('roles')->group(function () {
