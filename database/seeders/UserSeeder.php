@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -14,7 +15,18 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        User::factory()->count(5)->create();
+        // Create 5 doctors
+        $doctors = User::factory()->count(5)->create();
+        $doctorRole = Role::where('name', 'doctor')->first();
+        foreach ($doctors as $doctor) {
+            $doctor->assignRole($doctorRole);
+        }
 
-}
+        // Create 5 patients
+        $patients = User::factory()->count(5)->create();
+        $patientRole = Role::where('name', 'patient')->first();
+        foreach ($patients as $patient) {
+            $patient->assignRole($patientRole);
+        }
+    }
 }
