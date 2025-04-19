@@ -134,6 +134,10 @@ Route::get('/feedbacks', function () {
     return Inertia::render('ListTable/ListeFeedbacks');
 })->name('feedback.view');
 
+Route::get('/traitements', function () {
+    return Inertia::render('ListTable/ListeTraitements');
+})->name('traitements.view');
+
 Route::get('/mutuels', function () {
     return Inertia::render('ListTable/ListeMutuels');
 })->name('mutuels.view'); //done
@@ -152,10 +156,11 @@ Route::get('/payments', function () {
 
 Route::get('/salaires', function () {
     return Inertia::render('ListTable/ListeSalaires');
-})->name('salaire.view');
+})->name('salaire.view'); //done
+
 Route::get('/charges', function () {
     return Inertia::render('ListTable/ListeCharges');
-})->name('charges.view'); //actions not working
+})->name('charges.view'); //Done
 
 
 require __DIR__.'/auth.php';

@@ -1,36 +1,16 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: '/api',  
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    withCredentials: true, // ← important pour envoyer les cookies de session Laravel
+  baseURL: '/api',              // ou '' si vos routes API ne sont pas préfixées
+  withCredentials: true,        // ↔︎ envoie / reçoit le cookie de session
+  headers: { 'X-Requested-With': 'XMLHttpRequest' },
 });
 
-// Intercepteur pour ajouter le token d'authentification aux requêtes
-axiosInstance.interceptors.request.use(
-    (config) => {
-        // Récupérer le token depuis le localStorage
-        const token = localStorage.getItem('auth_token');
-        
-        // Si le token existe, l'ajouter aux headers
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
-axiosInstance.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        return Promise.reject(error);
-    }
-);
+// Ajoute automatiquement le token CSRF fourni par Blade
+axiosInstance.interceptors.request.use(config => {
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+  if (csrf) config.headers['X-CSRF-TOKEN'] = csrf;
+  return config;
+});
 
 export default axiosInstance;

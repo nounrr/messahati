@@ -1,108 +1,70 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axiosInstance';
 
-// ✅ 1. Vérifier si l'utilisateur est connecté
+/* ────────────────────────────────────────────────────────────── */
+/*  THUNKS                                                        */
+/* ────────────────────────────────────────────────────────────── */
+
+// Vérifie la session courante (GET /user → Breeze)
+// Renvoie 401 si non connecté
 export const fetchAuthUser = createAsyncThunk(
-    'auth/fetchAuthUser',
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await axiosInstance.get('/user');
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data || 'Non authentifié');
-        }
+  'auth/fetchAuthUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosInstance.get('/user');
+      return data;                          // { id, name, email, … }
+    } catch {
+      return rejectWithValue('Non authentifié');
     }
+  }
 );
 
-// ✅ 2. Déconnexion
+// Déconnexion (POST /logout)
 export const logout = createAsyncThunk(
-    'auth/logout',
-    async (_, { rejectWithValue, dispatch }) => {
-        try {
-            // 1. Supprimer le token du localStorage
-            localStorage.removeItem('auth_token');
-            
-            // 2. Réinitialiser l'état de l'authentification
-            dispatch(resetAuth());
-            
-            // 3. Effectuer la requête pour la déconnexion via la route web
-            await fetch('/logout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                credentials: 'same-origin'
-            });
-            
-            return null;
-        } catch (error) {
-            return rejectWithValue(error.response?.data || 'Erreur lors de la déconnexion');
-        }
+  'auth/logout',
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      await axiosInstance.post('/logout');
+      dispatch(resetAuth());
+      return null;
+    } catch {
+      return rejectWithValue('Erreur lors de la déconnexion');
     }
+  }
 );
 
-// Slice d'authentification
+/* ────────────────────────────────────────────────────────────── */
+/*  SLICE                                                         */
+/* ────────────────────────────────────────────────────────────── */
+
 const authSlice = createSlice({
-    name: 'auth',
-    initialState: {
-        user: null,
-        token: localStorage.getItem('auth_token') || null,
-        status: 'idle',
-        error: null,
+  name: 'auth',
+  initialState: {
+    user: null,
+    status: 'idle',     // idle | loading | succeeded | failed
+    error: null,
+  },
+  reducers: {
+    resetAuth: state => {
+      state.user   = null;
+      state.status = 'idle';
+      state.error  = null;
     },
-    reducers: {
-        setToken: (state, action) => {
-            state.token = action.payload;
-            localStorage.setItem('auth_token', action.payload);
-        },
-        clearToken: (state) => {
-            state.token = null;
-            state.user = null;
-            state.status = 'idle';
-            localStorage.removeItem('auth_token');
-        },
-        setUser: (state, action) => {
-            state.user = action.payload;
-            state.status = 'succeeded';
-        },
-        resetAuth: (state) => {
-            state.user = null;
-            state.token = null;
-            state.status = 'idle';
-            state.error = null;
-            localStorage.removeItem('auth_token');
-        },
-        resetStatus: (state) => {
-            state.status = 'idle';
-        }
-    },
-    extraReducers: (builder) => {
-        builder
-            .addCase(fetchAuthUser.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(fetchAuthUser.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.user = action.payload;
-            })
-            .addCase(fetchAuthUser.rejected, (state, action) => {
-                state.status = 'failed';
-                state.user = null;
-                state.error = action.payload;
-            })
-            .addCase(logout.fulfilled, (state) => {
-                state.user = null;
-                state.token = null;
-                state.status = 'idle';
-                state.error = null;
-            })
-            .addCase(logout.rejected, (state, action) => {
-                state.error = action.payload;
-            });
-    },
+    resetStatus: state => { state.status = 'idle'; },
+    setUser: (state, action) => {
+      state.user = action.payload;
+      state.status = 'succeeded';
+    }
+  },
+  extraReducers: builder => {
+    builder
+      .addCase(fetchAuthUser.pending,   s => { s.status = 'loading'; })
+      .addCase(fetchAuthUser.fulfilled, (s,a)=>{ s.status='succeeded'; s.user=a.payload; })
+      .addCase(fetchAuthUser.rejected,  (s,a)=>{ s.status='failed'; s.user=null; s.error=a.payload; })
+      .addCase(logout.fulfilled,        s => { s.user=null; s.status='idle'; })
+      .addCase(logout.rejected,         (s,a)=>{ s.error=a.payload; });
+  }
 });
 
-export const { setToken, clearToken, setUser, resetAuth, resetStatus } = authSlice.actions;
-
+export const { resetAuth, resetStatus, setUser } = authSlice.actions;
 export default authSlice.reducer;

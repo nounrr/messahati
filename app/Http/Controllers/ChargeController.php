@@ -88,18 +88,22 @@ class ChargeController extends Controller
 
     public function destroy(Request $request, string $id = null)
     {
-        if ($id) {
-            $charge = Charge::findOrFail($id);
-            $charge->delete();
-            return response()->json(['message' => 'Charge deleted successfully']);
-        } else {
-            $ids = $request->validate([
-                'ids' => 'required|array',
-                'ids.*' => 'required|integer|exists:charges,id'
-            ])['ids'];
-            
-            Charge::whereIn('id', $ids)->delete();
-            return response()->json(['message' => 'Charges deleted successfully']);
+        try {
+            if ($id) {
+                $charge = Charge::findOrFail($id);
+                $charge->delete();
+                return response()->json(['message' => 'Charge deleted successfully']);
+            } else {
+                $ids = $request->validate([
+                    'ids' => 'required|array',
+                    'ids.*' => 'required|integer|exists:charges,id'
+                ])['ids'];
+                
+                Charge::whereIn('id', $ids)->delete();
+                return response()->json(['message' => 'Charges deleted successfully']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error deleting charges', 'error' => $e->getMessage()], 500);
         }
     }
 }

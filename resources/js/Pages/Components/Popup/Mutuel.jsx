@@ -50,7 +50,7 @@ const Mutuel = ({ onClose, mutuel = null }) => {
                 // Mode modification
                 await dispatch(updateMutuels({ 
                     updates: [{
-                        id: mutuels[0].id, 
+                        id: mutuel.id,
                         nom_mutuel: mutuels[0].nom_mutuel
                     }]
                 })).unwrap();
@@ -60,9 +60,6 @@ const Mutuel = ({ onClose, mutuel = null }) => {
                     title: 'Succès !',
                     text: 'La mutuelle a été modifiée avec succès.'
                 });
-                
-                // Rafraîchir les données après la mise à jour
-                await dispatch(fetchMutuels());
             } else {
                 // Mode création
                 await dispatch(createMutuels(mutuels)).unwrap();
@@ -72,10 +69,10 @@ const Mutuel = ({ onClose, mutuel = null }) => {
                     title: 'Succès !',
                     text: 'Les mutuelles ont été créées avec succès.'
                 });
-                
-                // Rafraîchir les données après la création
-                await dispatch(fetchMutuels());
             }
+            
+            // Rafraîchir les données
+            await dispatch(fetchMutuels());
             
             // Fermer le modal après un court délai
             setTimeout(() => {
@@ -84,9 +81,8 @@ const Mutuel = ({ onClose, mutuel = null }) => {
         } catch (error) {
             console.error('Erreur lors de l\'opération:', error);
             
-            // Afficher un message d'erreur plus détaillé
             let errorMessage = 'Une erreur est survenue lors de l\'opération.';
-            if (error.response && error.response.data && error.response.data.message) {
+            if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
             } else if (error.message) {
                 errorMessage = error.message;

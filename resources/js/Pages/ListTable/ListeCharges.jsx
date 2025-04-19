@@ -78,7 +78,7 @@ const ListeCharges = () => {
                 'La charge a été supprimée avec succès.',
                 'success'
             );
-            await dispatch(fetchCharges());
+            await loadCharges();
         } catch (error) {
             console.error('Erreur lors de la suppression:', error);
             Swal.fire(
@@ -89,12 +89,10 @@ const ListeCharges = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [dispatch]);
+    }, [dispatch, loadCharges]);
 
     const handleRowSelected = useCallback((state) => {
-        console.log('État de sélection reçu:', state);
         const selectedItems = state.selectedRows || [];
-        console.log('Lignes sélectionnées:', selectedItems);
         setSelectedRows(selectedItems);
     }, []);
 
@@ -154,7 +152,7 @@ const ListeCharges = () => {
                 'success'
             );
             
-            await dispatch(fetchCharges());
+            await loadCharges();
         } catch (error) {
             console.error('Erreur lors de la suppression:', error);
             Swal.fire(
@@ -165,14 +163,15 @@ const ListeCharges = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [dispatch]);
+    }, [dispatch, loadCharges]);
 
     const handleClosePopup = useCallback(() => {
         setShowPopup(false);
         setTimeout(() => {
             setSelectedCharge(null);
+            loadCharges(); // Recharger les charges après la fermeture du popup
         }, 300);
-    }, []);
+    }, [loadCharges]);
 
     const handlePartenaireFilter = (e) => {
         setSelectedPartenaire(e.target.value);

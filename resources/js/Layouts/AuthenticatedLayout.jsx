@@ -5,7 +5,7 @@ import ResponsiveNavLink from '@/Components/Child/ResponsiveNavLink';
 import { Link, usePage, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setUser, logout, clearToken, resetAuth } from '../Redux/auth/authSlice';
+import { setUser, logout, resetAuth, fetchAuthUser } from '../Redux/auth/authSlice';
 
 export default function AuthenticatedLayout({ header, children }) {
     const dispatch = useDispatch();
@@ -14,10 +14,17 @@ export default function AuthenticatedLayout({ header, children }) {
 
     // Synchroniser l'utilisateur Inertia avec Redux
     useEffect(() => {
-        if (auth && auth.user && !user) {
+        if (auth?.user && (!user || user.id !== auth.user.id)) {
             dispatch(setUser(auth.user));
         }
-    }, [auth, dispatch, user]);
+    }, [auth, user]);
+
+    // Vérifier l'authentification si nécessaire
+    useEffect(() => {
+        if (!user && !auth?.user) {
+            dispatch(fetchAuthUser());
+        }
+    }, []);
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);

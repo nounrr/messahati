@@ -24,26 +24,34 @@ class ReclamationController extends Controller
     // Enregistrement d'une réclamation
     public function store(Request $request)
     {
+        // Récupérer l'ID de l'utilisateur connecté
+        $userId = Auth::id();
+        
+        if (!$userId) {
+            return response()->json([
+                'message' => 'Utilisateur non authentifié'
+            ], 401);
+        }
+
         // Vérifier si la requête contient un tableau de réclamations
-        if ($request->isJson() && is_array($request->json()->all())) {
-            $reclamations = $request->json()->all();
+        if (is_array($request->all())) {
+            $reclamations = $request->all();
             $created = [];
             
             foreach ($reclamations as $data) {
                 $validated = validator($data, [
                     'titre' => 'required|string',
                     'description' => 'required|string',
-                    'statut' => 'required|string|in:en_attente,traité,rejeté',
-                    'user_id' => 'required|exists:users,id',
                 ])->validate();
                 
                 $reclamation = new Reclamation();
                 $reclamation->titre = $validated['titre'];
                 $reclamation->description = $validated['description'];
-                $reclamation->statut = $validated['statut'];
-                $reclamation->user_id = $validated['user_id'];
+                $reclamation->statut = 'en_attente';
+                $reclamation->user_id = $userId;
                 $reclamation->save();
                 
+                $reclamation->load('user');
                 $created[] = $reclamation;
             }
             
@@ -53,17 +61,16 @@ class ReclamationController extends Controller
             $validated = $request->validate([
                 'titre' => 'required|string',
                 'description' => 'required|string',
-                'statut' => 'required|string|in:en_attente,traité,rejeté',
-                'user_id' => 'required|exists:users,id',
             ]);
 
             $reclamation = new Reclamation();
             $reclamation->titre = $validated['titre'];
             $reclamation->description = $validated['description'];
-            $reclamation->statut = $validated['statut'];
-            $reclamation->user_id = $validated['user_id'];
+            $reclamation->statut = 'en_attente';
+            $reclamation->user_id = $userId;
             $reclamation->save();
 
+            $reclamation->load('user');
             return response()->json($reclamation, 201);
         }
     }
@@ -90,16 +97,14 @@ class ReclamationController extends Controller
         $validated = $request->validate([
             'titre' => 'required|string',
             'description' => 'required|string',
-            'statut' => 'required|string|in:en_attente,traité,rejeté',
-            'user_id' => 'required|exists:users,id',
         ]);
 
         $reclamation->titre = $validated['titre'];
         $reclamation->description = $validated['description'];
-        $reclamation->statut = $validated['statut'];
-        $reclamation->user_id = $validated['user_id'];
+        // Le statut et user_id ne sont pas modifiables
         $reclamation->save();
 
+        $reclamation->load('user');
         return response()->json($reclamation);
     }
 

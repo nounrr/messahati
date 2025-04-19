@@ -101,19 +101,25 @@ class DepartementController extends Controller
     // Supprime un ou plusieurs départements
     public function destroy(Request $request, string $id = null)
     {
+        // Si un ID spécifique est fourni, supprimer ce département
         if ($id) {
             $departement = Departement::findOrFail($id);
             $departement->delete();
-        } else {
-            $validatedData = $request->validate([
-                'ids' => 'required|array',
-                'ids.*' => 'required|exists:departements,id',
-            ]);
-
-            Departement::whereIn('id', $validatedData['ids'])->delete();
+            return response()->json(['message' => 'Département supprimé avec succès.']);
         }
-
-        return response()->json(['message' => 'Départements supprimés avec succès.']);
+        
+        // Sinon, gérer la suppression multiple
+        // Vérifier si la requête contient des IDs dans le format attendu
+        if ($request->has('ids')) {
+            $ids = $request->input('ids');
+            if (is_array($ids)) {
+                Departement::whereIn('id', $ids)->delete();
+                return response()->json(['message' => 'Départements supprimés avec succès.']);
+            }
+        }
+        
+        // Si aucun ID n'est fourni, retourner une erreur
+        return response()->json(['message' => 'Aucun ID de département fourni.'], 400);
     }
 
     public function export()

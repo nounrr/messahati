@@ -17,6 +17,7 @@ import MasterLayout from './masterLayout/MasterLayout';
 import { Provider } from 'react-redux';
 import store from './Redux/store';
 import AuthProvider from './AuthProvider';
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -31,14 +32,13 @@ createInertiaApp({
 
         root.render(
             <Provider store={store}>
-        <BrowserRouter>
-        <AuthProvider>
-        <App {...props} />
-        </AuthProvider>
-        </BrowserRouter>
-        </Provider>
-    
-    );
+                <BrowserRouter>
+                    <AuthProvider>
+                        <App {...props} />
+                    </AuthProvider>
+                </BrowserRouter>
+            </Provider>
+        );
     },
     progress: {
         color: '#4B5563',

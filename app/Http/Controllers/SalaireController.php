@@ -10,7 +10,7 @@ class SalaireController extends Controller
     // Liste des salaires
     public function index()
     {
-        $salaires = Salaire::all();
+        $salaires = Salaire::with('user')->get();
         return response()->json($salaires);
     }
 
@@ -41,6 +41,8 @@ class SalaireController extends Controller
             $salaire->user_id = $data['user_id'];
             $salaire->save();
 
+            // Charger la relation user pour chaque salaire créé
+            $salaire->load('user');
             $created[] = $salaire;
         }
 
@@ -54,7 +56,7 @@ class SalaireController extends Controller
         return response()->json($salaire);
     }
 
-    // Formulaire d’édition
+    // Formulaire d'édition
     public function edit($id)
     {
         $salaire = Salaire::findOrFail($id);
@@ -83,18 +85,34 @@ class SalaireController extends Controller
             $salaire->user_id = $data['user_id'];
             $salaire->save();
 
+            // Charger la relation user pour chaque salaire mis à jour
+            $salaire->load('user');
             $updated[] = $salaire;
         }
 
         return response()->json($updated, 200);
     }
 
-    // Suppression d’un salaire
-    public function destroy($id)
+    // Suppression d'un salaire
+    public function destroy(Request $request)
     {
-        $salaire = Salaire::findOrFail($id);
-        $salaire->delete();
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'required|exists:salaires,id'
+            ]);
 
-        return redirect()->route('salaires.index')->with('success', 'Salaire supprimé avec succès.');
+            Salaire::whereIn('id', $validated['ids'])->delete();
+
+            return response()->json([
+                'message' => 'Salaires supprimés avec succès',
+                'ids' => $validated['ids']
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de la suppression des salaires',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

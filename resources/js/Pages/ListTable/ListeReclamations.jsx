@@ -1,144 +1,196 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchReclamations, deleteReclamation } from '@/Redux/reclamations/reclamationSlice';
+import { fetchReclamations, deleteReclamation } from '../../Redux/reclamations/reclamationSlice';
 import TableDataLayer from '../Components/tables/TableDataLayer';
-import Reclamation from '@/Pages/Components/Popup/Reclamation';
+import Reclamation from '../Components/Popup/Reclamation';
 import Swal from 'sweetalert2';
+import { Icon } from '@iconify/react';
 
 const ListeReclamations = () => {
     const dispatch = useDispatch();
-    const { items: reclamations, status, error } = useSelector((state) => state.reclamations);
-    const [showPopup, setShowPopup] = useState(false);
+    const reclamations = useSelector((state) => state.reclamations.items);
+    const [showModal, setShowModal] = useState(false);
     const [selectedReclamation, setSelectedReclamation] = useState(null);
+    const [selectedRows, setSelectedRows] = useState([]);
 
     useEffect(() => {
-        if (status === 'idle') {
-            dispatch(fetchReclamations());
-        }
-    }, [status, dispatch]);
-
-    const handleAdd = () => {
-        setSelectedReclamation(null);
-        setShowPopup(true);
-    };
+        dispatch(fetchReclamations());
+    }, [dispatch]);
 
     const handleEdit = (reclamation) => {
         setSelectedReclamation(reclamation);
-        setShowPopup(true);
+        setShowModal(true);
     };
 
-    const handleDelete = async (id) => {
-        const result = await Swal.fire({
-            title: 'Êtes-vous sûr ?',
-            text: "Cette action est irréversible !",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Oui, supprimer !',
-            cancelButtonText: 'Annuler'
-        });
-
-        if (result.isConfirmed) {
-            try {
-                await dispatch(deleteReclamation(id)).unwrap();
-                Swal.fire(
-                    'Supprimé !',
-                    'La réclamation a été supprimée avec succès.',
-                    'success'
-                );
-            } catch (error) {
-                Swal.fire(
-                    'Erreur !',
-                    'Une erreur est survenue lors de la suppression.',
-                    'error'
-                );
-            }
+    const handleDelete = async (ids) => {
+        try {
+            await Swal.fire({
+                title: 'Êtes-vous sûr?',
+                text: "Cette action est irréversible!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Oui, supprimer!',
+                cancelButtonText: 'Annuler'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    for (const id of ids) {
+                        await dispatch(deleteReclamation(id)).unwrap();
+                    }
+                    setSelectedRows([]);
+                    Swal.fire(
+                        'Supprimé!',
+                        'Les réclamations ont été supprimées avec succès.',
+                        'success'
+                    );
+                }
+            });
+        } catch (error) {
+            Swal.fire(
+                'Erreur!',
+                'Une erreur est survenue lors de la suppression.',
+                'error'
+            );
         }
+    };
+
+    const handleBulkDelete = () => {
+        if (selectedRows.length === 0) {
+            Swal.fire('Attention', 'Veuillez sélectionner des éléments à supprimer', 'warning');
+            return;
+        }
+        handleDelete(selectedRows);
     };
 
     const columns = [
         {
-            header: 'Sujet',
-            accessor: 'sujet',
+            name: 'ID',
+            selector: row => row.id,
+            sortable: true,
+            width: '80px'
         },
         {
-            header: 'Description',
-            accessor: 'description',
+            name: 'Titre',
+            selector: row => row.titre,
+            sortable: true,
+            grow: 1
         },
         {
-            header: 'Statut',
-            accessor: 'statut',
-            cell: (value) => (
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold
-                    ${value === 'en_attente' ? 'bg-yellow-100 text-yellow-800' :
-                    value === 'en_cours' ? 'bg-blue-100 text-blue-800' :
-                    value === 'resolu' ? 'bg-green-100 text-green-800' :
-                    'bg-red-100 text-red-800'}`}>
-                    {value === 'en_attente' ? 'En attente' :
-                     value === 'en_cours' ? 'En cours' :
-                     value === 'resolu' ? 'Résolu' :
-                     'Rejeté'}
+            name: 'Description',
+            selector: row => row.description,
+            cell: row => (
+                <span title={row.description}>
+                    {row.description.length > 50 ? `${row.description.substring(0, 50)}...` : row.description}
                 </span>
             ),
+            sortable: true,
+            grow: 2
         },
         {
-            header: 'Date de création',
-            accessor: 'created_at',
-            cell: (value) => new Date(value).toLocaleDateString('fr-FR'),
+            name: 'Utilisateur',
+            selector: row => row.user?.name || 'Non assigné',
+            sortable: true,
+            grow: 1
         },
         {
-            header: 'Actions',
-            accessor: 'id',
-            cell: (value, row) => (
+            name: 'Date',
+            selector: row => row.created_at,
+            format: row => row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : 'Non définie',
+            sortable: true,
+            grow: 1
+        },
+        {
+            name: 'Statut',
+            selector: row => row.status,
+            cell: row => (
+                <span className={`px-3 py-1 rounded-full text-sm ${
+                    row.status === 'En attente' ? 'bg-warning-focus text-warning-main' :
+                    row.status === 'Traité' ? 'bg-success-focus text-success-main' :
+                    'bg-danger-focus text-danger-main'
+                }`}>
+                    {row.status}
+                </span>
+            ),
+            sortable: true,
+            width: '120px'
+        },
+        {
+            name: 'Actions',
+            cell: row => (
                 <div className="flex space-x-2">
                     <button
                         onClick={() => handleEdit(row)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="w-8 h-8 bg-success-focus text-success-main rounded-full flex items-center justify-center"
+                        title="Modifier"
                     >
-                        Modifier
+                        <Icon icon="lucide:edit" />
                     </button>
                     <button
-                        onClick={() => handleDelete(value)}
-                        className="text-red-600 hover:text-red-800"
+                        onClick={() => handleDelete(row.id)}
+                        className="w-8 h-8 bg-danger-focus text-danger-main rounded-full flex items-center justify-center"
+                        title="Supprimer"
                     >
-                        Supprimer
+                        <Icon icon="mingcute:delete-2-line" />
+                    </button>
+                    <button
+                        className="w-8 h-8 bg-primary-light text-primary-600 rounded-full flex items-center justify-center"
+                        title="Voir les détails"
+                    >
+                        <Icon icon="iconamoon:eye-light" />
                     </button>
                 </div>
             ),
-        },
+            width: '150px',
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+        }
     ];
 
-    if (status === 'loading') {
-        return <div>Chargement...</div>;
-    }
-
-    if (status === 'failed') {
-        return <div>Erreur: {error}</div>;
-    }
-
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Liste des réclamations</h1>
-                <button
-                    onClick={handleAdd}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    Ajouter une réclamation
-                </button>
+        <div className="container mx-auto px-4 py-6">
+            <div className="mb-4 flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Liste des Réclamations</h2>
+                <div className="space-x-2">
+                    <button
+                        onClick={() => {
+                            setSelectedReclamation(null);
+                            setShowModal(true);
+                        }}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                    >
+                        Ajouter plusieurs réclamations
+                    </button>
+                    {selectedRows.length > 0 && (
+                        <button
+                            onClick={handleBulkDelete}
+                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+                        >
+                            Supprimer la sélection ({selectedRows.length})
+                        </button>
+                    )}
+                </div>
             </div>
-
             <TableDataLayer
-                data={reclamations}
                 columns={columns}
+                data={reclamations}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onSelectionChange={setSelectedRows}
+                enableRowSelection={true}
+                title="Liste des Réclamations"
             />
-
-            {showPopup && (
-                <Reclamation
-                    reclamation={selectedReclamation}
-                    onClose={() => setShowPopup(false)}
-                />
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <Reclamation
+                        reclamation={selectedReclamation}
+                        onClose={() => {
+                            setShowModal(false);
+                            setSelectedReclamation(null);
+                        }}
+                    />
+                </div>
             )}
         </div>
     );

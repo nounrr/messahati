@@ -10,7 +10,7 @@ class MutuelController extends Controller
     // Affiche toutes les mutuelles avec leurs utilisateurs liés
     public function index()
     {
-        $mutuels = Mutuel::with('user')->get();
+        $mutuels = Mutuel::all();
         return response()->json($mutuels);
     }
 
@@ -44,43 +44,52 @@ class MutuelController extends Controller
     // Affiche une mutuelle spécifique
     public function show($id)
     {
-        $mutuel = Mutuel::with('user')->findOrFail($id);
-        return view('mutuel.show', compact('mutuel'));
+        $mutuel = Mutuel::findOrFail($id);
+        return response()->json($mutuel);
     }
 
-    // Affiche le formulaire d’édition
+    // Affiche le formulaire d'édition
     public function edit($id)
     {
         $mutuel = Mutuel::findOrFail($id);
         return view('mutuel.edit', compact('mutuel'));
     }
 
-    // Met à jour une ou plusieurs mutuelles sans mass-assignement
-    public function update(Request $request)
+    // Met à jour une mutuelle
+    public function update(Request $request, string $id)
     {
         $validated = $request->validate([
-            'updates' => 'required|array',
-            'updates.*.id' => 'required|exists:mutuels,id',
-            'updates.*.nom_mutuel' => 'required|string'
+            'nom_mutuel' => 'required|string'
         ]);
 
-        $updatedItems = [];
+        $mutuel = Mutuel::findOrFail($id);
+        $mutuel->nom_mutuel = $validated['nom_mutuel'];
+        $mutuel->save();
 
-        foreach ($validated['updates'] as $data) {
-            $mutuel = Mutuel::findOrFail($data['id']);
-            $mutuel->nom_mutuel = $data['nom_mutuel'];
-            $mutuel->save();
-
-            $updatedItems[] = $mutuel;
-        }
-
-        return response()->json($updatedItems, 200);
+        return response()->json($mutuel, 200);
     }
 
     // Supprime une mutuelle
-    public function destroy($id)
+    public function destroy(Request $request, string $id = null)
     {
-        Mutuel::findOrFail($id)->delete();
-        return redirect()->route('mutuel.index')->with('success', 'Mutuelle supprimée avec succès.');
+        try {
+            if ($id) {
+                // Suppression unique
+                $mutuel = Mutuel::findOrFail($id);
+                $mutuel->delete();
+                return response()->json(['message' => 'Mutuelle supprimée avec succès']);
+            } else {
+                // Suppression multiple
+                $ids = $request->validate([
+                    'ids' => 'required|array',
+                    'ids.*' => 'required|integer|exists:mutuels,id'
+                ])['ids'];
+                
+                Mutuel::whereIn('id', $ids)->delete();
+                return response()->json(['message' => 'Mutuelles supprimées avec succès']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la suppression', 'error' => $e->getMessage()], 500);
+        }
     }
 }

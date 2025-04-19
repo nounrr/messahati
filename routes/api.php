@@ -44,8 +44,15 @@ Route::get('/users/role/{role}', [UserController::class, 'getUsersByRole']);
 Route::get('/roles', [UserController::class, 'getRoles']);
 
 // Routes pour les départements
+
+Route::delete('/departements/bulk', [DepartementController::class, 'destroy'])->name('departements.destroy.multiple');
 Route::resource('departements', DepartementController::class);
 
+// ROUTE CHarges done
+Route::apiResource('charges', ChargeController::class)   
+     ->except(['create', 'edit', 'show']);               
+Route::put   ('charges', [ChargeController::class, 'update']);   
+Route::delete('charges', [ChargeController::class, 'destroy']);  
 // Routes pour les cliniques
 Route::resource('cliniques', CliniqueController::class);
 
@@ -55,10 +62,10 @@ Route::resource('type-traitements', TypeTraitementController::class);
 // Routes pour les types de certificats
 Route::resource('type-certificats', TypeCertificatController::class);
 
-// Routes pour les types de médicaments
+// Routes pour les types de médicaments Done
 Route::resource('type-medicaments', TypeMedicamentController::class);
 
-// Routes pour les types de partenaires
+// Routes pour les types de partenaires DONE
 Route::resource('type-partenaires', TypePartenaireController::class);
 
 // Routes pour les traitements
@@ -67,8 +74,10 @@ Route::resource('traitements', TraitementController::class);
 // Routes pour les tâches
 Route::resource('taches', TachController::class);
 
-// Routes pour les salaires
-Route::resource('salaires', SalaireController::class);
+// Routes pour les salaires Done
+Route::resource('salaires', SalaireController::class) ->except(['create', 'edit', 'show']);               
+Route::put   ('salaires', [SalaireController::class, 'update']);   
+Route::delete('salaires', [SalaireController::class, 'destroy']);  
 
 // Routes pour les rendez-vous
 Route::resource('rendez-vous', RendezVousController::class);
@@ -89,18 +98,16 @@ Route::resource('ordonances', OrdonanceController::class);
 // Routes pour les médicaments
 Route::resource('medicaments', MedicamentController::class);
 
-// Routes pour les mutuels
-Route::resource('mutuels', MutuelController::class);
+// Routes pour les mutuels Done
+Route::apiResource('mutuels', MutuelController::class)
+     ->except(['create', 'edit']);
+Route::delete('mutuels', [MutuelController::class, 'destroy']);
 
 // Routes pour les notifications
 Route::resource('notifications', NotificationController::class);
 
 // Routes pour les messages
 Route::resource('messages', MessageController::class);
-
-// Routes pour les charges
-Route::resource('charges', ChargeController::class);
-Route::delete('/charges', [ChargeController::class, 'destroy'])->name('charges.destroy.multiple');
 
 // Routes pour les certificats médicaux
 Route::resource('certificats-medicaux', CertificatsMedicaleController::class);

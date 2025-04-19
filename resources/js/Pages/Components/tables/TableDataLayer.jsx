@@ -9,9 +9,10 @@ const TableDataLayer = ({
     onView,
     onEdit,
     onDelete,
-    showCheckbox = true,
+    selectableRows = false,
     pageLength = 100,
-    onSelectedRowsChange
+    onSelectionChange,
+    isLoading = false
 }) => {
     // Personnalisation du style pour correspondre à l'ancien design
     const customStyles = {
@@ -35,6 +36,9 @@ const TableDataLayer = ({
         rows: {
             style: {
                 minHeight: '50px',
+            },
+            selectedHighlightStyle: {
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
             },
         },
         cells: {
@@ -70,7 +74,7 @@ const TableDataLayer = ({
     };
 
     // Personnalisation des colonnes pour inclure les actions
-    const customColumns = [
+    const finalColumns = onView || onEdit || onDelete ? [
         ...columns,
         {
             name: 'Actions',
@@ -106,9 +110,9 @@ const TableDataLayer = ({
             allowOverflow: true,
             button: true,
             width: '200px',
-            grow:1
+            grow: 1
         },
-    ];
+    ] : columns;
 
     // Personnalisation de la pagination
     const paginationComponentOptions = {
@@ -125,10 +129,10 @@ const TableDataLayer = ({
             </div>
             <div className="card-body">
                 <DataTable
-                    columns={customColumns}
+                    columns={finalColumns}
                     data={data}
-                    selectableRows={showCheckbox}
-                    onSelectedRowsChange={onSelectedRowsChange}
+                    selectableRows={selectableRows}
+                    onSelectedRowsChange={onSelectionChange}
                     pagination
                     paginationPerPage={pageLength}
                     paginationComponentOptions={paginationComponentOptions}
@@ -137,6 +141,8 @@ const TableDataLayer = ({
                     pointerOnHover
                     responsive
                     noHeader
+                    progressPending={isLoading}
+                    selectableRowsHighlight
                 />
             </div>
         </div>

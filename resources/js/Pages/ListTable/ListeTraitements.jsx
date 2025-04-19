@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTraitements, deleteTraitement } from '../../Redux/traitements/traitementSlice';
-import TableDataLayer from '../../Components/TableDataLayer';
+import { fetchTraitements, deleteTraitements } from '../../Redux/traitements/traitementSlice';
+import TableDataLayer from '../Components/tables/TableDataLayer';
 import Traitement from '../Components/Popup/Traitement';
 import Swal from 'sweetalert2';
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
@@ -42,7 +42,7 @@ function ListeTraitements() {
     const handleDelete = async (id) => {
         try {
             setIsLoading(true);
-            await dispatch(deleteTraitement(id)).unwrap();
+            await dispatch(deleteTraitements(id)).unwrap();
             
             Swal.fire({
                 icon: 'success',

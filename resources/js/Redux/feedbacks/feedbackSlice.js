@@ -1,36 +1,48 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosInstance';
 
 // Actions asynchrones
 export const fetchFeedbacks = createAsyncThunk(
     'feedbacks/fetchFeedbacks',
     async () => {
-        const response = await axios.get('/api/feedbacks');
+        const response = await axiosInstance.get('/feedbacks');
         return response.data;
     }
 );
 
 export const createFeedback = createAsyncThunk(
     'feedbacks/createFeedback',
-    async (feedbackData) => {
-        const response = await axios.post('/api/feedbacks', feedbackData);
-        return response.data;
+    async (feedbackData, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.post('/feedbacks', { feedbacks: [feedbackData] });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
     }
 );
 
 export const updateFeedback = createAsyncThunk(
     'feedbacks/updateFeedback',
-    async ({ id, ...feedbackData }) => {
-        const response = await axios.put(`/api/feedbacks/${id}`, feedbackData);
-        return response.data;
+    async ({ id, ...feedbackData }, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put(`/feedbacks/${id}`, feedbackData);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
     }
 );
 
 export const deleteFeedback = createAsyncThunk(
     'feedbacks/deleteFeedback',
-    async (id) => {
-        await axios.delete(`/api/feedbacks/${id}`);
-        return id;
+    async (id, { rejectWithValue }) => {
+        try {
+            await axiosInstance.delete(`/feedbacks/${id}`);
+            return id;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
     }
 );
 
@@ -59,7 +71,7 @@ const feedbackSlice = createSlice({
             })
             // Create feedback
             .addCase(createFeedback.fulfilled, (state, action) => {
-                state.items.push(action.payload);
+                state.items.push(...action.payload);
             })
             // Update feedback
             .addCase(updateFeedback.fulfilled, (state, action) => {

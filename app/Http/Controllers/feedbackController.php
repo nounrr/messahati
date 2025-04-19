@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Feedback;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class FeedbackController extends Controller
 {
@@ -12,7 +13,7 @@ class FeedbackController extends Controller
     public function index()
     {
         $feedbacks = Feedback::with('user')->get();
-        return view('feedback.index', compact('feedbacks'));
+        return response()->json($feedbacks);
     }
 
     // Affiche le formulaire de création
@@ -26,24 +27,24 @@ class FeedbackController extends Controller
     {
         $validated = $request->validate([
             'feedbacks' => 'required|array',
-            'feedbacks.*.user_id' => 'required|exists:users,id',
+            'feedbacks.*.titre' => 'required|string',
             'feedbacks.*.contenu' => 'required|string',
-            'feedbacks.*.rating' => 'required|numeric',
-            'feedbacks.*.date' => 'required|date',
-            'feedbacks.*.status' => 'required'
+            'feedbacks.*.note' => 'required|numeric|min:1|max:5',
+            'feedbacks.*.statut' => 'required|string|in:en_attente,traite,ignore'
         ]);
 
         $createdItems = [];
 
         foreach ($validated['feedbacks'] as $data) {
             $feedback = new Feedback();
-            $feedback->user_id = $data['user_id'];
+            $feedback->user_id = Auth::id(); // Utiliser l'utilisateur connecté
+            $feedback->titre = $data['titre'];
             $feedback->contenu = $data['contenu'];
-            $feedback->rating = $data['rating'];
-            $feedback->date = $data['date'];
-            $feedback->status = $data['status'];
+            $feedback->note = $data['note'];
+            $feedback->statut = $data['statut'];
             $feedback->save();
 
+            $feedback->load('user'); // Charger la relation utilisateur
             $createdItems[] = $feedback;
         }
 
@@ -64,40 +65,34 @@ class FeedbackController extends Controller
         return view('feedback.edit', compact('feedback'));
     }
 
-    // Mise à jour de plusieurs feedbacks sans mass-assignement
-    public function update(Request $request)
+    // Mise à jour d'un feedback
+    public function update(Request $request, $id)
     {
+        $feedback = Feedback::findOrFail($id);
+
         $validated = $request->validate([
-            'updates' => 'required|array',
-            'updates.*.id' => 'required|exists:feedbacks,id',
-            'updates.*.user_id' => 'required|exists:users,id',
-            'updates.*.contenu' => 'required|string',
-            'updates.*.rating' => 'required|numeric',
-            'updates.*.date' => 'required|date',
-            'updates.*.status' => 'required'
+            'titre' => 'required|string',
+            'contenu' => 'required|string',
+            'note' => 'required|numeric|min:1|max:5',
+            'statut' => 'required|string|in:en_attente,traite,ignore'
         ]);
 
-        $updatedItems = [];
+        $feedback->titre = $validated['titre'];
+        $feedback->contenu = $validated['contenu'];
+        $feedback->note = $validated['note'];
+        $feedback->statut = $validated['statut'];
+        // On ne modifie pas le user_id lors de la mise à jour
+        $feedback->save();
 
-        foreach ($validated['updates'] as $data) {
-            $feedback = Feedback::findOrFail($data['id']);
-            $feedback->user_id = $data['user_id'];
-            $feedback->contenu = $data['contenu'];
-            $feedback->rating = $data['rating'];
-            $feedback->date = $data['date'];
-            $feedback->status = $data['status'];
-            $feedback->save();
-
-            $updatedItems[] = $feedback;
-        }
-
-        return response()->json($updatedItems, 200);
+        $feedback->load('user'); // Charger la relation utilisateur
+        return response()->json($feedback);
     }
 
-    // Suppression d’un feedback
+    // Suppression d'un feedback
     public function destroy($id)
     {
-        Feedback::findOrFail($id)->delete();
-        return redirect()->route('feedback.index')->with('success', 'Feedback supprimé avec succès');
+        $feedback = Feedback::findOrFail($id);
+        $feedback->delete();
+        return response()->json(null, 204);
     }
 }
