@@ -6,37 +6,46 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
-use Database\Seeders\RolesAndPermissionsSeeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
      */
-    public function run()
+    public function run(): void
     {
-        /*$this->call(RolesAndPermissionsSeeder::class);*/
+        // User::factory(10)->create();
 
-        // Créer d'abord les départements
-        \App\Models\Departement::factory(5)->create();
-    
-        // Ensuite les users qui dépendent des départements
-        \App\Models\User::factory(10)->create();
-    
-        \App\Models\Rendezvous::factory(20)->create();
-        \App\Models\Partenaire::factory(5)->create();
-    
-        \App\Models\Salaire::factory(50)->create();
-        \App\Models\Payment::factory(50)->create();
-        \App\Models\Charge::factory(30)->create();
-        \App\Models\Traitement::factory(10)->create();
-        \App\Models\TypeTraitement::factory(10)->create();
-        \App\Models\Partenaire::factory()->count(10)->create(); 
-        \App\Models\TypePartenaire::factory()->count(5)->create(); // Crée 5 types de partenaires
-
-
-
-        
+        $this->call([
+            TypeTraitementSeeder::class,
+            MutuelSeeder::class,
+            CliniqueSeeder::class,
+            RolesAndPermissionsSeeder::class,
+            DepartementSeeder::class,
+            UserSeeder::class,    // UserSeeder runs after DepartementSeeder
+            TraitementSeeder::class,
+            RendezVousSeeder::class,
+            ReclamationSeeder::class,
+            NotificationSeeder::class,
+            OrdonanceSeeder::class,
+            TypeMedicamentSeeder::class,
+            MedicamentSeeder::class,
+            TypeCertificatSeeder::class,
+            CertificatMedicaleSeeder::class,
+            OrdonanceMedicamentSeeder::class,
+            PaymentSeeder::class,
+            FeedbackSeeder::class,
+            TacheSeeder::class,
+            AuditLogCliniqueSeeder::class,
+            TypePartenaireSeeder::class,
+            PartenaireSeeder::class,
+            MessageSeeder::class,
+            MutuelUserSeeder::class,
+            NotificationUserSeeder::class,
+            AttachementSeeder::class,
+            UserTacheSeeder::class,
+            ChargeSeeder::class,
+            SalaireSeeder::class,
+        ]);
     }
-    
-}    
+}
