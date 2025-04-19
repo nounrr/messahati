@@ -9,8 +9,22 @@ use Illuminate\Support\Facades\Auth;
 class ReclamationController extends Controller
 {
     // Liste des réclamations
-    public function index()
+    public function index(Request $request)
     {
+        // Vérifier si un ID utilisateur est fourni
+        if ($request->has('user_id')) {
+            $userId = $request->input('user_id');
+            \Log::info('ReclamationController - Liste des réclamations filtrées par user_id: ' . $userId);
+            
+            // Récupérer les réclamations pour cet utilisateur
+            $reclamations = Reclamation::with('user')
+                ->where('user_id', $userId)
+                ->get();
+                
+            return response()->json($reclamations);
+        }
+        
+        // Sinon, récupérer toutes les réclamations
         $reclamations = Reclamation::with('user')->get();
         return response()->json($reclamations);
     }
@@ -24,26 +38,42 @@ class ReclamationController extends Controller
     // Enregistrement d'une réclamation
     public function store(Request $request)
     {
+        // Vérifier simplement si l'utilisateur est authentifié mais ne pas bloquer
+        $isAuthenticated = Auth::check();
+        
+        // Log si l'utilisateur n'est pas authentifié
+        if (!$isAuthenticated) {
+            \Log::warning('ReclamationController - Création de réclamation sans authentification');
+        }
+        
+        // Récupérer l'ID utilisateur envoyé par le frontend
+        $userId = null;
+        
         // Vérifier si la requête contient un tableau de réclamations
-        if ($request->isJson() && is_array($request->json()->all())) {
-            $reclamations = $request->json()->all();
+        if (is_array($request->all()) && !isset($request->all()['titre'])) {
+            $reclamations = $request->all();
             $created = [];
             
             foreach ($reclamations as $data) {
+                // Valider les données
                 $validated = validator($data, [
                     'titre' => 'required|string',
                     'description' => 'required|string',
-                    'statut' => 'required|string|in:en_attente,traité,rejeté',
-                    'user_id' => 'required|exists:users,id',
+                    'user_id' => 'required|integer|exists:users,id',
                 ])->validate();
+                
+                // Utiliser l'ID utilisateur du frontend
+                $userId = $validated['user_id'];
+                \Log::info('ReclamationController - Création de réclamation avec user_id fourni: ' . $userId);
                 
                 $reclamation = new Reclamation();
                 $reclamation->titre = $validated['titre'];
                 $reclamation->description = $validated['description'];
-                $reclamation->statut = $validated['statut'];
-                $reclamation->user_id = $validated['user_id'];
+                $reclamation->statut = 'en_attente';
+                $reclamation->user_id = $userId;
                 $reclamation->save();
                 
+                $reclamation->load('user');
                 $created[] = $reclamation;
             }
             
@@ -53,17 +83,21 @@ class ReclamationController extends Controller
             $validated = $request->validate([
                 'titre' => 'required|string',
                 'description' => 'required|string',
-                'statut' => 'required|string|in:en_attente,traité,rejeté',
-                'user_id' => 'required|exists:users,id',
+                'user_id' => 'required|integer|exists:users,id',
             ]);
 
+            // Utiliser l'ID utilisateur du frontend
+            $userId = $validated['user_id'];
+            \Log::info('ReclamationController - Création de réclamation avec user_id fourni: ' . $userId);
+            
             $reclamation = new Reclamation();
             $reclamation->titre = $validated['titre'];
             $reclamation->description = $validated['description'];
-            $reclamation->statut = $validated['statut'];
-            $reclamation->user_id = $validated['user_id'];
+            $reclamation->statut = 'en_attente';
+            $reclamation->user_id = $userId;
             $reclamation->save();
 
+            $reclamation->load('user');
             return response()->json($reclamation, 201);
         }
     }
@@ -90,16 +124,21 @@ class ReclamationController extends Controller
         $validated = $request->validate([
             'titre' => 'required|string',
             'description' => 'required|string',
-            'statut' => 'required|string|in:en_attente,traité,rejeté',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'sometimes|required|integer|exists:users,id',
         ]);
 
         $reclamation->titre = $validated['titre'];
         $reclamation->description = $validated['description'];
-        $reclamation->statut = $validated['statut'];
-        $reclamation->user_id = $validated['user_id'];
+        
+        // Mettre à jour l'user_id si fourni
+        if (isset($validated['user_id'])) {
+            \Log::info('ReclamationController - Mise à jour de réclamation avec user_id fourni: ' . $validated['user_id']);
+            $reclamation->user_id = $validated['user_id'];
+        }
+        
         $reclamation->save();
 
+        $reclamation->load('user');
         return response()->json($reclamation);
     }
 

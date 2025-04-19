@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nom');
             $table->float('prix_unitaire');
             $table->integer('quantite');
+            $table->string('status');
             $table->foreignId('partenaire_id')->references('id')->on('partenaires')->onDelete('cascade');
             $table->timestamps();
         });

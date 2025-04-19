@@ -1,11 +1,47 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axiosInstance';
 
+// Fetch all users
+export const fetchUsers = createAsyncThunk(
+    'rolePermissions/fetchUsers',
+    async () => {
+        const response = await axiosInstance.get('/users');
+        return response.data;
+    }
+);
+
 // Fetch all roles
 export const fetchRoles = createAsyncThunk(
     'rolePermissions/fetchRoles',
     async () => {
         const response = await axiosInstance.get('/roles');
+        return response.data;
+    }
+);
+
+// Create new role
+export const createRole = createAsyncThunk(
+    'rolePermissions/createRole',
+    async (roleData) => {
+        const response = await axiosInstance.post('/roles', roleData);
+        return response.data;
+    }
+);
+
+// Update role
+export const updateRole = createAsyncThunk(
+    'rolePermissions/updateRole',
+    async ({ id, roleData }) => {
+        const response = await axiosInstance.put(`/roles/${id}`, roleData);
+        return response.data;
+    }
+);
+
+// Delete role
+export const deleteRole = createAsyncThunk(
+    'rolePermissions/deleteRole',
+    async (id) => {
+        const response = await axiosInstance.delete(`/roles/${id}`);
         return response.data;
     }
 );
@@ -28,6 +64,15 @@ export const assignRoleToUser = createAsyncThunk(
     }
 );
 
+// Remove role from user
+export const removeRoleFromUser = createAsyncThunk(
+    'rolePermissions/removeRoleFromUser',
+    async ({ userId, role }) => {
+        const response = await axiosInstance.post('/remove-role', { user_id: userId, role });
+        return response.data;
+    }
+);
+
 // Assign permission to user
 export const assignPermissionToUser = createAsyncThunk(
     'rolePermissions/assignPermissionToUser',
@@ -37,11 +82,22 @@ export const assignPermissionToUser = createAsyncThunk(
     }
 );
 
+// Fetch user roles
+export const fetchUserRoles = createAsyncThunk(
+    'rolePermissions/fetchUserRoles',
+    async (userId) => {
+        const response = await axiosInstance.get(`/api/users/${userId}/roles`);
+        return response.data;
+    }
+);
+
 const rolePermissionSlice = createSlice({
     name: 'rolePermissions',
     initialState: {
         roles: [],
         permissions: [],
+        userRoles: {}, // Nouveau state pour stocker les rôles par utilisateur
+        users: [], // Add users to the state
         status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
         error: null,
     },
@@ -52,6 +108,18 @@ const rolePermissionSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // Fetch users
+            .addCase(fetchUsers.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchUsers.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.users = action.payload;
+            })
+            .addCase(fetchUsers.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
             // Fetch roles
             .addCase(fetchRoles.pending, (state) => {
                 state.status = 'loading';
@@ -61,6 +129,46 @@ const rolePermissionSlice = createSlice({
                 state.roles = action.payload;
             })
             .addCase(fetchRoles.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            // Create role
+            .addCase(createRole.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(createRole.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.roles.push(action.payload.role);
+            })
+            .addCase(createRole.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            // Update role
+            .addCase(updateRole.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateRole.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                const index = state.roles.findIndex(role => role.id === action.payload.role.id);
+                if (index !== -1) {
+                    state.roles[index] = action.payload.role;
+                }
+            })
+            .addCase(updateRole.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            // Delete role
+            .addCase(deleteRole.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteRole.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                const deletedId = action.payload?.id || action.meta?.arg;
+                state.roles = state.roles.filter(role => role.id !== deletedId);
+            })
+            .addCase(deleteRole.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
@@ -87,6 +195,27 @@ const rolePermissionSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.error.message;
             })
+            // Remove role from user
+            .addCase(removeRoleFromUser.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(removeRoleFromUser.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                // Update the userRoles state if needed
+                if (action.payload.user_id && action.payload.role) {
+                    const userId = action.payload.user_id;
+                    const roleToRemove = action.payload.role;
+                    if (state.userRoles[userId]) {
+                        state.userRoles[userId] = state.userRoles[userId].filter(
+                            role => role.name !== roleToRemove
+                        );
+                    }
+                }
+            })
+            .addCase(removeRoleFromUser.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
             // Assign permission to user
             .addCase(assignPermissionToUser.pending, (state) => {
                 state.status = 'loading';
@@ -95,6 +224,18 @@ const rolePermissionSlice = createSlice({
                 state.status = 'succeeded';
             })
             .addCase(assignPermissionToUser.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            // Fetch user roles
+            .addCase(fetchUserRoles.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchUserRoles.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.userRoles[action.payload.user_id] = action.payload.roles;
+            })
+            .addCase(fetchUserRoles.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             });

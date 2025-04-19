@@ -70,7 +70,7 @@ function Traitement({ onClose }) {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="relative bg-white rounded-xl shadow-lg p-6">
             <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-red-500">
                 <X size={22} />
             </button>

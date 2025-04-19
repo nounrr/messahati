@@ -39,24 +39,17 @@ export const createMutuels = createAsyncThunk(
 // Update existing mutuels
 export const updateMutuels = createAsyncThunk(
     'mutuels/updateMutuels',
-    async (mutuels, { rejectWithValue }) => {
+    async ({ updates }, { rejectWithValue }) => {
         try {
-            const formData = new FormData();
-            mutuels.forEach((mutuel, index) => {
-                Object.entries(mutuel).forEach(([key, value]) => {
-                    if (key === 'image' && value instanceof File) {
-                        formData.append(`mutuels[${index}][image]`, value);
-                    } else {
-                        formData.append(`mutuels[${index}][${key}]`, value);
-                    }
-                });
-            });
-
-            const response = await axiosInstance.put('/mutuels', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+            const mutuel = updates[0];
+            const response = await axiosInstance.put(`/mutuels/${mutuel.id}`, {
+                nom_mutuel: mutuel.nom_mutuel
             });
             return response.data;
         } catch (error) {
+            if (!error.response) {
+                throw error;
+            }
             return rejectWithValue(error.response.data);
         }
     }
@@ -67,8 +60,8 @@ export const deleteMutuels = createAsyncThunk(
     'mutuels/deleteMutuels',
     async (ids, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.delete('/mutuels', { data: { ids } });
-            return response.data;
+            await axiosInstance.delete('/mutuels', { data: { ids } });
+            return { ids }; // Retourner les IDs pour le reducer
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -143,15 +136,15 @@ const mutuelSlice = createSlice({
                 state.error = action.payload?.message || 'Erreur lors de la création';
             })
             .addCase(updateMutuels.fulfilled, (state, action) => {
-                action.payload.forEach((updated) => {
-                    const index = state.items.findIndex((item) => item.id === updated.id);
-                    if (index !== -1) {
-                        state.items[index] = updated;
-                    }
-                });
+                const updatedMutuel = action.payload;
+                const index = state.items.findIndex((item) => item.id === updatedMutuel.id);
+                if (index !== -1) {
+                    state.items[index] = updatedMutuel;
+                }
             })
             .addCase(deleteMutuels.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
+                const idsToDelete = action.payload.ids;
+                state.items = state.items.filter(item => !idsToDelete.includes(item.id));
             })
             .addCase(importMutuels.fulfilled, (state, action) => {
                 state.items.push(...action.payload);

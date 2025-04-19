@@ -58,23 +58,23 @@ class TypePartenaireController extends Controller
     }
 
     // Mise à jour de plusieurs types de partenaires
-    public function update(Request $request, string $id = null)
+    public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'types' => 'required|array',
-            'types.*.id' => 'required|exists:type_partenaires,id',
-            'types.*.nom' => 'required|string|max:255',
-            'types.*.description' => 'nullable|string',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'id' => 'required|exists:type_partenaires,id',
+                'nom' => 'required|string|max:255',
+                'description' => 'nullable|string',
+            ]);
 
-        foreach ($validatedData['types'] as $data) {
-            $type = TypePartenaire::findOrFail($data['id']);
-            $type->nom = $data['nom'];
-            $type->description = $data['description'] ?? null;
-            $type->save();
+            $type = TypePartenaire::findOrFail($id);
+            $type->update($validatedData);
+
+            return response()->json(['message' => 'Types de partenaires mis à jour avec succès.']);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la mise à jour du type partenaire: ' . $e->getMessage());
+            return response()->json(['error' => 'Erreur lors de la mise à jour: ' . $e->getMessage()], 500);
         }
-
-        return response()->json(['message' => 'Types de partenaires mis à jour avec succès.']);
     }
 
     // Suppression d'un ou plusieurs types
