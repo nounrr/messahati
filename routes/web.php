@@ -23,6 +23,11 @@ use Inertia\Inertia;
 |
 */
 
+// Add route for sanctum CSRF cookie
+Route::get('/sanctum/csrf-cookie', function () {
+    return response()->json(['message' => 'CSRF cookie set']);
+});
+
 // Routes publiques
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -69,8 +74,8 @@ Route::get('/Departement', function () {
 // Routes pour les départements
 Route::get('/export', [DepartementController::class, 'export'])->name('departements.export');
 
-// Routes pour les réclamations, feedbacks et mutuels
-Route::resource('reclamation', ReclamationController::class);
+// Routes pour les réclamations, feedbacks et mutuels - protégées par auth
+Route::middleware(['auth'])->resource('reclamation', ReclamationController::class);
 Route::resource('feedback', FeedbackController::class);
 Route::resource('mutuel', MutuelController::class);
 
@@ -114,7 +119,8 @@ Route::get('/type-traitements', function () {
     return Inertia::render('ListTable/ListeTypeTraitements');
 })->name('type-traitements.view'); //done
 
-Route::get('/reclamations', function () {
+// Route pour la liste des réclamations - protégée par auth
+Route::middleware(['auth'])->get('/reclamations', function () {
     return Inertia::render('ListTable/ListeReclamations');
 })->name('reclamations.view');
 

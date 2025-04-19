@@ -1,32 +1,27 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchAuthUser } from './Redux/auth/authSlice';
-import AuthInitializer from './Components/Auth/AuthInitializer';
-import RequireAuth from './Components/Auth/RequireAuth';
-import GuestLayout from './Layouts/GuestLayout';
-
-// Liste des chemins qui ne nécessitent pas d'authentification
-const PUBLIC_PATHS = ['/login', '/register', '/forgot-password', '/reset-password'];
+import axios from 'axios';
 
 const AuthProvider = ({ children }) => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(fetchAuthUser());
+        const initAuth = async () => {
+            try {
+                // Get CSRF cookie first
+                await axios.get('/sanctum/csrf-cookie');
+                // Then attempt to fetch the authenticated user
+                dispatch(fetchAuthUser());
+            } catch (error) {
+                console.error('Error initializing authentication:', error);
+            }
+        };
+        
+        initAuth();
     }, [dispatch]);
 
-    // Vérifier si le chemin actuel est public
-    const isPublicPath = PUBLIC_PATHS.includes(window.location.pathname);
-
-    return (
-        <AuthInitializer>
-            {isPublicPath ? (
-                <GuestLayout>{children}</GuestLayout>
-            ) : (
-                <RequireAuth>{children}</RequireAuth>
-            )}
-        </AuthInitializer>
-    );
+    return children;
 };
 
 export default AuthProvider;

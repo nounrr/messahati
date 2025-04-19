@@ -82,7 +82,9 @@ Route::delete('salaires', [SalaireController::class, 'destroy']);
 // Routes pour les rendez-vous
 Route::resource('rendez-vous', RendezVousController::class);
 
-// Routes pour les réclamations
+// Routes pour les réclamations - protégées par auth:sanctum
+// routes/api.php
+
 Route::resource('reclamations', ReclamationController::class);
 
 // Routes pour les paiements

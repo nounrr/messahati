@@ -1,27 +1,38 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import axiosInstance from '../../utils/axiosInstance';
 
 // Actions asynchrones
 export const fetchReclamations = createAsyncThunk(
     'reclamations/fetchReclamations',
-    async (_, { rejectWithValue }) => {
+    async (params = {}, { rejectWithValue, getState }) => {
         try {
-            const response = await axios.get('/api/reclamations');
+            const { userId } = params; // Récupérer l'ID utilisateur s'il est fourni
+            console.log('Fetching reclamations with userId:', userId);
+
+            // Construire l'URL avec les paramètres si nécessaire
+            let url = '/reclamations';
+            if (userId) {
+                url += `?user_id=${userId}`;
+            }
+
+            const response = await axiosInstance.get(url);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Une erreur est survenue' });
         }
     }
 );
 
 export const createReclamation = createAsyncThunk(
     'reclamations/createReclamation',
-    async (reclamationData, { rejectWithValue }) => {
+    async (reclamationData, { rejectWithValue, getState }) => {
         try {
-            const response = await axios.post('/api/reclamations', reclamationData);
+            console.log('Sending reclamation with auth user from Redux');
+            const response = await axiosInstance.post('/reclamations', reclamationData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Une erreur est survenue' });
         }
     }
 );
@@ -30,10 +41,10 @@ export const updateReclamation = createAsyncThunk(
     'reclamations/updateReclamation',
     async ({ id, ...reclamationData }, { rejectWithValue }) => {
         try {
-            const response = await axios.put(`/api/reclamations/${id}`, reclamationData);
+            const response = await axiosInstance.put(`/reclamations/${id}`, reclamationData);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Une erreur est survenue' });
         }
     }
 );
@@ -42,10 +53,10 @@ export const deleteReclamation = createAsyncThunk(
     'reclamations/deleteReclamation',
     async (id, { rejectWithValue }) => {
         try {
-            await axios.delete(`/api/reclamations/${id}`);
+            await axiosInstance.delete(`/reclamations/${id}`);
             return id;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Une erreur est survenue' });
         }
     }
 );
@@ -55,7 +66,7 @@ export const exportReclamations = createAsyncThunk(
     'reclamations/exportReclamations',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axios.get('/reclamations/export', {
+            const response = await axiosInstance.get('/reclamations/export', {
                 responseType: 'blob',
             });
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -66,7 +77,7 @@ export const exportReclamations = createAsyncThunk(
             link.click();
             link.remove();
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Une erreur est survenue' });
         }
     }
 );
@@ -78,14 +89,14 @@ export const importReclamations = createAsyncThunk(
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const response = await axios.post('/reclamations/import', formData, {
+            const response = await axiosInstance.post('/reclamations/import', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Une erreur est survenue' });
         }
     }
 );

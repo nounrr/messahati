@@ -9,13 +9,34 @@ import { Icon } from '@iconify/react';
 const ListeReclamations = () => {
     const dispatch = useDispatch();
     const reclamations = useSelector((state) => state.reclamations.items);
+    const loadingStatus = useSelector((state) => state.reclamations.status);
+    const auth = useSelector((state) => state.auth);
     const [showModal, setShowModal] = useState(false);
     const [selectedReclamation, setSelectedReclamation] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
+    const [userFilter, setUserFilter] = useState('all'); // 'all', 'mine', or 'others'
+
+    // État pour vérifier si les données sont en cours de chargement
+    const isLoading = loadingStatus === 'loading';
 
     useEffect(() => {
-        dispatch(fetchReclamations());
-    }, [dispatch]);
+        // Envoyer l'ID utilisateur authentifié lors du fetch des réclamations
+        dispatch(fetchReclamations({
+            userId: auth.user?.id
+        }));
+    }, [dispatch, auth.user]);
+
+    // Vérifier si les réclamations existent
+    const safeReclamations = reclamations || [];
+
+    // Filtrer les réclamations en fonction du filtre utilisateur
+    const filteredReclamations = safeReclamations.filter(rec => {
+        if (!rec) return false; // Ignorer les éléments null/undefined
+        if (userFilter === 'all') return true;
+        if (userFilter === 'mine' && rec.user_id === auth.user?.id) return true;
+        if (userFilter === 'others' && rec.user_id !== auth.user?.id) return true;
+        return false;
+    });
 
     const handleEdit = (reclamation) => {
         setSelectedReclamation(reclamation);
@@ -35,7 +56,9 @@ const ListeReclamations = () => {
                 cancelButtonText: 'Annuler'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    for (const id of ids) {
+                    // Convertir en tableau si ce n'est pas déjà le cas
+                    const idArray = Array.isArray(ids) ? ids : [ids];
+                    for (const id of idArray) {
                         await dispatch(deleteReclamation(id)).unwrap();
                     }
                     setSelectedRows([]);
@@ -66,52 +89,64 @@ const ListeReclamations = () => {
     const columns = [
         {
             name: 'ID',
-            selector: row => row.id,
+            selector: row => row.id || '',
             sortable: true,
             width: '80px'
         },
         {
             name: 'Titre',
-            selector: row => row.titre,
+            selector: row => row.titre || '',
             sortable: true,
             grow: 1
         },
         {
             name: 'Description',
-            selector: row => row.description,
-            cell: row => (
-                <span title={row.description}>
-                    {row.description.length > 50 ? `${row.description.substring(0, 50)}...` : row.description}
-                </span>
-            ),
+            selector: row => row.description || '',
+            cell: row => {
+                const description = row.description || '';
+                return (
+                    <span title={description}>
+                        {description.length > 50 ? `${description.substring(0, 50)}...` : description}
+                    </span>
+                );
+            },
             sortable: true,
             grow: 2
         },
         {
             name: 'Utilisateur',
             selector: row => row.user?.name || 'Non assigné',
+            cell: row => (
+                <span className={auth.user?.id === row.user_id ? "font-bold text-blue-600" : ""}>
+                    {row.user?.name || 'Non assigné'}
+                </span>
+            ),
             sortable: true,
             grow: 1
         },
         {
             name: 'Date',
-            selector: row => row.created_at,
+            selector: row => row.created_at || '',
             format: row => row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : 'Non définie',
             sortable: true,
             grow: 1
         },
         {
             name: 'Statut',
-            selector: row => row.status,
-            cell: row => (
-                <span className={`px-3 py-1 rounded-full text-sm ${
-                    row.status === 'En attente' ? 'bg-warning-focus text-warning-main' :
-                    row.status === 'Traité' ? 'bg-success-focus text-success-main' :
-                    'bg-danger-focus text-danger-main'
-                }`}>
-                    {row.status}
-                </span>
-            ),
+            selector: row => row.statut || 'en_attente',
+            cell: row => {
+                const statut = row.statut || 'en_attente';
+                return (
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                        statut === 'en_attente' ? 'bg-warning-focus text-warning-main' :
+                        statut === 'traité' ? 'bg-success-focus text-success-main' :
+                        'bg-danger-focus text-danger-main'
+                    }`}>
+                        {statut === 'en_attente' ? 'En attente' : 
+                         statut === 'traité' ? 'Traité' : statut}
+                    </span>
+                );
+            },
             sortable: true,
             width: '120px'
         },
@@ -152,7 +187,20 @@ const ListeReclamations = () => {
         <div className="container mx-auto px-4 py-6">
             <div className="mb-4 flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Liste des Réclamations</h2>
-                <div className="space-x-2">
+                <div className="space-x-2 flex items-center">
+                    {/* Filtre par utilisateur */}
+                    <div className="mr-4">
+                        <select 
+                            className="p-2 border rounded-md"
+                            value={userFilter}
+                            onChange={(e) => setUserFilter(e.target.value)}
+                        >
+                            <option value="all">Toutes les réclamations</option>
+                            <option value="mine">Mes réclamations</option>
+                            <option value="others">Autres réclamations</option>
+                        </select>
+                    </div>
+                    
                     <button
                         onClick={() => {
                             setSelectedReclamation(null);
@@ -174,12 +222,15 @@ const ListeReclamations = () => {
             </div>
             <TableDataLayer
                 columns={columns}
-                data={reclamations}
+                data={filteredReclamations}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onSelectionChange={setSelectedRows}
                 enableRowSelection={true}
                 title="Liste des Réclamations"
+                progressPending={isLoading}
+                progressComponent={<div className="p-4 text-center">Chargement des réclamations...</div>}
+                noDataComponent={<div className="p-4 text-center">Aucune réclamation trouvée</div>}
             />
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -188,6 +239,10 @@ const ListeReclamations = () => {
                         onClose={() => {
                             setShowModal(false);
                             setSelectedReclamation(null);
+                            // Rafraîchir la liste après avoir fermé le modal
+                            dispatch(fetchReclamations({
+                                userId: auth.user?.id
+                            }));
                         }}
                     />
                 </div>

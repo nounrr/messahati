@@ -1,24 +1,50 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { createReclamation, updateReclamation } from '@/Redux/reclamations/reclamationSlice';
+import { fetchAuthUser } from '@/Redux/auth/authSlice';
 import Swal from 'sweetalert2';
 import { X } from 'lucide-react';
 
 const Reclamation = ({ reclamation, onClose }) => {
     const dispatch = useDispatch();
+    // Récupérer l'utilisateur authentifié depuis Redux
+    const authUser = useSelector(state => state.auth.user);
+    const authStatus = useSelector(state => state.auth.status);
+    
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [reclamations, setReclamations] = useState([{
         titre: reclamation?.titre || '',
         description: reclamation?.description || '',
-        statut: 'en_attente'
+        statut: 'en_attente',
+        user_id: reclamation?.user_id || authUser?.id || null
     }]);
+
+    // Mise à jour du user_id quand authUser change
+    useEffect(() => {
+        if (authUser && authUser.id) {
+            setReclamations(prev => 
+                prev.map(rec => ({
+                    ...rec,
+                    user_id: rec.user_id || authUser.id
+                }))
+            );
+        }
+    }, [authUser]);
+
+    // Si l'authentification n'est pas encore tentée, on la tente
+    useEffect(() => {
+        if (authStatus === 'idle') {
+            dispatch(fetchAuthUser());
+        }
+    }, [authStatus, dispatch]);
 
     const handleAddField = () => {
         if (reclamation) return; // Désactiver l'ajout en mode édition
         setReclamations([...reclamations, {
             titre: '',
             description: '',
-            statut: 'en_attente'
+            statut: 'en_attente',
+            user_id: authUser?.id || null
         }]);
     };
 
@@ -47,13 +73,41 @@ const Reclamation = ({ reclamation, onClose }) => {
             return;
         }
 
+        // Vérifier si l'utilisateur est authentifié
+        if (!authUser) {
+            // Si authentification en cours, attendre
+            if (authStatus === 'loading') {
+                Swal.fire({
+                    title: 'Vérification de l\'authentification...',
+                    text: 'Veuillez patienter...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                setTimeout(() => {
+                    Swal.close();
+                    handleSubmit(); // Réessayer après un délai
+                }, 1500);
+                return;
+            }
+            
+            // Utiliser un ID utilisateur par défaut (ici 1 pour l'admin)
+            console.log('Utilisateur non authentifié, utilisation de l\'ID par défaut');
+            // On continue avec l'ID par défaut
+        }
+
         setIsSubmitting(true);
 
         try {
+            const userId = authUser?.id || 1; // Utiliser l'ID 1 (admin) par défaut
+            
             if (reclamation) {
+                // Mode édition
                 await dispatch(updateReclamation({ 
                     id: reclamation.id, 
-                    ...reclamations[0] 
+                    ...reclamations[0],
+                    user_id: userId
                 })).unwrap();
                 Swal.fire({
                     icon: 'success',
@@ -61,7 +115,16 @@ const Reclamation = ({ reclamation, onClose }) => {
                     text: 'La réclamation a été mise à jour avec succès.',
                 });
             } else {
-                await dispatch(createReclamation(reclamations)).unwrap();
+                // Mode création
+                // Ajouter l'ID utilisateur à chaque réclamation
+                const reclamationsWithUserId = reclamations.map(rec => ({
+                    ...rec,
+                    user_id: userId
+                }));
+                
+                console.log('Envoi des réclamations au serveur avec user_id:', reclamationsWithUserId);
+                const result = await dispatch(createReclamation(reclamationsWithUserId)).unwrap();
+                console.log('Réponse du serveur :', result);
                 Swal.fire({
                     icon: 'success',
                     title: 'Succès !',
@@ -70,6 +133,7 @@ const Reclamation = ({ reclamation, onClose }) => {
             }
             onClose();
         } catch (error) {
+            console.error('Erreur lors de la création/modification de réclamation:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Erreur !',

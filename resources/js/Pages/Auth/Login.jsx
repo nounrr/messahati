@@ -34,14 +34,8 @@ export default function Login({ status }) {
   const submit = e => {
     e.preventDefault();
     post(route('login'), {
-      onSuccess: async () => {
-        await dispatch(fetchAuthUser()).unwrap();
-        // Redirection gérée par Inertia
-      },
-      onError: () => {
-        reset('password');
-        dispatch(resetAuth());
-      },
+      onSuccess: () => dispatch(fetchAuthUser()),
+      onError:   () => reset('password'),
     });
   };
 
@@ -72,7 +66,7 @@ export default function Login({ status }) {
 
             <h4 className="text-2xl font-semibold mb-2">Connectez‑vous à votre compte</h4>
             <p className="text-lg text-gray-500">
-              Heureux de vous revoir ! Veuillez saisir vos identifiants.
+              Heureux de vous revoir ! Veuillez saisir vos identifiants.
             </p>
           </div>
 
@@ -129,9 +123,9 @@ export default function Login({ status }) {
                 Se souvenir de moi
               </label>
 
-              {/* Supprimez ce lien si vous n'avez pas la route */}
+              {/* Supprimez ce lien si vous n’avez pas la route */}
               <Link href={route('password.request')} className="text-primary-600 font-medium">
-                Mot de passe oublié ?
+                Mot de passe oublié ?
               </Link>
             </div>
 
