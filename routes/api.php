@@ -86,6 +86,7 @@ Route::resource('rendez-vous', RendezVousController::class);
 // routes/api.php
 
 Route::resource('reclamations', ReclamationController::class);
+Route::delete('/reclamations', [ReclamationController::class, 'destroy'])->name('reclamations.destroy.multiple');
 
 // Routes pour les paiements
 Route::resource('payments', PaymentController::class);

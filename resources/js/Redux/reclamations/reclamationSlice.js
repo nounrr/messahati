@@ -12,9 +12,9 @@ export const fetchReclamations = createAsyncThunk(
 
             // Construire l'URL avec les paramètres si nécessaire
             let url = '/reclamations';
-            if (userId) {
-                url += `?user_id=${userId}`;
-            }
+            // if (userId) {
+            //     url += `?user_id=${userId}`;
+            // }
 
             const response = await axiosInstance.get(url);
             return response.data;
@@ -53,10 +53,17 @@ export const deleteReclamation = createAsyncThunk(
     'reclamations/deleteReclamation',
     async (id, { rejectWithValue }) => {
         try {
+            // Vérifier que l'ID est bien formaté (nombre ou chaîne)
+            if (id === null || id === undefined || typeof id === 'object') {
+                throw new Error('ID de réclamation invalide');
+            }
+            
+            console.log('Deleting reclamation with ID:', id);
             await axiosInstance.delete(`/reclamations/${id}`);
             return id;
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Une erreur est survenue' });
+            console.error('Error deleting reclamation:', error);
+            return rejectWithValue(error.response?.data || { message: 'Une erreur est survenue lors de la suppression' });
         }
     }
 );

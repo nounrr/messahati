@@ -10,7 +10,7 @@ const AuthProvider = ({ children }) => {
         const initAuth = async () => {
             try {
                 // Get CSRF cookie first
-                await axios.get('/sanctum/csrf-cookie');
+                await axios.get('http://127.0.0.1:8001/sanctum/csrf-cookie');
                 // Then attempt to fetch the authenticated user
                 dispatch(fetchAuthUser());
             } catch (error) {
