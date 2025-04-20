@@ -28,7 +28,19 @@ Route::get('/sanctum/csrf-cookie', function () {
     return response()->json(['message' => 'CSRF cookie set']);
 });
 
-// Routes publiques
+
+use App\Http\Controllers\FactureController;
+
+
+Route::get('/typeTraitement', function () {return Inertia::render('Components/Forms/TypeTraitement');});
+Route::get('/AccesDenied', function () {return Inertia::render('AccesDenied/AccesDenied');});
+Route::get('/popup', function () {return Inertia::render('Home');});
+Route::get('/home', function () {return Inertia::render('Components/Popup/Departement');});
+Route::get('/Bienvenue', function () {return Inertia::render('Bienvenue/Bienvenue');});
+Route::get('/AddInfo', function () {return Inertia::render('Bienvenue/AddInfo');});
+Route::get('/Departement', function () {return Inertia::render('Components/Popup/Departement');});
+// Route::get('/Departement', function () {return Inertia::render('Components/DepartementCreate');});
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -74,10 +86,12 @@ Route::get('/Departement', function () {
 // Routes pour les départements
 Route::get('/export', [DepartementController::class, 'export'])->name('departements.export');
 
+
 // Routes pour les réclamations, feedbacks et mutuels - protégées par auth
 Route::middleware(['auth'])->resource('reclamation', ReclamationController::class);
 Route::resource('feedback', FeedbackController::class);
 Route::resource('mutuel', MutuelController::class);
+
 
 // Routes pour les vues des rôles et permissions
 Route::get('/roles', function () {
@@ -90,6 +104,7 @@ Route::get('/assign-roles', function () {
 
 // Routes pour l'attribution des rôles (vues)
 Route::get('/assign-role', [RoleController::class, 'index'])->name('roles.assign');
+
 
 // Route pour les rôles et permissions
 Route::get('/role-permissions', [RolePermissionController::class, 'roles'])->name('role.permissions');
@@ -168,5 +183,8 @@ Route::get('/charges', function () {
     return Inertia::render('ListTable/ListeCharges');
 })->name('charges.view'); //Done
 
+
+
+Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
 
 require __DIR__.'/auth.php';
