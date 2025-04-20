@@ -96,4 +96,14 @@ public function rendezvousAsDocteur()
     public function departement(){
         return $this->belongsTo(Departement::class);
     }
+
+    /**
+     * Relation avec les médicaments via la table pharmacie_user.
+     */
+    public function medicaments()
+    {
+        return $this->belongsToMany(Medicament::class, 'pharmacie_user')
+                    ->withPivot('payment', 'statut', 'quantite')
+                    ->withTimestamps();
+    }
 }

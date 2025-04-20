@@ -5,10 +5,9 @@ use App\Http\Controllers\DepartementController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
+use App\Http\Controllers\FactureController;
 
 Route::get('/export', [DepartementController::class, 'export'])->name('departements.export');
-
 
 Route::get('/typeTraitement', function () {return Inertia::render('Components/Forms/TypeTraitement');});
 Route::get('/AccesDenied', function () {return Inertia::render('AccesDenied/AccesDenied');});
@@ -28,7 +27,6 @@ Route::get('/', function () {
 });
 // use App\Http\Controllers\RoleController;
 
-
 // Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
 // Route::post('/roles/assign/{user}', [RoleController::class, 'assign'])->name('roles.assign');
 // Route::post('/roles/remove', [RoleController::class, 'removeRole'])->name('roles.remove');
@@ -37,8 +35,6 @@ use App\Http\Controllers\RoleController;
 Route::get('/assign-roles', [RoleController::class, 'index'])->name('assign.index');
 Route::post('/assign-role/{userId}', [RoleController::class, 'assign'])->name('assign.role');
 Route::post('/remove-role', [RoleController::class, 'removeRole'])->name('remove.role');
-
-
 
 // // ✅ Route protégée par rôle
 // Route::middleware(['role:admin'])->get('/admin/dashboard', function () {
@@ -81,7 +77,6 @@ use App\Http\Controllers\MutuelController;
 Route::resource('feedback', feedbackController::class);
 Route::resource('mutuel', MutuelController::class);
 
-
 // Routes pour la gestion des rôles et permissions
 
     // Routes pour les rôles
@@ -99,6 +94,6 @@ Route::resource('mutuel', MutuelController::class);
     Route::post('/remove-role', [App\Http\Controllers\RoleController::class, 'removeRole'])->name('roles.remove');
 
 
-
+Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
 
 require __DIR__.'/auth.php';
