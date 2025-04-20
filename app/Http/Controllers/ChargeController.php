@@ -13,7 +13,7 @@ class ChargeController extends Controller
 
     public function index()
     {
-        $charges = Charge::all();
+        $charges = Charge::with('partenaire')->get();
         return response()->json($charges);
     }
 
@@ -28,7 +28,8 @@ class ChargeController extends Controller
             'charges.*.nom' => 'required|string',
             'charges.*.prix_unitaire' => 'required|numeric',
             'charges.*.quantite' => 'required|numeric',
-            'charges.*.partenaire_id' => 'required|exists:partenaires,id'
+            'charges.*.partenaire_id' => 'required|exists:partenaires,id',
+            'charges.*.status' => 'required|in:paye,en_attente,annule'
         ]);
 
         $createdItems = [];
@@ -39,6 +40,7 @@ class ChargeController extends Controller
             $item->prix_unitaire = $data['prix_unitaire'];
             $item->quantite = $data['quantite'];
             $item->partenaire_id = $data['partenaire_id'];
+            $item->status = $data['status'];
             $item->save();
 
             $createdItems[] = $item;
@@ -49,13 +51,13 @@ class ChargeController extends Controller
 
     public function show($id)
     {
-        $charge = Charge::findOrFail($id);
+        $charge = Charge::with('partenaire')->findOrFail($id);
         return response()->json($charge);
     }
 
     public function edit($id)
     {
-        $charge = Charge::findOrFail($id);
+        $charge = Charge::with('partenaire')->findOrFail($id);
         return view('charges.edit', compact('charge'));
     }
 
@@ -67,7 +69,8 @@ class ChargeController extends Controller
             'updates.*.nom' => 'required|string',
             'updates.*.prix_unitaire' => 'required|numeric',
             'updates.*.quantite' => 'required|numeric',
-            'updates.*.partenaire_id' => 'required|exists:partenaires,id'
+            'updates.*.partenaire_id' => 'required|exists:partenaires,id',
+            'updates.*.status' => 'required|in:paye,en_attente,annule'
         ]);
 
         $updatedItems = [];
@@ -78,20 +81,34 @@ class ChargeController extends Controller
             $item->prix_unitaire = $data['prix_unitaire'];
             $item->quantite = $data['quantite'];
             $item->partenaire_id = $data['partenaire_id'];
+            $item->status = $data['status'];
             $item->save();
 
-            $updatedItems[] = $item;
+            $updatedItems[] = $item->load('partenaire');
         }
 
         return response()->json($updatedItems, 200);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, string $id = null)
     {
-        $charge = Charge::findOrFail($id);
-        $charge->delete();
-
-        return redirect()->route('charges.index')->with('success', 'Charge deleted successfully.');
+        try {
+            if ($id) {
+                $charge = Charge::findOrFail($id);
+                $charge->delete();
+                return response()->json(['message' => 'Charge deleted successfully']);
+            } else {
+                $ids = $request->validate([
+                    'ids' => 'required|array',
+                    'ids.*' => 'required|integer|exists:charges,id'
+                ])['ids'];
+                
+                Charge::whereIn('id', $ids)->delete();
+                return response()->json(['message' => 'Charges deleted successfully']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error deleting charges', 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function export()

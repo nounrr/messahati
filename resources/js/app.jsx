@@ -16,6 +16,8 @@ import RouteScrollToTop from './helper/RouteScrollToTop';
 import MasterLayout from './masterLayout/MasterLayout';
 import { Provider } from 'react-redux';
 import store from './Redux/store';
+import AuthProvider from './AuthProvider';
+import AuthenticatedLayout from './Layouts/AuthenticatedLayout';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -32,7 +34,9 @@ createInertiaApp({
             <Provider store={store}>
         <BrowserRouter>
         <App {...props} />
+
         </BrowserRouter>
+
         </Provider>
     
     );

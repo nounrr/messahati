@@ -1,28 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
-import { createFeedback } from '../../../Redux/feedbacks/feedbackSlice';
-import { fetchUsers } from '../../../Redux/users/userSlice';
+import { createFeedback, updateFeedback } from '../../../Redux/feedbacks/feedbackSlice';
 import { X } from 'lucide-react';
 
-function Feedback({ onClose }) {
+function Feedback({ onClose, feedback = null }) {
     const dispatch = useDispatch();
-    const users = useSelector((state) => state.users.items);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [feedbacks, setFeedbacks] = useState([{
-        user_id: '',
-        titre: '',
-        contenu: '',
-        note: 5,
-        statut: 'en_attente'
+        titre: feedback?.titre || '',
+        contenu: feedback?.contenu || '',
+        note: feedback?.note || 5,
+        statut: feedback?.statut || 'en_attente'
     }]);
 
-    useEffect(() => {
-        dispatch(fetchUsers());
-    }, [dispatch]);
-
     const handleAddField = () => {
+        if (feedback) return; // Désactiver l'ajout en mode édition
         setFeedbacks([...feedbacks, {
-            user_id: '',
             titre: '',
             contenu: '',
             note: 5,
@@ -37,16 +31,18 @@ function Feedback({ onClose }) {
     };
 
     const handleRemoveField = (index) => {
+        if (feedback) return; // Désactiver la suppression en mode édition
         const updated = [...feedbacks];
         updated.splice(index, 1);
         setFeedbacks(updated);
     };
 
-    const handleSubmit = () => {
-        const isValid = feedbacks.every(feedback => 
-            feedback.user_id !== '' && 
-            feedback.titre !== '' &&
-            feedback.contenu !== ''
+    const handleSubmit = async () => {
+        if (isSubmitting) return;
+
+        const isValid = feedbacks.every(item => 
+            item.titre && 
+            item.contenu
         );
 
         if (!isValid) {
@@ -54,79 +50,90 @@ function Feedback({ onClose }) {
             return;
         }
 
-        dispatch(createFeedback(feedbacks))
-            .unwrap()
-            .then(() => {
-                Swal.fire('Succès', 'Feedbacks ajoutés avec succès.', 'success');
-                setFeedbacks([{
-                    user_id: '',
-                    titre: '',
-                    contenu: '',
-                    note: 5,
-                    statut: 'en_attente'
-                }]);
-                onClose();
-            })
-            .catch((error) => {
-                console.error('Erreur:', error);
-                Swal.fire('Erreur', 'Une erreur s\'est produite.', 'error');
+        setIsSubmitting(true);
+
+        try {
+            if (feedback) {
+                await dispatch(updateFeedback({
+                    id: feedback.id,
+                    ...feedbacks[0]
+                })).unwrap();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Succès !',
+                    text: 'Le feedback a été modifié avec succès.'
+                });
+            } else {
+                await dispatch(createFeedback(feedbacks)).unwrap();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Succès !',
+                    text: 'Les feedbacks ont été créés avec succès.'
+                });
+            }
+            onClose();
+        } catch (error) {
+            console.error('Erreur:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur !',
+                text: error.message || 'Une erreur est survenue lors de l\'opération.'
             });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
         <div className="bg-white rounded-xl shadow-lg p-6">
-            <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-red-500">
+            <button 
+                onClick={onClose} 
+                className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+                disabled={isSubmitting}
+            >
                 <X size={22} />
             </button>
             <div className='text-center mb-6'>
                 <img src='assets/images/logo.png' alt='logo' className='mx-auto mb-4 w-28 h-auto' />
-                <h4 className='text-2xl font-semibold mb-1'>Ajoutez les Feedbacks</h4>
+                <h4 className='text-2xl font-semibold mb-1'>
+                    {feedback ? 'Modifier le feedback' : 'Ajouter des feedbacks'}
+                </h4>
                 <h6 className='text-gray-500 text-md'>Veuillez fournir les informations suivantes :</h6>
             </div>
 
-            {feedbacks.map((feedback, index) => (
+            {feedbacks.map((item, index) => (
                 <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm relative">
-                    {feedbacks.length > 1 && (
+                    {!feedback && feedbacks.length > 1 && (
                         <button
                             className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                             onClick={() => handleRemoveField(index)}
+                            disabled={isSubmitting}
                         >
                             <X size={18} />
                         </button>
                     )}
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Utilisateur</label>
-                        <select
-                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={feedback.user_id}
-                            onChange={(e) => handleChange(index, 'user_id', e.target.value)}
-                        >
-                            <option value="">Sélectionnez un utilisateur</option>
-                            {users.map((user) => (
-                                <option key={user.id} value={user.id}>
-                                    {user.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="mb-4 text-left">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Titre</label>
                         <input
                             type="text"
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={feedback.titre}
+                            value={item.titre}
                             onChange={(e) => handleChange(index, 'titre', e.target.value)}
                             placeholder='Entrez le titre du feedback'
+                            disabled={isSubmitting}
+                            required
                         />
                     </div>
                     <div className="mb-4 text-left">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Contenu</label>
                         <textarea
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={feedback.contenu}
+                            value={item.contenu}
                             onChange={(e) => handleChange(index, 'contenu', e.target.value)}
                             placeholder='Entrez le contenu du feedback'
                             rows='4'
+                            disabled={isSubmitting}
+                            required
                         />
                     </div>
                     <div className="mb-4 text-left">
@@ -136,8 +143,9 @@ function Feedback({ onClose }) {
                             min="1"
                             max="5"
                             className='w-full'
-                            value={feedback.note}
+                            value={item.note}
                             onChange={(e) => handleChange(index, 'note', parseInt(e.target.value))}
+                            disabled={isSubmitting}
                         />
                         <div className="flex justify-between text-sm text-gray-600">
                             <span>1</span>
@@ -151,8 +159,9 @@ function Feedback({ onClose }) {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
                         <select
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={feedback.statut}
+                            value={item.statut}
                             onChange={(e) => handleChange(index, 'statut', e.target.value)}
+                            disabled={isSubmitting}
                         >
                             <option value="en_attente">En attente</option>
                             <option value="traite">Traité</option>
@@ -163,17 +172,21 @@ function Feedback({ onClose }) {
             ))}
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                {!feedback && (
+                    <button
+                        className='bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition'
+                        onClick={handleAddField}
+                        disabled={isSubmitting}
+                    >
+                        Ajouter un autre feedback
+                    </button>
+                )}
                 <button
-                    className='bg-green-600 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition'
-                    onClick={handleAddField}
-                >
-                    Ajouter un autre feedback
-                </button>
-                <button
-                    className='bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition'
                     onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition disabled:opacity-50"
                 >
-                    Enregistrer
+                    {isSubmitting ? 'Traitement en cours...' : (feedback ? 'Modifier' : 'Enregistrer')}
                 </button>
             </div>
         </div>

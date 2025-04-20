@@ -64,15 +64,11 @@ export const updateDepartements = createAsyncThunk(
 );
 
 // Delete départements
-export const deleteDepartements = createAsyncThunk(
-    'departements/deleteDepartements',
-    async (ids, { rejectWithValue }) => {
-        try {
-            const response = await axiosInstance.delete('/departements', { data: { ids } });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
+export const deleteDepartement = createAsyncThunk(
+    'departements/delete',
+    async (ids) => {
+        const response = await axiosInstance.delete('/departements/bulk', { data: { ids } });
+        return { ids: Array.isArray(ids) ? ids : [ids] };
     }
 );
 
@@ -161,9 +157,10 @@ const departementSlice = createSlice({
                 });
             })
 
-            .addCase(deleteDepartements.fulfilled, (state, action) => {
-                const deletedIds = Array.isArray(action.payload?.ids) ? action.payload.ids : [];
-                state.items = state.items.filter((item) => !deletedIds.includes(item.id));
+            .addCase(deleteDepartement.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                // Supprimer les éléments du state en fonction des IDs retournés
+                state.items = state.items.filter(item => !action.payload.ids.includes(item.id));
             })
 
             .addCase(importDepartements.fulfilled, (state, action) => {

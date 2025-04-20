@@ -12,7 +12,7 @@ class PartenaireController extends Controller
     // Affiche tous les partenaires
     public function index()
     {
-        $partenaires = Partenaire::all();
+        $partenaires = Partenaire::with('type_partenaire')->get();
         return response()->json($partenaires);
     }
 
@@ -26,26 +26,16 @@ class PartenaireController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'partenaires' => 'required|array',
-            'partenaires.*.nom' => 'required|string',
-            'partenaires.*.adress' => 'nullable|string',
-            'partenaires.*.typepartenaires_id' => 'required|exists:type_partenaires,id',
-            'partenaires.*.telephone' => 'nullable|string'
+            'nom' => 'required|string',
+            'adress' => 'nullable|string',
+            'typepartenaires_id' => 'required|exists:type_partenaires,id',
+            'telephone' => 'nullable|string'
         ]);
 
-        $createdItems = [];
+        $partenaire = Partenaire::create($validated);
+        $partenaire->load('type_partenaire');
 
-        foreach ($validated['partenaires'] as $data) {
-            $partenaire = new Partenaire();
-            $partenaire->nom = $data['nom'];
-            $partenaire->adress = $data['adress'] ?? null;
-            $partenaire->typepartenaires_id = $data['typepartenaires_id'];
-            $partenaire->telephone = $data['telephone'] ?? null;
-            $partenaire->save();
-            $createdItems[] = $partenaire;
-        }
-
-        return response()->json($createdItems, 201);
+        return response()->json($partenaire, 201);
     }
 
     // Affiche un partenaire spécifique
@@ -63,30 +53,20 @@ class PartenaireController extends Controller
     }
 
     // Mise à jour sans mass-assignement
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'updates' => 'required|array',
-            'updates.*.id' => 'required|exists:partenaires,id',
-            'updates.*.nom' => 'required|string',
-            'updates.*.adress' => 'nullable|string',
-            'updates.*.typepartenaires_id' => 'required|exists:typepartenairess,id',
-            'updates.*.telephone' => 'nullable|string'
+            'nom' => 'required|string',
+            'adress' => 'nullable|string',
+            'typepartenaires_id' => 'required|exists:type_partenaires,id',
+            'telephone' => 'nullable|string'
         ]);
 
-        $updatedItems = [];
+        $partenaire = Partenaire::findOrFail($id);
+        $partenaire->update($validated);
+        $partenaire->load('type_partenaire');
 
-        foreach ($validated['updates'] as $data) {
-            $partenaire = Partenaire::find($data['id']);
-            $partenaire->nom = $data['nom'];
-            $partenaire->adress = $data['adress'] ?? null;
-            $partenaire->typepartenaires_id = $data['typepartenaires_id'];
-            $partenaire->telephone = $data['telephone'] ?? null;
-            $partenaire->save();
-            $updatedItems[] = $partenaire;
-        }
-
-        return response()->json($updatedItems, 200);
+        return response()->json($partenaire);
     }
 
     // Suppression d'un ou plusieurs partenaires

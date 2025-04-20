@@ -2,14 +2,44 @@ import ApplicationLogo from '@/Components/Child/ApplicationLogo';
 import Dropdown from '@/Components/Child/Dropdown';
 import NavLink from '@/Components/Child/NavLink';
 import ResponsiveNavLink from '@/Components/Child/ResponsiveNavLink';
-import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Link, usePage, router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser, logout, resetAuth } from '../Redux/auth/authSlice';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.auth.user);
+    const { auth } = usePage().props;
+
+    // Synchroniser l'utilisateur Inertia avec Redux
+    useEffect(() => {
+        if (auth && auth.user && !user) {
+            dispatch(setUser(auth.user));
+        }
+    }, [auth, dispatch, user]);
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
+
+    // Fonction pour gérer la déconnexion
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        
+        try {
+            // 1. Nettoyage Redux et localStorage
+            dispatch(resetAuth());
+            
+            // 2. Déconnexion Laravel via Inertia
+            await router.post(route('logout'));
+            
+            // 3. Forcer la réinitialisation du status
+            dispatch({ type: 'auth/resetStatus' });
+            
+        } catch (error) {
+            console.error('Erreur lors de la déconnexion:', error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -30,6 +60,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    href={route('reclamations.view')}
+                                    active={route().current('reclamations.*')}
+                                >
+                                    Réclamations
+                                </NavLink>
                             </div>
                         </div>
 
@@ -42,7 +78,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 type="button"
                                                 className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
                                             >
-                                                {user.name}
+                                                {user ? user.name : 'Utilisateur'}
 
                                                 <svg
                                                     className="-me-0.5 ms-2 h-4 w-4"
@@ -67,9 +103,8 @@ export default function AuthenticatedLayout({ header, children }) {
                                             Profile
                                         </Dropdown.Link>
                                         <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
+                                            href="#"
+                                            onClick={handleLogout}
                                         >
                                             Log Out
                                         </Dropdown.Link>
@@ -134,15 +169,21 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('reclamations.view')}
+                            active={route().current('reclamations.*')}
+                        >
+                            Réclamations
+                        </ResponsiveNavLink>
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">
                         <div className="px-4">
                             <div className="text-base font-medium text-gray-800">
-                                {user.name}
+                                {user ? user.name : 'Utilisateur'}
                             </div>
                             <div className="text-sm font-medium text-gray-500">
-                                {user.email}
+                                {user ? user.email : ''}
                             </div>
                         </div>
 
@@ -151,9 +192,8 @@ export default function AuthenticatedLayout({ header, children }) {
                                 Profile
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
-                                method="post"
-                                href={route('logout')}
-                                as="button"
+                                href="#"
+                                onClick={handleLogout}
                             >
                                 Log Out
                             </ResponsiveNavLink>

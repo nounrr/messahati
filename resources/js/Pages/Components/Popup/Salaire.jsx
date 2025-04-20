@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
-import { createSalaires } from '../../../Redux/salaires/salaireSlice';
+import { createSalaires, updateSalaires } from '../../../Redux/salaires/salaireSlice';
 import { fetchUsers } from '../../../Redux/users/userSlice';
 import { X } from 'lucide-react';
 
-function Salaire({ onClose }) {
+function Salaire({ onClose, salaire = null }) {
     const dispatch = useDispatch();
     const users = useSelector((state) => state.users.items);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [salaires, setSalaires] = useState([{
         user_id: '',
         montant: '',
@@ -38,9 +39,23 @@ function Salaire({ onClose }) {
 
     useEffect(() => {
         dispatch(fetchUsers());
-    }, [dispatch]);
+        
+        // Si on est en mode édition, initialiser avec les données du salaire
+        if (salaire) {
+            const date = new Date(salaire.date);
+            setSalaires([{
+                id: salaire.id,
+                user_id: salaire.user_id || '',
+                montant: salaire.montant || '',
+                primes: salaire.primes || '',
+                date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+                statut: salaire.statut || 'en_attente'
+            }]);
+        }
+    }, [dispatch, salaire]);
 
     const handleAddField = () => {
+        if (salaire) return; // Désactiver l'ajout en mode édition
         setSalaires([...salaires, {
             user_id: '',
             montant: '',
@@ -57,12 +72,15 @@ function Salaire({ onClose }) {
     };
 
     const handleRemoveField = (index) => {
+        if (salaire) return; // Désactiver la suppression en mode édition
         const updated = [...salaires];
         updated.splice(index, 1);
         setSalaires(updated);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        if (isSubmitting) return;
+        
         const isValid = salaires.every(salaire => 
             salaire.user_id !== '' && 
             salaire.montant !== '' &&
@@ -75,48 +93,62 @@ function Salaire({ onClose }) {
             return;
         }
 
-        // Formater les dates pour inclure le jour (01) avant l'envoi
-        const formattedSalaires = salaires.map(salaire => ({
-            ...salaire,
-            date: `${salaire.date}-01` // Ajouter le jour 01 à la date
-        }));
+        setIsSubmitting(true);
 
-        dispatch(createSalaires(formattedSalaires))
-            .unwrap()
-            .then(() => {
+        try {
+            // Formater les dates pour inclure le jour (01) avant l'envoi
+            const formattedSalaires = salaires.map(s => ({
+                ...s,
+                date: `${s.date}-01` // Ajouter le jour 01 à la date
+            }));
+
+            if (salaire) {
+                // Mode édition - Envoyer dans le format attendu par le contrôleur
+                await dispatch(updateSalaires({
+                    salaires: [{
+                        id: salaire.id,
+                        ...formattedSalaires[0]
+                    }]
+                })).unwrap();
+                Swal.fire('Succès', 'Salaire modifié avec succès.', 'success');
+            } else {
+                // Mode création
+                await dispatch(createSalaires({ salaires: formattedSalaires })).unwrap();
                 Swal.fire('Succès', 'Salaires ajoutés avec succès.', 'success');
-                setSalaires([{
-                    user_id: '',
-                    montant: '',
-                    primes: '',
-                    date: '',
-                    statut: 'en_attente'
-                }]);
-                onClose();
-            })
-            .catch((error) => {
-                console.error('Erreur:', error);
-                Swal.fire('Erreur', 'Une erreur s\'est produite.', 'error');
-            });
+            }
+            onClose();
+        } catch (error) {
+            console.error('Erreur:', error);
+            Swal.fire('Erreur', error.message || 'Une erreur s\'est produite.', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
         <div className="bg-white rounded-xl shadow-lg p-6">
-            <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-red-500">
+            <button 
+                onClick={onClose} 
+                className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+                disabled={isSubmitting}
+            >
                 <X size={22} />
             </button>
             <div className='text-center mb-6'>
                 <img src='assets/images/logo.png' alt='logo' className='mx-auto mb-4 w-28 h-auto' />
-                <h4 className='text-2xl font-semibold mb-1'>Ajoutez les Salaires</h4>
+                <h4 className='text-2xl font-semibold mb-1'>
+                    {salaire ? 'Modifier le salaire' : 'Ajoutez les Salaires'}
+                </h4>
                 <h6 className='text-gray-500 text-md'>Veuillez fournir les informations suivantes :</h6>
             </div>
 
-            {salaires.map((salaire, index) => (
+            {salaires.map((s, index) => (
                 <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm relative">
-                    {salaires.length > 1 && (
+                    {!salaire && salaires.length > 1 && (
                         <button
                             className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                             onClick={() => handleRemoveField(index)}
+                            disabled={isSubmitting}
                         >
                             <X size={18} />
                         </button>
@@ -125,9 +157,10 @@ function Salaire({ onClose }) {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Employé</label>
                         <select
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={salaire.user_id}
+                            value={s.user_id}
                             onChange={(e) => handleChange(index, 'user_id', e.target.value)}
                             required
+                            disabled={isSubmitting}
                         >
                             <option value="">Sélectionnez un employé</option>
                             {users.map((user) => (
@@ -142,9 +175,10 @@ function Salaire({ onClose }) {
                         <input
                             type="number"
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={salaire.montant}
+                            value={s.montant}
                             onChange={(e) => handleChange(index, 'montant', e.target.value)}
                             required
+                            disabled={isSubmitting}
                         />
                     </div>
                     <div className="mb-4 text-left">
@@ -152,9 +186,10 @@ function Salaire({ onClose }) {
                         <input
                             type="number"
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={salaire.primes}
+                            value={s.primes}
                             onChange={(e) => handleChange(index, 'primes', e.target.value)}
                             required
+                            disabled={isSubmitting}
                         />
                     </div>
                     <div className="mb-4 text-left">
@@ -162,12 +197,13 @@ function Salaire({ onClose }) {
                         <div className="flex space-x-2">
                             <select
                                 className='w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                                value={salaire.date ? salaire.date.split('-')[1] : ''}
+                                value={s.date ? s.date.split('-')[1] : ''}
                                 onChange={(e) => {
-                                    const year = salaire.date ? salaire.date.split('-')[0] : new Date().getFullYear();
+                                    const year = s.date ? s.date.split('-')[0] : new Date().getFullYear();
                                     handleChange(index, 'date', `${year}-${e.target.value}`);
                                 }}
                                 required
+                                disabled={isSubmitting}
                             >
                                 <option value="">Mois</option>
                                 {mois.map((mois) => (
@@ -178,12 +214,13 @@ function Salaire({ onClose }) {
                             </select>
                             <select
                                 className='w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                                value={salaire.date ? salaire.date.split('-')[0] : ''}
+                                value={s.date ? s.date.split('-')[0] : ''}
                                 onChange={(e) => {
-                                    const month = salaire.date ? salaire.date.split('-')[1] : '01';
+                                    const month = s.date ? s.date.split('-')[1] : '01';
                                     handleChange(index, 'date', `${e.target.value}-${month}`);
                                 }}
                                 required
+                                disabled={isSubmitting}
                             >
                                 <option value="">Année</option>
                                 {annees.map((annee) => (
@@ -197,17 +234,21 @@ function Salaire({ onClose }) {
                 </div>
             ))}
             <div className="flex justify-between mt-4">
-                <button
-                    onClick={handleAddField}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                >
-                    Ajouter un autre salaire
-                </button>
+                {!salaire && (
+                    <button
+                        onClick={handleAddField}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                        disabled={isSubmitting}
+                    >
+                        Ajouter un autre salaire
+                    </button>
+                )}
                 <button
                     onClick={handleSubmit}
                     className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                    disabled={isSubmitting}
                 >
-                    Enregistrer
+                    {isSubmitting ? 'Enregistrement...' : (salaire ? 'Modifier' : 'Enregistrer')}
                 </button>
             </div>
         </div>

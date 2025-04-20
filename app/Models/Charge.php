@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Charge extends Model
 {
+
     protected $fillable = ['nom', 'prix_unitaire', 'quantite', 'partenaire_id'];
+
 
     public function partenaire()
     {

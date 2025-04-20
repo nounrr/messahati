@@ -23,9 +23,9 @@ export const createPartenaire = createAsyncThunk(
 
 export const updatePartenaire = createAsyncThunk(
     'partenaires/updatePartenaire',
-    async (partenaire, { rejectWithValue }) => {
+    async ({ id, data }, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put(`/partenaires/${partenaire.id}`, { partenaire });
+            const response = await axiosInstance.put(`/partenaires/${id}`, data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -39,6 +39,18 @@ export const deletePartenaire = createAsyncThunk(
         try {
             const response = await axiosInstance.delete(`/partenaires/${id}`);
             return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const deletePartenaires = createAsyncThunk(
+    'partenaires/deletePartenaires',
+    async (ids, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.delete('/partenaires', { data: { ids } });
+            return { ids };
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -77,6 +89,9 @@ const partenaireSlice = createSlice({
             })
             .addCase(deletePartenaire.fulfilled, (state, action) => {
                 state.items = state.items.filter(item => item.id !== action.payload.id);
+            })
+            .addCase(deletePartenaires.fulfilled, (state, action) => {
+                state.items = state.items.filter(item => !action.payload.ids.includes(item.id));
             });
     },
 });

@@ -22,6 +22,7 @@ class UserSeeder extends Seeder
             $doctor->assignRole($doctorRole);
         }
 
+
         // Create 5 patients
         $patients = User::factory()->count(5)->create();
         $patientRole = Role::where('name', 'patient')->first();

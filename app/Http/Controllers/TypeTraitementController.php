@@ -53,28 +53,20 @@ class TypeTraitementController extends Controller
         return view('type-traitements.edit', compact('type'));
     }
 
-    // Mise à jour de plusieurs types de traitements
-    public function update(Request $request)
+    // Mise à jour d'un type de traitement
+    public function update(Request $request, string $id)
     {
         $validated = $request->validate([
-            'updates' => 'required|array',
-            'updates.*.id' => 'required|exists:typetraitements,id',
-            'updates.*.nom' => 'required|string',
-            'updates.*.prix-default' => 'nullable|numeric'
+            'nom' => 'required|string',
+            'prix-default' => 'nullable|numeric'
         ]);
 
-        $updatedItems = [];
+        $type = TypeTraitement::findOrFail($id);
+        $type->nom = $validated['nom'];
+        $type->{'prix-default'} = $validated['prix-default'] ?? null;
+        $type->save();
 
-        foreach ($validated['updates'] as $data) {
-            $type = TypeTraitement::findOrFail($data['id']);
-            $type->nom = $data['nom'];
-            $type->{'prix-default'} = $data['prix-default'] ?? null;
-            $type->save();
-
-            $updatedItems[] = $type;
-        }
-
-        return response()->json($updatedItems, 200);
+        return response()->json($type, 200);
     }
 
     // Suppression d'un ou plusieurs types

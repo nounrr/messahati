@@ -5,8 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class Rendezvous extends Model
-{
-    protected $table = 'rendez_vous';
+
+{   protected $table = 'rendez_vous';
+
     protected $fillable = ['date_heure','statut'];
     public function patient(){
         return $this->belongsTo(User::class,"patient_id");

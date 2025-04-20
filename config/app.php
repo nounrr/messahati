@@ -1,6 +1,20 @@
 <?php
 
+use Illuminate\Support\ServiceProvider;
+
 return [
+
+    'providers' => [
+        // ...existing providers...
+        Barryvdh\DomPDF\ServiceProvider::class,
+        Illuminate\Filesystem\FilesystemServiceProvider::class,
+    ],
+
+    'aliases' => [
+        // ...existing code...
+        'PDF' => Barryvdh\DomPDF\Facade::class,
+        'File' => Illuminate\Support\Facades\File::class,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -122,5 +136,20 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+    'providers' => ServiceProvider::defaultProviders()->merge([
+        /*
+         * Package Service Providers...
+         */
+
+        /*
+         * Application Service Providers...
+         */
+        App\Providers\AppServiceProvider::class,
+        App\Providers\AuthServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
+        App\Providers\EventServiceProvider::class,
+        App\Providers\RouteServiceProvider::class,
+    ])->toArray(),
 
 ];
