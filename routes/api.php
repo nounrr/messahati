@@ -28,12 +28,20 @@ use App\Http\Controllers\TypeMedicamentController;
 use App\Http\Controllers\TypePartenaireController;
 use App\Http\Controllers\TypeTraitementController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\FactureController;
 // Route pour obtenir l'utilisateur authentifié
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+use App\Http\Controllers\Api\ChatController;
+
+Route::post('/send-message', [ChatController::class, 'send']);
+// Route::get('/messages/{user_id}', [ChatController::class, 'getMessages']);
+Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages']);
+Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
+
+// Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);
 // Routes d'authentification
 Route::post('/login', [LoginController::class, 'login']);
 
@@ -70,13 +78,23 @@ Route::resource('taches', TachController::class);
 Route::resource('salaires', SalaireController::class);
 
 // Routes pour les rendez-vous
+Route::put('/rendez-vous/update', [RendezVousController::class, 'update']);
+Route::delete('/rendez-vous/delete', [RendezVousController::class, 'destroy']);
 Route::resource('rendez-vous', RendezVousController::class);
 
 // Routes pour les réclamations
-Route::resource('reclamations', ReclamationController::class);
+Route::get('/reclamations', [ReclamationController::class, 'index']);
+Route::post('/reclamations', [ReclamationController::class, 'store']);
+Route::get('/reclamations/{id}', [ReclamationController::class, 'show']);
+Route::put('/reclamations/{id}', [ReclamationController::class, 'update']);
+Route::delete('/reclamations/{id}', [ReclamationController::class, 'destroy']);
 
 // Routes pour les paiements
-Route::resource('payments', PaymentController::class);
+Route::get('/payments', [PaymentController::class, 'index']);
+Route::post('/payments', [PaymentController::class, 'store']);
+Route::get('/payments/{id}', [PaymentController::class, 'show']);
+Route::put('/payments', [PaymentController::class, 'update']);
+Route::delete('/payments/{id}', [PaymentController::class, 'destroy']);
 
 // Routes pour les partenaires
 Route::resource('partenaires', PartenaireController::class);
@@ -116,3 +134,19 @@ Route::resource('feedbacks', feedbackController::class);
 
     Route::post('/assign-role', [RolePermissionController::class, 'assignRoleToUser']);
     Route::post('/assign-permission', [RolePermissionController::class, 'assignPermissionToUser']);
+
+Route::get('/rendez-vous/notifications/{user_id}', [RendezVousController::class, 'getNotifications']);
+
+// Routes pour les notifications
+Route::get('/notifications/reclamations/{userId}', [NotificationController::class, 'getReclamationNotifications']);
+
+Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
+
+Route::get('/rendezvous/report/{id}', [RendezvousController::class, 'generateReport'])->name('RendezVous');
+
+
+Route::get('/ordonance/{id}', [OrdonanceController::class, 'generatePDF'])->name('ordonnance.generate');
+Route::get('/certificat-medical/{id}', [CertificatsMedicaleController::class, 'generatePDF'])->name('certificat.generate');
+
+
+Route::get('/patient/{id}/rapport-medical', [CertificatsMedicaleController::class, 'generatePatientReport'])->name('patient.rapport');

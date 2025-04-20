@@ -84,9 +84,15 @@ class User extends Authenticatable
         return $this->belongsToMany(Notification::class)->using(NotificationUser::class)->withPivot( 'message');
     }
 
-    public function rendezvous(){
-        return $this->hasMany(Rendezvous::class);
-    }
+public function rendezvousAsPatient()
+{
+    return $this->hasMany(Rendezvous::class, 'patient_id');
+}
+
+public function rendezvousAsDocteur()
+{
+    return $this->hasMany(Rendezvous::class, 'docteur_id');
+}
     public function departement(){
         return $this->belongsTo(Departement::class);
     }

@@ -73,7 +73,7 @@ use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\MutuelController;
 
-Route::resource('reclamation', ReclamationController::class);
+// Route::resource('reclamation', ReclamationController::class); // Supprimé car géré par l'API
 Route::resource('feedback', feedbackController::class);
 Route::resource('mutuel', MutuelController::class);
 
@@ -92,6 +92,7 @@ Route::resource('mutuel', MutuelController::class);
     Route::post('/assign-role', [App\Http\Controllers\RolePermissionController::class, 'assignRoleToUser'])->name('roles.assign');
     Route::post('/assign-permission', [App\Http\Controllers\RolePermissionController::class, 'assignPermissionToUser'])->name('permissions.assign');
     Route::post('/remove-role', [App\Http\Controllers\RoleController::class, 'removeRole'])->name('roles.remove');
+
 
 Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
 

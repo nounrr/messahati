@@ -32,9 +32,9 @@ class Medicament extends Model
         'remplacement', // Nouveau champ ajouté
     ];
 
-    public function ordonances()
-    {
-        return $this->belongsToMany(Ordonance::class);
+    public function ordonances(){
+        return $this->belongsToMany(Ordonance::class,'ordonances_medicaments')->using(MedicamentOrdonance::class)->withPivot( 'dosage','frequence','duree');
+
     }
 
     public function typemedicament()

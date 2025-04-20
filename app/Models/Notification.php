@@ -6,9 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    protected $fillable = ['date','statut'];
+    protected $fillable = [
+        'date',
+        'statut',
+        'type',
+        'data'
+    ];
 
-    public function users(){
-        return $this->belongsToMany(User::class)->using(NotificationUser::class)->withPivot('message');
+    protected $casts = [
+        'data' => 'array',
+        'date' => 'datetime',
+        'statut' => 'boolean'
+    ];
+
+    public $timestamps = true;
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'notification_users')
+            ->withPivot('message')
+            ->withTimestamps();
     }
 }
