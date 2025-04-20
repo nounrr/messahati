@@ -48,13 +48,13 @@
 
     <div class="details">
         <h2>Rendez-vous et Certificats Médicaux</h2>
-        @foreach ($patient->rendezvous as $rdv)
+        @foreach ($patient->rendezvousAsPatient as $rdv)
             <p><strong>Date du Rendez-vous :</strong> {{ \Carbon\Carbon::parse($rdv->date_heure)->format('d/m/Y H:i') }}</p>
             <p><strong>Docteur :</strong> {{ $rdv->docteur->name }}</p>
             <p><strong>Certificats Médicaux :</strong></p>
-            @if ($rdv->traitement && $rdv->traitement->certificatsMedicale->isNotEmpty())
+            @if ($rdv->traitement && $rdv->traitement->certificatMedicales->isNotEmpty())
                 <ul>
-                    @foreach ($rdv->traitement->certificatsMedicale as $certificat)
+                    @foreach ($rdv->traitement->certificatMedicales as $certificat)
                         <li>
                             <strong>Type :</strong> {{ $certificat->typeCertificat->nom ?? 'Non spécifié' }},
                             <strong>Description :</strong> {{ $certificat->description }},
