@@ -28,7 +28,7 @@ use App\Http\Controllers\TypeMedicamentController;
 use App\Http\Controllers\TypePartenaireController;
 use App\Http\Controllers\TypeTraitementController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\FactureController;
 // Route pour obtenir l'utilisateur authentifié
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -139,3 +139,14 @@ Route::get('/rendez-vous/notifications/{user_id}', [RendezVousController::class,
 
 // Routes pour les notifications
 Route::get('/notifications/reclamations/{userId}', [NotificationController::class, 'getReclamationNotifications']);
+
+Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
+
+Route::get('/rendezvous/report/{id}', [RendezvousController::class, 'generateReport'])->name('RendezVous');
+
+
+Route::get('/ordonance/{id}', [OrdonanceController::class, 'generatePDF'])->name('ordonnance.generate');
+Route::get('/certificat-medical/{id}', [CertificatsMedicaleController::class, 'generatePDF'])->name('certificat.generate');
+
+
+Route::get('/patient/{id}/rapport-medical', [CertificatsMedicaleController::class, 'generatePatientReport'])->name('patient.rapport');
