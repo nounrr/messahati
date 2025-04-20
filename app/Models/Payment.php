@@ -9,6 +9,7 @@ class Payment extends Model
 {
     use HasFactory;
 
+
     protected $fillable = ['rendez_vous_id', 'montant', 'date', 'status'];
 
     public function rendezVous()

@@ -6,12 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Partenaire extends Model
 {
+ected $fillable = ['nom', 'adress', 'telephone', 'typepartenaires_id'];
+=======
     protected $fillable = [
         'nom',
         'adress',
         'telephone',
         'typepartenaires_id'
     ];
+
     
    
     public function charges(){

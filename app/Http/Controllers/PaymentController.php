@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Payment;
+use App\Models\Rendezvous;
+use App\Exports\PaymentExport;
+use App\Traits\ExcelExportImport;
+
 use App\Models\User;
 use App\Models\Notification;
 use App\Models\RendezVous;
@@ -147,5 +151,12 @@ class PaymentController extends Controller
         }
 
         return response()->json(['message' => 'Payment deleted successfully']);
+    }
+
+    use ExcelExportImport;
+
+    public function export()
+    {
+        return $this->exportExcel(PaymentExport::class, 'payments.xlsx', null);
     }
 }

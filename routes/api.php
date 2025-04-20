@@ -31,9 +31,16 @@ use App\Http\Controllers\AuditLogCliniqueController;
 use App\Http\Controllers\AttachementController;
 use App\Http\Controllers\FeedbackController;
 
+// Route for importing partenaires
+Route::post('/partenaires/import', [PartenaireController::class, 'import'])->name('partenaires.import');
+Route::post('/departements/import', [DepartementController::class, 'import'])->name('departements.import');
+Route::post('/type-traitements/import', [TypeTraitementController::class, 'import'])->name('type_traitements.import');
+
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user(); // Retourne l'utilisateur authentifié
 });
+
 
 // Routes d'authentification
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);

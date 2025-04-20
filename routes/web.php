@@ -1,4 +1,13 @@
 <?php
+
+use App\Http\Controllers\AuditLogCliniqueController;
+use App\Http\Controllers\ChargeController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\FactureController;
+
 use App\Http\Controllers\Api\ChatController;
 
 use App\Http\Controllers\ProfileController;
@@ -28,8 +37,14 @@ Route::get('/sanctum/csrf-cookie', function () {
     return response()->json(['message' => 'CSRF cookie set']);
 });
 
+Route::get('/departments/export', [DepartementController::class, 'export'])->name('departements.export');
+Route::get('/charges/export', [ChargeController::class, 'export'])->name('charges.export');
+Route::get('/payments/export', [PaymentController::class, 'export'])->name('payments.export');
+Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
+Route::get('/audit-logs/export', [AuditLogCliniqueController::class, 'export'])->name('audit_logs.export');
 
-use App\Http\Controllers\FactureController;
+
+
 
 
 Route::get('/typeTraitement', function () {return Inertia::render('Components/Forms/TypeTraitement');});

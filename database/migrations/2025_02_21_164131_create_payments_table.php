@@ -17,8 +17,10 @@ return new class extends Migration
             $table->float('montant');
             $table->date('date');
             $table->boolean('status');
+            $table->enum('payment_method', ['espece', 'carte-bancaire', 'cheque']);
             $table->timestamps();
         });
+        
     }
 
     /**

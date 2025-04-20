@@ -15,14 +15,14 @@ class DepartementImport implements ToModel
      */
     public function model(array $row)
     {
-        
-        if (!isset($row[1]) || !isset($row[2])) {
+        // Skip rows with missing required data
+        if (!isset($row[0]) || !isset($row[1])) {
             return null;
         }
 
         return new Departement([
-            'nom' => $row[1], 
-            'description' => $row[2], 
+            'nom' => $row[0], // First column: Department name
+            'description' => $row[1], // Second column: Department description
         ]);
     }
 }
