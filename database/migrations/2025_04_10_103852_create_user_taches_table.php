@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('taches_id')->references('id')->on('taches')->onDelete('cascade');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->string('status')->default('en cours');
             $table->timestamps();
         });
     }

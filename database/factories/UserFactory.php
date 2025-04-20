@@ -31,7 +31,7 @@ class UserFactory extends Factory
             'telephone' => fake()->phoneNumber(),
             'adresse' => fake()->address(),
             'date_inscription' => now(),
-            'departement_id' => fake()->numberBetween(1, 5), // à adapter selon tes départements
+            'departement_id' => fake()->numberBetween(1, 3), // à adapter selon tes départements
             'password' => Hash::make('password'), // ou bcrypt('password')
             'img_path' => 'default.png', // ou une image de test
             'status' => fake()->boolean(), // à adapter si c'est booléen

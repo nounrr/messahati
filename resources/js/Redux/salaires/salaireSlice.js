@@ -13,10 +13,10 @@ export const fetchSalaires = createAsyncThunk(
 // Create new salaires
 export const createSalaires = createAsyncThunk(
     'salaires/createSalaires',
-    async (salaires, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            await axiosInstance.post('/salaires', { salaires });
-            return salaires;
+            const response = await axiosInstance.post('/salaires', data);
+            return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -26,9 +26,9 @@ export const createSalaires = createAsyncThunk(
 // Update existing salaires
 export const updateSalaires = createAsyncThunk(
     'salaires/updateSalaires',
-    async (salaires, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/salaires', { salaires });
+            const response = await axiosInstance.put('/salaires', data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -41,10 +41,12 @@ export const deleteSalaires = createAsyncThunk(
     'salaires/deleteSalaires',
     async (ids, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.delete('/salaires', { data: { ids } });
-            return response.data;
+            await axiosInstance.delete('/salaires', { 
+                data: { ids: Array.isArray(ids) ? ids : [ids] }
+            });
+            return { ids: Array.isArray(ids) ? ids : [ids] };
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Une erreur est survenue' });
         }
     }
 );

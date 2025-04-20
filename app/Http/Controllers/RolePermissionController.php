@@ -88,5 +88,16 @@ class RolePermissionController extends Controller
 
         return response()->json(['message' => 'Permission assigned successfully.']);
     }
+
+    public function userPermissions($id)
+    {
+        $user = User::with('permissions')->findOrFail($id);
+    
+        return response()->json([
+            'user' => $user->name,
+            'permissions' => $user->getAllPermissions(), // inclut permissions via rôles et directes
+        ]);
+    }
+    
 }
         

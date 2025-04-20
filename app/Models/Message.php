@@ -11,6 +11,8 @@ class Message extends Model
         'date_envoie',
         'heure_envoie',
         'status',
+        'destinataire_id',
+        'emetteure_id'
     ];
     public function destinataire(){
         return $this->belongsTo(User::class,"destinataire_id");

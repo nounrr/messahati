@@ -25,7 +25,8 @@ export const updateTypeTraitements = createAsyncThunk(
     'typeTraitements/updateTypeTraitements',
     async (data, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/type-traitements', data);
+            const { id, ...updateData } = data;
+            const response = await axiosInstance.put(`/type-traitements/${id}`, updateData);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -37,8 +38,10 @@ export const deleteTypeTraitements = createAsyncThunk(
     'typeTraitements/deleteTypeTraitements',
     async (ids, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.delete('/type-traitements', { data: { ids } });
-            return response.data;
+            // Supposons que nous recevons un tableau avec un seul ID
+            const id = ids[0];
+            const response = await axiosInstance.delete(`/type-traitements/${id}`);
+            return { ids };
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
@@ -70,12 +73,10 @@ const typeTraitementSlice = createSlice({
                 state.items.push(...action.payload);
             })
             .addCase(updateTypeTraitements.fulfilled, (state, action) => {
-                action.payload.forEach((updated) => {
-                    const index = state.items.findIndex((item) => item.id === updated.id);
-                    if (index !== -1) {
-                        state.items[index] = updated;
-                    }
-                });
+                const index = state.items.findIndex((item) => item.id === action.payload.id);
+                if (index !== -1) {
+                    state.items[index] = action.payload;
+                }
             })
             .addCase(deleteTypeTraitements.fulfilled, (state, action) => {
                 state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));

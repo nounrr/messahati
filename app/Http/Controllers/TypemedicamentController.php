@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TypeMedicament;
 
-class TypemedicamentController extends Controller
+class TypeMedicamentController extends Controller
 {
     // Liste des types de médicaments
     public function index()
@@ -83,6 +83,6 @@ class TypemedicamentController extends Controller
         $type = TypeMedicament::findOrFail($id);
         $type->delete();
 
-        return redirect()->route('typemedicaments.index')->with('success', 'Type de médicament supprimé avec succès.');
+        return response()->json(['message' => 'Type de médicament supprimé avec succès.'], 200);
     }
 }

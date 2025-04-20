@@ -15,10 +15,10 @@ export const createCharges = createAsyncThunk(
     'charges/createCharges',
     async (charges, { rejectWithValue }) => {
         try {
-            await axiosInstance.post('/charges', { charges });
-            return charges;
+            const response = await axiosInstance.post('/charges', { charges });
+            return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Erreur lors de la création des charges' });
         }
     }
 );
@@ -28,10 +28,10 @@ export const updateCharges = createAsyncThunk(
     'charges/updateCharges',
     async (charges, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/charges', { charges });
+            const response = await axiosInstance.put('/charges', { updates: charges });
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Erreur lors de la mise à jour des charges' });
         }
     }
 );
@@ -42,9 +42,9 @@ export const deleteCharges = createAsyncThunk(
     async (ids, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.delete('/charges', { data: { ids } });
-            return response.data;
+            return { ids };
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Erreur lors de la suppression des charges' });
         }
     }
 );
@@ -65,7 +65,7 @@ export const exportCharges = createAsyncThunk(
             link.click();
             link.remove();
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: 'Erreur lors de l\'exportation des charges' });
         }
     }
 );
@@ -82,6 +82,18 @@ export const importCharges = createAsyncThunk(
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Erreur lors de l\'importation des charges' });
+        }
+    }
+);
+
+export const deleteCharge = createAsyncThunk(
+    'charges/deleteCharge',
+    async (ids, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.delete('/api/charges/bulk', { data: { ids } });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -101,6 +113,7 @@ const chargeSlice = createSlice({
         builder
             .addCase(fetchCharges.pending, (state) => {
                 state.status = 'loading';
+                state.error = null;
             })
             .addCase(fetchCharges.fulfilled, (state, action) => {
                 state.status = 'succeeded';
@@ -110,22 +123,46 @@ const chargeSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.error.message;
             })
+            .addCase(createCharges.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
             .addCase(createCharges.fulfilled, (state, action) => {
-                state.items.push(...action.payload);
+                state.status = 'succeeded';
+                state.items = [...state.items, ...action.payload];
             })
             .addCase(createCharges.rejected, (state, action) => {
+                state.status = 'failed';
                 state.error = action.payload?.message || 'Erreur lors de la création';
             })
+            .addCase(updateCharges.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
             .addCase(updateCharges.fulfilled, (state, action) => {
-                action.payload.forEach((updated) => {
-                    const index = state.items.findIndex((item) => item.id === updated.id);
+                state.status = 'succeeded';
+                action.payload.forEach(updatedCharge => {
+                    const index = state.items.findIndex(item => item.id === updatedCharge.id);
                     if (index !== -1) {
-                        state.items[index] = updated;
+                        state.items[index] = updatedCharge;
                     }
                 });
             })
+            .addCase(updateCharges.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload?.message || 'Erreur lors de la mise à jour';
+            })
+            .addCase(deleteCharges.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
             .addCase(deleteCharges.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
+                state.status = 'succeeded';
+                state.items = state.items.filter(item => !action.payload.ids.includes(item.id));
+            })
+            .addCase(deleteCharges.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload?.message || 'Erreur lors de la suppression';
             })
             .addCase(importCharges.fulfilled, (state, action) => {
                 state.items.push(...action.payload);

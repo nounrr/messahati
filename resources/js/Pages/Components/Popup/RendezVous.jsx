@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
-import { createRendezVous } from '../../../Redux/rendezvous/rendezVousSlice';
+import { createRendezVous } from '../../../Redux/rendezvous/rendezvousSlice';
 import { fetchUsers } from '../../../Redux/users/userSlice';
 import { fetchDepartements } from '../../../Redux/departements/departementSlice';
 import { fetchTraitements } from '../../../Redux/traitements/traitementSlice';
