@@ -134,12 +134,23 @@ const chatSlice = createSlice({
 // Middleware pour la connexion WebSocket
 export const initializeWebSocket = () => (dispatch) => {
     const token = localStorage.getItem('token');
-    
+    const appKey = import.meta.env.VITE_PUSHER_APP_KEY;
+    const appCluster = import.meta.env.VITE_PUSHER_APP_CLUSTER;
+
+    if (!appKey) {
+        console.error('Pusher app key is missing. Please set VITE_PUSHER_APP_KEY in your environment variables.');
+        return;
+    }
+
     const echo = new Echo({
         broadcaster: 'pusher',
         key: import.meta.env.VITE_PUSHER_APP_KEY,
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
         forceTLS: true,
+        wsHost: `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
+        wsPort: 443,
+        wssPort: 443,
+        enabledTransports: ['ws', 'wss'], // Utilisez uniquement WebSocket
         authEndpoint: '/broadcasting/auth',
         auth: {
             headers: {
@@ -172,4 +183,4 @@ export const {
     setConnectionStatus 
 } = chatSlice.actions;
 
-export default chatSlice.reducer; 
+export default chatSlice.reducer;

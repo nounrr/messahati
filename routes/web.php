@@ -157,7 +157,7 @@ Route::get('/ordonnances', function () {
 })->name('ordonnance.view');
 
 Route::get('/payments', function () {
-    return Inertia::render('ListTable/ListePayment');
+    return Inertia::render('ListTable/ListePayments');
 })->name('payment.view');
 
 Route::get('/salaires', function () {

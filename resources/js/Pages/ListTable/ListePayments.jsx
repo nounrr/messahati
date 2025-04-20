@@ -39,6 +39,7 @@ const ListePayments = () => {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Oui, supprimer !',
+            
             cancelButtonText: 'Annuler'
         });
 

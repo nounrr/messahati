@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMedicaments, deleteMedicament } from '../../Redux/medicaments/medicamentSlice';
+import { fetchMedicaments, deleteMedicaments } from '../../Redux/medicaments/medicamentSlice';
 import TableDataLayer from '../Components/tables/TableDataLayer';
 import Medicament from '../Components/Popup/Medicament';
 import Swal from 'sweetalert2';
@@ -42,7 +42,7 @@ function ListeMedicaments() {
     const handleDelete = async (id) => {
         try {
             setIsLoading(true);
-            await dispatch(deleteMedicament(id)).unwrap();
+            await dispatch(deleteMedicaments(id)).unwrap();
             
             Swal.fire({
                 icon: 'success',
