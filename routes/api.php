@@ -152,9 +152,14 @@ Route::post('/remove-role', [RoleController::class, 'removeRole'])->name('api.ro
 Route::post('/assign-role/{userId}', [RoleController::class, 'assign'])->name('api.assign.role');
 Route::get('/user-permissions/{id}', [RolePermissionController::class, 'userPermissions'])->name('api.user.permissions');
 
-Route::post('/send-message', [ChatController::class, 'send']);
-// Route::get('/messages/{user_id}', [ChatController::class, 'getMessages']);
-Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages']);
-Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/send-message', [ChatController::class, 'send']);
+    Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages']);
+    Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
+    Route::get('/chat/users', [ChatController::class, 'getUsers']);
+    Route::get('/chat/messages/{user}', [ChatController::class, 'getMessages']);
+    Route::post('/chat/messages', [ChatController::class, 'sendMessage']);
+    Route::post('/chat/messages/read', [ChatController::class, 'markAsRead']);
+});
 
 // Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);

@@ -10,8 +10,8 @@ use App\Http\Controllers\FactureController;
 
 use App\Http\Controllers\Api\ChatController;
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DepartementController;
+
+
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\ReclamationController;
@@ -65,37 +65,46 @@ Route::get('/', function () {
     ]);
 });
 
-// Routes d'authentification
-Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// Authentication routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-// Dashboard
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
 
-// Pages Inertia
-Route::get('/typeTraitement', function () {
-    return Inertia::render('Components/Forms/TypeTraitement');
-});
-Route::get('/AccesDenied', function () {
-    return Inertia::render('AccesDenied/AccesDenied');
-});
-Route::get('/popup', function () {
-    return Inertia::render('Home');
-});
-Route::get('/home', function () {
-    return Inertia::render('Components/Popup/Departement');
-});
-Route::get('/Bienvenue', function () {
-    return Inertia::render('Bienvenue/Bienvenue');
-});
-Route::get('/AddInfo', function () {
-    return Inertia::render('Bienvenue/AddInfo');
-});
-Route::get('/Departement', function () {
-    return Inertia::render('Components/Popup/Departement');
+    // Application pages
+    Route::get('/typeTraitement', function () {
+        return Inertia::render('Components/Forms/TypeTraitement');
+    });
+    
+    Route::get('/AccesDenied', function () {
+        return Inertia::render('AccesDenied/AccesDenied');
+    });
+    
+    Route::get('/popup', function () {
+        return Inertia::render('Home');
+    });
+    
+    Route::get('/home', function () {
+        return Inertia::render('Components/Popup/Departement');
+    });
+    
+    Route::get('/Bienvenue', function () {
+        return Inertia::render('Bienvenue/Bienvenue');
+    });
+    
+    Route::get('/AddInfo', function () {
+        return Inertia::render('Bienvenue/AddInfo');
+    });
+    
+    Route::get('/Departement', function () {
+        return Inertia::render('Components/Popup/Departement');
+    });
 });
 
 // Routes pour les départements
@@ -130,7 +139,7 @@ Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages'
 Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
 
 // Route pour accéder à la vue du chat
-Route::get('/chat', function () {
+Route::middleware(['auth'])->get('/chat', function () {
     return Inertia::render('Components/Chat/ChatMessageLayer');
 })->name('chat.view');
 
@@ -201,5 +210,16 @@ Route::get('/charges', function () {
 
 
 Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
+
+// Route de test pour créer un paiement
+Route::get('/test-payment', function () {
+    $payment = new App\Models\Payment();
+    $payment->rendez_vous_id = 1;
+    $payment->montant = 100;
+    $payment->date = now();
+    $payment->status = 'payé';
+    $payment->save();
+    return "Paiement créé avec l'ID: " . $payment->id;
+});
 
 require __DIR__.'/auth.php';

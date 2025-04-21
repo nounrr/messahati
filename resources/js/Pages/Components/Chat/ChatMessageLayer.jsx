@@ -13,8 +13,11 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Swal from 'sweetalert2';
+import { router } from '@inertiajs/react';
 
 const ChatMessageLayer = () => {
+    console.log('ChatMessageLayer component mounted');
+    
     const dispatch = useDispatch();
     const messagesEndRef = useRef(null);
     const messageInputRef = useRef(null);
@@ -30,33 +33,78 @@ const ChatMessageLayer = () => {
     } = useSelector(state => state.chat);
 
     const currentUser = useSelector(state => state.auth.user);
+    console.log('Current user:', currentUser);
+
+    // Vérification de l'authentification
+    useEffect(() => {
+        console.log('Checking authentication...');
+        if (!currentUser) {
+            console.log('No current user, redirecting to login');
+            router.get('/login');
+            return;
+        }
+    }, [currentUser]);
 
     // Initialiser la connexion WebSocket
     useEffect(() => {
-        const cleanup = dispatch(initializeWebSocket());
-        return () => {
-            cleanup();
-            dispatch(clearMessages());
-        };
-    }, [dispatch]);
+        console.log('Initializing WebSocket...');
+        if (currentUser) {
+            try {
+                const cleanup = dispatch(initializeWebSocket());
+                console.log('WebSocket initialized');
+                
+                window.Echo.connector.pusher.connection.bind('connected', () => {
+                    console.log('Connected to Pusher!');
+                });
+
+                window.Echo.connector.pusher.connection.bind('disconnected', () => {
+                    console.log('Disconnected from Pusher!');
+                });
+
+                window.Echo.connector.pusher.connection.bind('error', (error) => {
+                    console.error('Pusher error:', error);
+                });
+
+                return () => {
+                    cleanup();
+                    dispatch(clearMessages());
+                };
+            } catch (error) {
+                console.error('Error initializing WebSocket:', error);
+            }
+        }
+    }, [dispatch, currentUser]);
 
     // Charger les utilisateurs au chargement du composant
     useEffect(() => {
-        dispatch(fetchUsers());
-    }, [dispatch]);
+        console.log('Fetching users...');
+        if (currentUser) {
+            dispatch(fetchUsers())
+                .then(() => console.log('Users fetched successfully'))
+                .catch(error => console.error('Error fetching users:', error));
+        }
+    }, [dispatch, currentUser]);
 
     // Charger les messages lorsqu'un utilisateur est sélectionné
     useEffect(() => {
-        if (selectedUser) {
+        if (selectedUser && currentUser) {
             dispatch(fetchSentMessages(selectedUser.id));
             dispatch(fetchReceivedMessages(selectedUser.id));
         }
-    }, [dispatch, selectedUser]);
+    }, [dispatch, selectedUser, currentUser]);
 
     // Défiler vers le bas lors de nouveaux messages
     useEffect(() => {
         scrollToBottom();
     }, [sentMessages, receivedMessages]);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            // Rediriger vers la page de connexion
+            window.location.href = '/login';
+        }
+    }, []);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

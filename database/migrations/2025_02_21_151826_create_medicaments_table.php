@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('nom_medicament'); // SPECIALITE
             $table->string('dosage')->nullable(); // DOSAGE
             $table->string('forme')->nullable(); // FORME
+            $table->date('date_expiration')->nullable(); // DATE EXPIRATION
             $table->string('presentation')->nullable(); // PRESENTATION
             $table->string('substance_active')->nullable(); // SUBSTANCE ACTIVE
             $table->string('classe_therapeutique')->nullable(); // CLASSE THERAPEUTIQUE

@@ -7,10 +7,17 @@ export const sendMessage = createAsyncThunk(
     'chat/sendMessage',
     async ({ receiver_id, message }, { getState }) => {
         const { auth } = getState();
-        const response = await axios.post('/api/messages', {
+        const token = localStorage.getItem('token');
+        const response = await axios.post('/api/send-message', {
             message,
             destinataire_id: receiver_id,
             emetteure_id: auth.user.id
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
         });
         return response.data;
     }
@@ -19,7 +26,13 @@ export const sendMessage = createAsyncThunk(
 export const fetchSentMessages = createAsyncThunk(
     'chat/fetchSentMessages',
     async (receiver_id) => {
-        const response = await axios.get(`/api/messages/sent/${receiver_id}`);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`/api/messages/sent/${receiver_id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
         return response.data.messages;
     }
 );
@@ -27,7 +40,13 @@ export const fetchSentMessages = createAsyncThunk(
 export const fetchReceivedMessages = createAsyncThunk(
     'chat/fetchReceivedMessages',
     async (sender_id) => {
-        const response = await axios.get(`/api/messages/received/${sender_id}`);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`/api/messages/received/${sender_id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
         return response.data.messages;
     }
 );
@@ -35,7 +54,13 @@ export const fetchReceivedMessages = createAsyncThunk(
 export const fetchUsers = createAsyncThunk(
     'chat/fetchUsers',
     async () => {
-        const response = await axios.get('/api/users');
+        const token = localStorage.getItem('token');
+        const response = await axios.get('/api/users', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
         return response.data;
     }
 );
@@ -133,7 +158,9 @@ const chatSlice = createSlice({
 
 // Middleware pour la connexion WebSocket
 export const initializeWebSocket = () => (dispatch) => {
+    console.log('Initializing WebSocket...');
     const token = localStorage.getItem('token');
+    console.log('Token:', token);
     
     const echo = new Echo({
         broadcaster: 'pusher',
@@ -148,6 +175,14 @@ export const initializeWebSocket = () => (dispatch) => {
                 'Content-Type': 'application/json'
             }
         }
+    });
+
+    echo.connector.pusher.connection.bind('connected', () => {
+        console.log('Connected to Pusher!');
+    });
+
+    echo.connector.pusher.connection.bind('disconnected', () => {
+        console.log('Disconnected from Pusher!');
     });
 
     // Écouter les messages privés
