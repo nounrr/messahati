@@ -19,4 +19,12 @@ class Traitement extends Model
     public function certificatMedicales(){
         return $this->hasMany(CertificatMedicale::class);
     }
+
+    /**
+     * Relation avec le modèle Document.
+     */
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
 }

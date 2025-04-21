@@ -1,8 +1,15 @@
 <?php
-use App\Http\Controllers\Api\ChatController;
 
+use App\Http\Controllers\AuditLogCliniqueController;
+use App\Http\Controllers\ChargeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\FactureController;
+
+use App\Http\Controllers\Api\ChatController;
+
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\ReclamationController;
@@ -28,7 +35,25 @@ Route::get('/sanctum/csrf-cookie', function () {
     return response()->json(['message' => 'CSRF cookie set']);
 });
 
-// Routes publiques
+Route::get('/departments/export', [DepartementController::class, 'export'])->name('departements.export');
+Route::get('/charges/export', [ChargeController::class, 'export'])->name('charges.export');
+Route::get('/payments/export', [PaymentController::class, 'export'])->name('payments.export');
+Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
+Route::get('/audit-logs/export', [AuditLogCliniqueController::class, 'export'])->name('audit_logs.export');
+
+
+
+
+
+Route::get('/typeTraitement', function () {return Inertia::render('Components/Forms/TypeTraitement');});
+Route::get('/AccesDenied', function () {return Inertia::render('AccesDenied/AccesDenied');});
+Route::get('/popup', function () {return Inertia::render('Home');});
+Route::get('/home', function () {return Inertia::render('Components/Popup/Departement');});
+Route::get('/Bienvenue', function () {return Inertia::render('Bienvenue/Bienvenue');});
+Route::get('/AddInfo', function () {return Inertia::render('Bienvenue/AddInfo');});
+Route::get('/Departement', function () {return Inertia::render('Components/Popup/Departement');});
+// Route::get('/Departement', function () {return Inertia::render('Components/DepartementCreate');});
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -74,10 +99,12 @@ Route::get('/Departement', function () {
 // Routes pour les départements
 Route::get('/export', [DepartementController::class, 'export'])->name('departements.export');
 
+
 // Routes pour les réclamations, feedbacks et mutuels - protégées par auth
 Route::middleware(['auth'])->resource('reclamation', ReclamationController::class);
 Route::resource('feedback', FeedbackController::class);
 Route::resource('mutuel', MutuelController::class);
+
 
 // Routes pour les vues des rôles et permissions
 Route::get('/roles', function () {
@@ -91,6 +118,7 @@ Route::get('/assign-roles', function () {
 // Routes pour l'attribution des rôles (vues)
 Route::get('/assign-role', [RoleController::class, 'index'])->name('roles.assign');
 
+
 // Route pour les rôles et permissions
 Route::get('/role-permissions', [RolePermissionController::class, 'roles'])->name('role.permissions');
 
@@ -99,10 +127,16 @@ Route::post('/send-message', [ChatController::class, 'send']);
 Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages']);
 Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
 
+
+Route::get('/rdv', function () {
+    return Inertia::render('Components/RDV/CalendarMainLayer');
+})->name('rdv.view');
+
 // Route pour accéder à la vue du chat
 Route::get('/chat', function () {
     return Inertia::render('Components/Chat/ChatMessageLayer');
 })->name('chat.view');
+
 
 // Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);
 
@@ -110,6 +144,11 @@ Route::get('/chat', function () {
 Route::get('/type-partenaires', function () {
     return Inertia::render('ListTable/ListeTypePartenaires');
 })->name('type-partenaires.view'); //done
+
+// Route pour gérer les permissions directes des utilisateurs
+Route::get('/model-permissions', function () {
+    return Inertia::render('Components/ModelPermissionManager');
+})->name('model-permissions.view');
 
 Route::get('/type-medicaments', function () {
     return Inertia::render('ListTable/ListeTypeMedicaments');
@@ -168,5 +207,8 @@ Route::get('/charges', function () {
     return Inertia::render('ListTable/ListeCharges');
 })->name('charges.view'); //Done
 
+
+
+Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
 
 require __DIR__.'/auth.php';

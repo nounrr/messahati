@@ -10,7 +10,12 @@ class RendezVousController extends Controller
     // Liste des rendez-vous
     public function index()
     {
-        $rendezVous = RendezVous::all();
+        $rendezVous = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])->get();
         return response()->json($rendezVous);
     }
 
@@ -48,17 +53,32 @@ class RendezVousController extends Controller
             $createdItems[] = $rendezVous;
         }
 
-        return response()->json($createdItems, 201);
+        // Charger les relations pour les éléments créés
+        $createdItemsWithRelations = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])
+            ->whereIn('id', collect($createdItems)->pluck('id'))
+            ->get();
+
+        return response()->json($createdItemsWithRelations, 201);
     }
 
     // Affiche un rendez-vous spécifique
     public function show(string $id)
     {
-        $rendezVous = RendezVous::findOrFail($id);
+        $rendezVous = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])->findOrFail($id);
         return response()->json($rendezVous);
     }
 
-    // Formulaire d’édition
+    // Formulaire d'édition
     public function edit(string $id)
     {
         $rendezVous = RendezVous::findOrFail($id);
@@ -79,7 +99,7 @@ class RendezVousController extends Controller
             'updates.*.statut' => 'required'
         ]);
 
-        $updatedItems = [];
+        $updatedIds = [];
 
         foreach ($validated['updates'] as $data) {
             $rendezVous = RendezVous::findOrFail($data['id']);
@@ -91,13 +111,23 @@ class RendezVousController extends Controller
             $rendezVous->statut = $data['statut'];
             $rendezVous->save();
 
-            $updatedItems[] = $rendezVous;
+            $updatedIds[] = $rendezVous->id;
         }
 
-        return response()->json($updatedItems, 200);
+        // Charger les relations pour les éléments mis à jour
+        $updatedItemsWithRelations = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])
+            ->whereIn('id', $updatedIds)
+            ->get();
+
+        return response()->json($updatedItemsWithRelations, 200);
     }
 
-    // Suppression d’un ou plusieurs rendez-vous
+    // Suppression d'un ou plusieurs rendez-vous
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {

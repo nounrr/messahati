@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('telephone');
             $table->string('adresse');
-            $table->date('date_inscription');
+            $table->date('date_naissance');
             $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
             $table->string('password');
             $table->string('img_path')->nullable();

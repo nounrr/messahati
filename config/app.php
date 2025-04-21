@@ -4,6 +4,18 @@ use Illuminate\Support\ServiceProvider;
 
 return [
 
+    'providers' => [
+        // ...existing providers...
+        Barryvdh\DomPDF\ServiceProvider::class,
+        Illuminate\Filesystem\FilesystemServiceProvider::class,
+    ],
+
+    'aliases' => [
+        // ...existing code...
+        'PDF' => Barryvdh\DomPDF\Facade::class,
+        'File' => Illuminate\Support\Facades\File::class,
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

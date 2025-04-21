@@ -27,21 +27,22 @@ class FeedbackController extends Controller
     {
         $validated = $request->validate([
             'feedbacks' => 'required|array',
-            'feedbacks.*.titre' => 'required|string',
             'feedbacks.*.contenu' => 'required|string',
-            'feedbacks.*.note' => 'required|numeric|min:1|max:5',
-            'feedbacks.*.statut' => 'required|string|in:en_attente,traite,ignore'
+            'feedbacks.*.rating' => 'required|numeric|min:1|max:5',
+            'feedbacks.*.user_id' => 'required|exists:users,id'
         ]);
 
         $createdItems = [];
 
         foreach ($validated['feedbacks'] as $data) {
             $feedback = new Feedback();
-            $feedback->user_id = Auth::id(); // Utiliser l'utilisateur connecté
-            $feedback->titre = $data['titre'];
+            $feedback->user_id = $data['user_id'];
             $feedback->contenu = $data['contenu'];
-            $feedback->note = $data['note'];
-            $feedback->statut = $data['statut'];
+            $feedback->rating = $data['rating'];
+            // Le status est true (1) par défaut pour "en attente"
+            $feedback->status = true;
+            // Ajout de la date actuelle
+            $feedback->date = now()->toDateString();
             $feedback->save();
 
             $feedback->load('user'); // Charger la relation utilisateur
@@ -71,17 +72,13 @@ class FeedbackController extends Controller
         $feedback = Feedback::findOrFail($id);
 
         $validated = $request->validate([
-            'titre' => 'required|string',
             'contenu' => 'required|string',
-            'note' => 'required|numeric|min:1|max:5',
-            'statut' => 'required|string|in:en_attente,traite,ignore'
+            'rating' => 'required|numeric|min:1|max:5'
         ]);
 
-        $feedback->titre = $validated['titre'];
         $feedback->contenu = $validated['contenu'];
-        $feedback->note = $validated['note'];
-        $feedback->statut = $validated['statut'];
-        // On ne modifie pas le user_id lors de la mise à jour
+        $feedback->rating = $validated['rating'];
+        // On ne modifie pas le status lors de la mise à jour via cette méthode
         $feedback->save();
 
         $feedback->load('user'); // Charger la relation utilisateur

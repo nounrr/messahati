@@ -30,10 +30,19 @@ use App\Http\Controllers\CertificatsMedicaleController;
 use App\Http\Controllers\AuditLogCliniqueController;
 use App\Http\Controllers\AttachementController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ModelPermissionController;
+
+// Route for importing partenaires
+Route::post('/partenaires/import', [PartenaireController::class, 'import'])->name('partenaires.import');
+Route::post('/departements/import', [DepartementController::class, 'import'])->name('departements.import');
+Route::post('/type-traitements/import', [TypeTraitementController::class, 'import'])->name('type_traitements.import');
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user(); // Retourne l'utilisateur authentifié
+    $user = $request->user()->load('roles');
+    return $user;
 });
+
 
 // Routes d'authentification
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -86,6 +95,7 @@ Route::resource('rendez-vous', RendezVousController::class);
 // routes/api.php
 
 Route::resource('reclamations', ReclamationController::class);
+Route::delete('/reclamations', [ReclamationController::class, 'destroy'])->name('reclamations.destroy.multiple');
 
 // Routes pour les paiements
 Route::resource('payments', PaymentController::class);
@@ -150,3 +160,12 @@ Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages'
 Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
 
 // Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);
+
+// Routes API pour les model_has_permissions
+Route::prefix('model-permissions')->group(function () {
+    Route::get('/', [ModelPermissionController::class, 'index'])->name('api.model-permissions.index');
+    Route::get('/user/{userId}', [ModelPermissionController::class, 'getUserPermissions'])->name('api.model-permissions.user');
+    Route::post('/', [ModelPermissionController::class, 'store'])->name('api.model-permissions.store');
+    Route::delete('/', [ModelPermissionController::class, 'destroy'])->name('api.model-permissions.destroy');
+    Route::delete('/bulk', [ModelPermissionController::class, 'bulkDestroy'])->name('api.model-permissions.bulk-destroy');
+});

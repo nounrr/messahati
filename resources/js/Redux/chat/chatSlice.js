@@ -49,7 +49,9 @@ const initialState = {
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
     isConnected: false,
-    users: []
+    users: [],
+    isOpen: true,
+    unreadMessages: 0
 };
 
 // Slice
@@ -77,6 +79,12 @@ const chatSlice = createSlice({
         },
         setConnectionStatus: (state, action) => {
             state.isConnected = action.payload;
+        },
+        setChatOpen: (state, action) => {
+            state.isOpen = action.payload;
+        },
+        resetUnreadMessages: (state) => {
+            state.unreadMessages = 0;
         }
     },
     extraReducers: (builder) => {
@@ -180,7 +188,9 @@ export const {
     toggleProfile, 
     clearMessages, 
     addMessage, 
-    setConnectionStatus 
+    setConnectionStatus,
+    setChatOpen,
+    resetUnreadMessages
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\AuditLogClinique;
+use App\Exports\AuditLogCliniqueExport;
+use App\Traits\ExcelExportImport;
 
 class AuditLogCliniqueController extends Controller
 {
@@ -84,5 +86,12 @@ class AuditLogCliniqueController extends Controller
         $auditLog->delete();
 
         return redirect()->route('audit_logs.index')->with('success', 'Audit log supprimé avec succès.');
+    }
+
+    use ExcelExportImport;
+
+    public function export()
+    {
+        return $this->exportExcel(AuditLogCliniqueExport::class, 'audit_logs.xlsx', null);
     }
 }

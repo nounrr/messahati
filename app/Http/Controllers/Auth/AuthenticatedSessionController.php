@@ -32,7 +32,8 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-
+        // dd($request->session()->all());
+// 
         return redirect()->intended(route('reclamations.view', absolute: false));
     }
 

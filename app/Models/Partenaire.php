@@ -12,8 +12,7 @@ class Partenaire extends Model
         'telephone',
         'typepartenaires_id'
     ];
-    
-   
+
     public function charges(){
         return $this->hasMany(Charge::class);
     }

@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Charge;
+use App\Exports\ChargeExport;
+use App\Traits\ExcelExportImport;
 
 class ChargeController extends Controller
 {
+    use ExcelExportImport;
+
     public function index()
     {
         $charges = Charge::with('partenaire')->get();
@@ -105,5 +109,10 @@ class ChargeController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error deleting charges', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function export()
+    {
+        return $this->exportExcel(ChargeExport::class, 'charges.xlsx', null);
     }
 }

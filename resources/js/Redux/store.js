@@ -19,7 +19,9 @@ import notificationReducer from './notifications/notificationSlice';
 import mutuelReducer from './mutuels/mutuelSlice';
 import feedbackReducer from './feedbacks/feedbackSlice';
 import typeMedicamentReducer from './typeMedicaments/typeMedicamentSlice';
-import rolePermissionReducer from './rolePermissions/rolePermissionSlice';
+import permissionReducer from './permissions/permissionSlice';
+import roleReducer from './roles/roleSlice';
+import modelPermissionReducer from './modelPermissions/modelPermissionSlice';
 import chatReducer from './chat/chatSlice';
 import authReducer from './auth/authSlice';
 import chargeReducer from './charges/chargeSlice';
@@ -46,7 +48,9 @@ const store = configureStore({
         mutuels: mutuelReducer,
         feedbacks: feedbackReducer,
         typeMedicaments: typeMedicamentReducer,
-        rolePermissions: rolePermissionReducer,
+        permissions: permissionReducer,
+        roles: roleReducer,
+        modelPermissions: modelPermissionReducer,
         chat: chatReducer,
         auth: authReducer,
         charges: chargeReducer,

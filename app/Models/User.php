@@ -62,6 +62,23 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Accesseur pour obtenir le rôle principal de l'utilisateur
+     * 
+     * @return string|null
+     */
+    public function getRoleAttribute()
+    {
+        $role = $this->roles->first();
+        return $role ? $role->name : null;
+    }
+
+    /**
+     * Ajouter le rôle aux attributs visibles lors d'une conversion en tableau ou JSON
+     */
+    protected $appends = ['role'];
+
     public function taches(){
             return $this->belongsToMany(Tache::class)->using(UserTache::class)->withPivot( 'status');
      }
@@ -89,5 +106,15 @@ class User extends Authenticatable
     }
     public function departement(){
         return $this->belongsTo(Departement::class);
+    }
+
+    /**
+     * Relation avec les médicaments via la table pharmacie_user.
+     */
+    public function medicaments()
+    {
+        return $this->belongsToMany(Medicament::class, 'pharmacie_user')
+                    ->withPivot('payment', 'statut', 'quantite')
+                    ->withTimestamps();
     }
 }

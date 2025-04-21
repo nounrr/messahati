@@ -4,16 +4,16 @@ import axiosInstance from '../../utils/axiosInstance';
 export const fetchRendezVous = createAsyncThunk(
     'rendezvous/fetchRendezVous',
     async () => {
-        const response = await axiosInstance.get('/rendezvous');
+        const response = await axiosInstance.get('/rendez-vous');
         return response.data;
     }
 );
 
 export const createRendezVous = createAsyncThunk(
     'rendezvous/createRendezVous',
-    async (rendezvous, { rejectWithValue }) => {
+    async (rendezVous, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/rendezvous', { rendezvous });
+            const response = await axiosInstance.post('/rendez-vous', { rendez_vous: rendezVous });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -23,9 +23,9 @@ export const createRendezVous = createAsyncThunk(
 
 export const updateRendezVous = createAsyncThunk(
     'rendezvous/updateRendezVous',
-    async (rendezvous, { rejectWithValue }) => {
+    async (updates, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/rendezvous', { rendezvous });
+            const response = await axiosInstance.put('/rendez-vous', { updates });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -37,7 +37,7 @@ export const deleteRendezVous = createAsyncThunk(
     'rendezvous/deleteRendezVous',
     async (ids, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.delete('/rendezvous', { data: { ids } });
+            const response = await axiosInstance.delete('/rendez-vous', { data: { ids } });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

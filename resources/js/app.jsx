@@ -17,6 +17,7 @@ import MasterLayout from './masterLayout/MasterLayout';
 import { Provider } from 'react-redux';
 import store from './Redux/store';
 import AuthProvider from './AuthProvider';
+import AuthenticatedLayout from './Layouts/AuthenticatedLayout';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -32,10 +33,11 @@ createInertiaApp({
         root.render(
             <Provider store={store}>
         <BrowserRouter>
-        <AuthProvider>
-        <App {...props} />
-        </AuthProvider>
+            <MasterLayout>
+                <App {...props} />
+            </MasterLayout>
         </BrowserRouter>
+
         </Provider>
     
     );
