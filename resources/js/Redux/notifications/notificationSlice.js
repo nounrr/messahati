@@ -1,116 +1,54 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosInstance from '../../utils/axiosInstance';
+import axios from 'axios';
 
-// Fetch all notifications
+// Configuration d'Axios
+const axiosInstance = axios.create({
+    baseURL: '/api',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    withCredentials: true
+});
+
+// Thunks
 export const fetchNotifications = createAsyncThunk(
     'notifications/fetchNotifications',
-    async () => {
-        const response = await axiosInstance.get('/notifications');
-        return response.data;
-    }
-);
-
-// Create new notifications
-export const createNotifications = createAsyncThunk(
-    'notifications/createNotifications',
-    async (notifications, { rejectWithValue }) => {
-        try {
-            const formData = new FormData();
-            notifications.forEach((notification, index) => {
-                Object.entries(notification).forEach(([key, value]) => {
-                    if (key === 'image' && value instanceof File) {
-                        formData.append(`notifications[${index}][image]`, value);
-                    } else {
-                        formData.append(`notifications[${index}][${key}]`, value);
-                    }
-                });
-            });
-
-            const response = await axiosInstance.post('/notifications', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
-    }
-);
-
-// Update existing notifications
-export const updateNotifications = createAsyncThunk(
-    'notifications/updateNotifications',
-    async (notifications, { rejectWithValue }) => {
-        try {
-            const formData = new FormData();
-            notifications.forEach((notification, index) => {
-                Object.entries(notification).forEach(([key, value]) => {
-                    if (key === 'image' && value instanceof File) {
-                        formData.append(`notifications[${index}][image]`, value);
-                    } else {
-                        formData.append(`notifications[${index}][${key}]`, value);
-                    }
-                });
-            });
-
-            const response = await axiosInstance.put('/notifications', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
-    }
-);
-
-// Delete notifications
-export const deleteNotifications = createAsyncThunk(
-    'notifications/deleteNotifications',
-    async (ids, { rejectWithValue }) => {
-        try {
-            const response = await axiosInstance.delete('/notifications', { data: { ids } });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
-    }
-);
-
-// Export notifications
-export const exportNotifications = createAsyncThunk(
-    'notifications/exportNotifications',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.get('/notifications/export', {
-                responseType: 'blob',
-            });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'notifications.xlsx');
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            const response = await axiosInstance.get('/notifications');
+            return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            console.error('Erreur détaillée:', error.response);
+            return rejectWithValue(error.response?.data || 'Erreur lors de la récupération des notifications');
         }
     }
 );
 
-// Import notifications
-export const importNotifications = createAsyncThunk(
-    'notifications/importNotifications',
-    async (file, { rejectWithValue }) => {
+export const markNotificationAsRead = createAsyncThunk(
+    'notifications/markAsRead',
+    async (notificationId, { rejectWithValue }) => {
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-            const response = await axiosInstance.post('/notifications/import', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            return response.data;
+            await axiosInstance.put(`/notifications/${notificationId}/mark-as-read`);
+            return notificationId;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            console.error('Erreur détaillée:', error.response);
+            return rejectWithValue(error.response?.data || 'Erreur lors du marquage de la notification');
+        }
+    }
+);
+
+export const deleteNotification = createAsyncThunk(
+    'notifications/delete',
+    async (notificationId, { rejectWithValue }) => {
+        try {
+            await axiosInstance.delete(`/notifications/${notificationId}`);
+            return notificationId;
+        } catch (error) {
+            console.error('Erreur détaillée:', error.response);
+            return rejectWithValue(error.response?.data || 'Erreur lors de la suppression de la notification');
         }
     }
 );
@@ -119,14 +57,16 @@ const notificationSlice = createSlice({
     name: 'notifications',
     initialState: {
         items: [],
-        status: 'idle',
-        error: null,
+        status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+        error: null
     },
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // fetchNotifications
             .addCase(fetchNotifications.pending, (state) => {
                 state.status = 'loading';
+                state.error = null;
             })
             .addCase(fetchNotifications.fulfilled, (state, action) => {
                 state.status = 'succeeded';
@@ -134,29 +74,20 @@ const notificationSlice = createSlice({
             })
             .addCase(fetchNotifications.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.error.message;
+                state.error = action.payload;
             })
-            .addCase(createNotifications.fulfilled, (state, action) => {
-                state.items.push(...action.payload);
+            // markNotificationAsRead
+            .addCase(markNotificationAsRead.fulfilled, (state, action) => {
+                const notification = state.items.find(item => item.id === action.payload);
+                if (notification) {
+                    notification.statut = true;
+                }
             })
-            .addCase(createNotifications.rejected, (state, action) => {
-                state.error = action.payload?.message || 'Erreur lors de la création';
-            })
-            .addCase(updateNotifications.fulfilled, (state, action) => {
-                action.payload.forEach((updated) => {
-                    const index = state.items.findIndex((item) => item.id === updated.id);
-                    if (index !== -1) {
-                        state.items[index] = updated;
-                    }
-                });
-            })
-            .addCase(deleteNotifications.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
-            })
-            .addCase(importNotifications.fulfilled, (state, action) => {
-                state.items.push(...action.payload);
+            // deleteNotification
+            .addCase(deleteNotification.fulfilled, (state, action) => {
+                state.items = state.items.filter(item => item.id !== action.payload);
             });
-    },
+    }
 });
 
 export default notificationSlice.reducer; 

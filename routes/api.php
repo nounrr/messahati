@@ -109,7 +109,11 @@ Route::resource('medicaments', MedicamentController::class);
 Route::resource('mutuels', MutuelController::class);
 
 // Routes pour les notifications
-Route::resource('notifications', NotificationController::class);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'getNotifications']);
+    Route::put('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+});
 
 // Routes pour les messages
 Route::resource('messages', MessageController::class);

@@ -102,3 +102,9 @@ Route::resource('mutuel', MutuelController::class);
 
 
 require __DIR__.'/auth.php';
+
+// Route pour le service worker Firebase
+Route::get('/firebase-messaging-sw.js', function () {
+    return response()->file(public_path('firebase-messaging-sw.js'))
+        ->header('Content-Type', 'application/javascript');
+});

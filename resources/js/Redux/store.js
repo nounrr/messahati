@@ -45,6 +45,10 @@ const store = configureStore({
         typeMedicaments: typeMedicamentReducer,
         rolePermissions: rolePermissionReducer,
     },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            serializableCheck: false,
+        }),
 });
 
 export default store;

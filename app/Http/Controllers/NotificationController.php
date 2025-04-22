@@ -4,16 +4,62 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
     /**
-     * Affiche toutes les notifications.
+     * Récupérer toutes les notifications de l'utilisateur
      */
     public function index()
     {
-        $notifications = Notification::all();
+        $notifications = Auth::user()->notifications()
+            ->with(['users' => function ($query) {
+                $query->select('users.id', 'notification_users.message');
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return response()->json($notifications);
+    }
+
+    /**
+     * Marquer une notification comme lue
+     */
+    public function markAsRead($id)
+    {
+        $notification = Auth::user()->notifications()->findOrFail($id);
+        $notification->statut = true;
+        $notification->save();
+        return response()->json(['message' => 'Notification marquée comme lue']);
+    }
+
+    /**
+     * Supprimer une notification
+     */
+    public function destroy($id)
+    {
+        $notification = Auth::user()->notifications()->findOrFail($id);
+        $notification->delete();
+        return response()->json(['message' => 'Notification supprimée']);
+    }
+
+    /**
+     * Marquer toutes les notifications comme lues
+     */
+    public function markAllAsRead()
+    {
+        Auth::user()->notifications()->update(['statut' => true]);
+        return response()->json(['message' => 'Toutes les notifications ont été marquées comme lues']);
+    }
+
+    /**
+     * Supprimer toutes les notifications
+     */
+    public function destroyAll()
+    {
+        Auth::user()->notifications()->delete();
+        return response()->json(['message' => 'Toutes les notifications ont été supprimées']);
     }
 
     /**
@@ -61,7 +107,9 @@ class NotificationController extends Controller
      */
     public function show($id)
     {
-        $notification = Notification::findOrFail($id);
+        $notification = Notification::with(['users' => function ($query) {
+            $query->select('users.id', 'notification_users.message');
+        }])->findOrFail($id);
         return response()->json($notification);
     }
 
@@ -89,18 +137,7 @@ class NotificationController extends Controller
         $notification->statut = $validatedData['statut'];
         $notification->save();
 
-        return redirect()->route('notifications.index')->with('success', 'Notification mise à jour avec succès.');
-    }
-
-    /**
-     * Supprime une notification.
-     */
-    public function destroy($id)
-    {
-        $notification = Notification::findOrFail($id);
-        $notification->delete();
-
-        return redirect()->route('notifications.index')->with('success', 'Notification supprimée avec succès.');
+        return response()->json(['message' => 'Notification mise à jour avec succès']);
     }
 
     public function getReclamationNotifications($userId)
@@ -112,6 +149,40 @@ class NotificationController extends Controller
             ->with(['users' => function ($query) {
                 $query->select('users.id', 'notification_users.message');
             }])
+            ->get();
+
+        return response()->json($notifications);
+    }
+
+    public function saveToken(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string'
+        ]);
+
+        $user = Auth::user();
+        $user->notification_token = $request->token;
+        $user->save();
+
+        return response()->json(['message' => 'Token saved successfully']);
+    }
+
+    public function getNotifications()
+    {
+        $user = Auth::user();
+        
+        // Récupérer les notifications avec leurs messages
+        $notifications = $user->notifications()
+            ->join('notification_users', 'notifications.id', '=', 'notification_users.notification_id')
+            ->select(
+                'notifications.id',
+                'notifications.type',
+                'notifications.date',
+                'notifications.statut',
+                'notifications.created_at',
+                'notification_users.message'
+            )
+            ->orderBy('notifications.created_at', 'desc')
             ->get();
 
         return response()->json($notifications);
