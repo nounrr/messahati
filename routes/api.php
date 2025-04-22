@@ -154,3 +154,12 @@ Route::get('/certificat-medical/{id}', [CertificatsMedicaleController::class, 'g
 
 
 Route::get('/patient/{id}/rapport-medical', [CertificatsMedicaleController::class, 'generatePatientReport'])->name('patient.rapport');
+
+// Routes pour le chat
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/send-message', [ChatController::class, 'send']);
+    Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages']);
+    Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
+    Route::get('/messages/conversation/{user_id1}/{user_id2}', [ChatController::class, 'getConversation']);
+    Route::put('/messages/{message_id}/read', [ChatController::class, 'markAsRead']);
+});
