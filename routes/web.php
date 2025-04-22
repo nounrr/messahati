@@ -207,6 +207,10 @@ Route::get('/charges', function () {
     return Inertia::render('ListTable/ListeCharges');
 })->name('charges.view'); //Done
 
+Route::get('/planning-meds', function () {
+    return Inertia::render('Components/PlanningMeds/PlanningMeds');
+});
+
 
 
 Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
