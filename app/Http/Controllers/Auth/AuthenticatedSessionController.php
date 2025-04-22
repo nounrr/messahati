@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\JsonResponse;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -27,13 +28,25 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): JsonResponse|RedirectResponse
     {
         $request->authenticate();
 
+        // Si la requête attend une réponse JSON (API)
+        if ($request->expectsJson()) {
+            $user = Auth::user();
+            $token = $user->createToken('auth-token')->plainTextToken;
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Authentification réussie',
+                'token' => $token,
+                'user' => $user
+            ]);
+        }
+
+        // Pour les requêtes web normales
         $request->session()->regenerate();
-        // dd($request->session()->all());
-// 
         return redirect()->intended(route('reclamations.view', absolute: false));
     }
 

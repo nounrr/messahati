@@ -52,15 +52,19 @@ return [
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'useTLS' => true,
-                'encrypted' => true,
-                'host' => '127.0.0.1',
-                'port' => 6001,
+                'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
+                'useTLS' => false,
+                'encrypted' => false,
+                'host' => 'api-mt1.pusher.com',
+                'port' => 80,
                 'scheme' => 'http'
             ],
             'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+                'verify' => false,
+                'curl' => [
+                    CURLOPT_SSL_VERIFYHOST => 0,
+                    CURLOPT_SSL_VERIFYPEER => 0,
+                ],
             ],
         ],
 

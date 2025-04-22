@@ -152,4 +152,6 @@ return [
         App\Providers\RouteServiceProvider::class,
     ])->toArray(),
 
+    'timeout' => 120,
+
 ];
