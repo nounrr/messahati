@@ -9,6 +9,7 @@ use App\Models\Notification;
 use App\Models\Rendezvous;
 use App\Models\Role;
 
+
 class PaymentController extends Controller
 {
     // Affiche la liste des paiements
@@ -33,17 +34,15 @@ class PaymentController extends Controller
             'payments.*.montant' => 'required|numeric',
             'payments.*.date' => 'required|date',
             'payments.*.status' => 'required|in:0,1' // 0 = non payé, 1 = payé
+
         ]);
 
-        $createdItems = [];
+        $payment = Payment::create($validatedData);
 
-        foreach ($validated['payments'] as $data) {
-            $payment = new Payment();
-            $payment->rendez_vous_id = $data['rendez_vous_id'];
-            $payment->montant = $data['montant'];
-            $payment->date = $data['date'];
-            $payment->status = $data['status'];
-            $payment->save();
+        // Get the associated appointment and users
+        $rendezvous = RendezVous::with('patient')->findOrFail($payment->rendez_vous_id);
+        $patient = $rendezvous->patient;
+        $admin = User::role('admin-financier')->first();
 
             // Récupérer le rendez-vous et les utilisateurs concernés
             $rendezvous = Rendezvous::with(['patient', 'docteur'])->find($data['rendez_vous_id']);
@@ -78,9 +77,10 @@ class PaymentController extends Controller
             }
 
             $createdItems[] = $payment;
+
         }
 
-        return response()->json($createdItems, 201);
+        return response()->json(['message' => 'Payment created successfully', 'payment' => $payment]);
     }
 
     // Affiche un paiement
@@ -98,7 +98,7 @@ class PaymentController extends Controller
     }
 
     // Met à jour plusieurs paiements (instanciation explicite)
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'updates' => 'required|array',
@@ -107,9 +107,15 @@ class PaymentController extends Controller
             'updates.*.montant' => 'required|numeric',
             'updates.*.date' => 'required|date',
             'updates.*.status' => 'required|in:0,1' // 0 = non payé, 1 = payé
+
         ]);
 
-        $updatedItems = [];
+        $payment->update($validatedData);
+
+        // Get the associated appointment and users
+        $rendezvous = RendezVous::with('patient')->findOrFail($payment->rendez_vous_id);
+        $patient = $rendezvous->patient;
+        $admin = User::role('admin-financier')->first();
 
         foreach ($validated['updates'] as $data) {
             $payment = Payment::findOrFail($data['id']);
@@ -154,9 +160,10 @@ class PaymentController extends Controller
             }
 
             $updatedItems[] = $payment;
+
         }
 
-        return response()->json($updatedItems, 200);
+        return response()->json(['message' => 'Payment updated successfully', 'payment' => $payment]);
     }
 
     // Supprime un paiement
@@ -197,5 +204,6 @@ class PaymentController extends Controller
 
         $payment->delete();
         return response()->json(null, 204);
+
     }
 }
