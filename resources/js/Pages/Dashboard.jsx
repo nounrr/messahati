@@ -5,12 +5,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchUsers } from '@/Redux/users/userSlice';
 import { fetchAllPermissions } from '@/Redux/permissions/permissionSlice';
 import { fetchAllRoles } from '@/Redux/roles/roleSlice';
+import { fetchDepartements } from '@/Redux/departements/departementSlice';
 
 export default function Dashboard() {
     const dispatch = useDispatch();
     const { items: users, status: usersStatus, error: usersError } = useSelector((state) => state.users);
     const { items: allPermissions, status: permissionsStatus, error: permissionsError } = useSelector((state) => state.permissions);
     const { items: allRoles, status: rolesStatus, error: rolesError } = useSelector((state) => state.roles);
+    const { items: departements, status: departementsStatus, error: departementsError } = useSelector((state) => state.departements);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedUser, setSelectedUser] = useState(null);
     
@@ -23,7 +25,8 @@ export default function Dashboard() {
             await Promise.all([
                 dispatch(fetchUsers()),
                 dispatch(fetchAllPermissions()),
-                dispatch(fetchAllRoles())
+                dispatch(fetchAllRoles()),
+                dispatch(fetchDepartements())
             ]);
             
             setIsLoading(false);
@@ -38,7 +41,7 @@ export default function Dashboard() {
     };
     
     // Gérer les erreurs
-    const error = usersError || permissionsError || rolesError;
+    const error = usersError || permissionsError || rolesError || departementsError;
     
     return (
         <AuthenticatedLayout
@@ -66,7 +69,7 @@ export default function Dashboard() {
                                 <div>
                                     <p>Vous êtes connecté!</p>
                                     
-                                    <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+                                    <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4">
                                         <div className="rounded-lg border border-gray-200 bg-white p-4 shadow">
                                             <h3 className="mb-3 text-lg font-semibold">Utilisateurs</h3>
                                             <p className="text-xl font-bold text-blue-600">{users.length}</p>
@@ -83,6 +86,12 @@ export default function Dashboard() {
                                             <h3 className="mb-3 text-lg font-semibold">Rôles</h3>
                                             <p className="text-xl font-bold text-green-600">{allRoles.length}</p>
                                             <p className="text-sm text-gray-500">Total des rôles disponibles</p>
+                                        </div>
+
+                                        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow">
+                                            <h3 className="mb-3 text-lg font-semibold">Départements</h3>
+                                            <p className="text-xl font-bold text-orange-600">{departements.length}</p>
+                                            <p className="text-sm text-gray-500">Total des départements</p>
                                         </div>
                                     </div>
                                     
@@ -111,14 +120,31 @@ export default function Dashboard() {
                                                             <div>
                                                                 <h4 className="font-medium text-gray-900">{user.name} {user.prenom}</h4>
                                                                 <p className="text-sm text-gray-500">{user.email}</p>
+                                                                {user.departement && (
+                                                                    <div className="mt-1 flex items-center">
+                                                                        <span className="text-xs text-gray-500">Département:</span>
+                                                                        <span className="ml-1 rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800">
+                                                                            {user.departement.nom}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                         
-                                                        {user.role && (
-                                                            <div className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
-                                                                {user.role}
-                                                            </div>
-                                                        )}
+                                                        <div className="flex items-center space-x-2">
+                                                            {user.role && (
+                                                                <div className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+                                                                    {user.role}
+                                                                </div>
+                                                            )}
+                                                            {user.departement && user.departement.image && (
+                                                                <img 
+                                                                    src={user.departement.image} 
+                                                                    alt={user.departement.nom}
+                                                                    className="h-8 w-8 rounded-full object-cover"
+                                                                />
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     
                                                     {/* Afficher les permissions quand l'utilisateur est sélectionné */}
@@ -140,6 +166,25 @@ export default function Dashboard() {
                                                                     <p className="text-sm text-gray-500">Aucune permission spécifique</p>
                                                                 )}
                                                             </div>
+
+                                                            {user.departement && (
+                                                                <div className="mt-4">
+                                                                    <h5 className="mb-2 text-sm font-semibold text-gray-700">Département:</h5>
+                                                                    <div className="flex items-center space-x-2">
+                                                                        {user.departement.image && (
+                                                                            <img 
+                                                                                src={user.departement.image} 
+                                                                                alt={user.departement.nom}
+                                                                                className="h-10 w-10 rounded-full object-cover"
+                                                                            />
+                                                                        )}
+                                                                        <div>
+                                                                            <p className="font-medium text-gray-900">{user.departement.nom}</p>
+                                                                            <p className="text-sm text-gray-500">{user.departement.description}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
@@ -182,6 +227,53 @@ export default function Dashboard() {
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Liste des départements */}
+                                    <div className="mt-8">
+                                        <h3 className="mb-4 text-lg font-semibold">Liste des départements</h3>
+                                        
+                                        {departementsStatus === 'loading' && (
+                                            <div className="text-center">
+                                                <div className="spinner-border text-primary" role="status">
+                                                    <span className="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {departementsStatus === 'failed' && (
+                                            <div className="alert alert-danger" role="alert">
+                                                {departementsError}
+                                            </div>
+                                        )}
+
+                                        {departementsStatus === 'succeeded' && (
+                                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                                {departements.map((departement) => (
+                                                    <div key={departement.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow">
+                                                        <div className="flex items-center justify-between">
+                                                            <h5 className="text-lg font-semibold">{departement.nom}</h5>
+                                                            {departement.img_path  && (
+                                                                <img 
+                                                                    src={departement.img_path} 
+                                                                    alt={departement.nom}
+                                                                    className="h-12 w-12 rounded-full object-cover"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <p className="mt-2 text-sm text-gray-600">{departement.description}</p>
+                                                        <div className="mt-4 flex justify-between">
+                                                            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                                                                {departement.users_count || 0} Utilisateurs
+                                                            </span>
+                                                            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800">
+                                                                {new Date(departement.created_at).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>

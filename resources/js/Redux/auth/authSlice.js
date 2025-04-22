@@ -5,32 +5,53 @@ import axiosInstance from '../../utils/axiosInstance';
 /*  THUNKS                                                        */
 /* ────────────────────────────────────────────────────────────── */
 
-// Vérifie la session courante (GET /user → Breeze)
-// Renvoie 401 si non connecté
+// Vérifie la session courante
 export const fetchAuthUser = createAsyncThunk(
-  'auth/fetchAuthUser',
-  async (_, { rejectWithValue }) => {
-    try {
-      const { data } = await axiosInstance.get('/user');
-      return data;                          // { id, name, email, … }
-    } catch {
-      return rejectWithValue('Non authentifié');
+    'auth/fetchAuthUser',
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                return rejectWithValue('Non authentifié');
+            }
+
+            const response = await axiosInstance.get('/user', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+            }
+            return rejectWithValue('Non authentifié');
+        }
     }
-  }
 );
 
-// Déconnexion (POST /logout)
+// Déconnexion
 export const logout = createAsyncThunk(
-  'auth/logout',
-  async (_, { dispatch, rejectWithValue }) => {
-    try {
-      await axiosInstance.post('/logout');
-      dispatch(resetAuth());
-      return null;
-    } catch {
-      return rejectWithValue('Erreur lors de la déconnexion');
+    'auth/logout',
+    async (_, { dispatch, rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                await axiosInstance.post('/logout', {}, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+            }
+            localStorage.removeItem('token');
+            dispatch(resetAuth());
+            return null;
+        } catch (error) {
+            return rejectWithValue('Erreur lors de la déconnexion');
+        }
     }
-  }
 );
 
 /* ────────────────────────────────────────────────────────────── */
@@ -38,39 +59,52 @@ export const logout = createAsyncThunk(
 /* ────────────────────────────────────────────────────────────── */
 
 const authSlice = createSlice({
-  name: 'auth',
-  initialState: {
-    user: null,
-    role: null,
-    status: 'idle',     // idle | loading | succeeded | failed
-    error: null,
-  },
-  reducers: {
-    resetAuth: state => {
-      state.user   = null;
-      state.role   = null;
-      state.status = 'idle';
-      state.error  = null;
+    name: 'auth',
+    initialState: {
+        user: null,
+        role: null,
+        status: 'idle',     // idle | loading | succeeded | failed
+        error: null,
     },
-    resetStatus: state => { state.status = 'idle'; },
-    setUser: (state, action) => {
-      state.user = action.payload;
-      state.role = action.payload?.role || null;
-      state.status = 'succeeded';
+    reducers: {
+        resetAuth: state => {
+            state.user   = null;
+            state.role   = null;
+            state.status = 'idle';
+            state.error  = null;
+        },
+        resetStatus: state => { state.status = 'idle'; },
+        setUser: (state, action) => {
+            state.user = action.payload;
+            state.role = action.payload?.role || null;
+            state.status = 'succeeded';
+        }
+    },
+    extraReducers: builder => {
+        builder
+            .addCase(fetchAuthUser.pending, state => {
+                state.status = 'loading';
+            })
+            .addCase(fetchAuthUser.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.user = action.payload;
+                state.role = action.payload?.role || null;
+            })
+            .addCase(fetchAuthUser.rejected, (state, action) => {
+                state.status = 'failed';
+                state.user = null;
+                state.role = null;
+                state.error = action.payload;
+            })
+            .addCase(logout.fulfilled, state => {
+                state.user = null;
+                state.role = null;
+                state.status = 'idle';
+            })
+            .addCase(logout.rejected, (state, action) => {
+                state.error = action.payload;
+            });
     }
-  },
-  extraReducers: builder => {
-    builder
-      .addCase(fetchAuthUser.pending,   s => { s.status = 'loading'; })
-      .addCase(fetchAuthUser.fulfilled, (s,a)=>{ 
-        s.status = 'succeeded'; 
-        s.user = a.payload; 
-        s.role = a.payload?.role || null;
-      })
-      .addCase(fetchAuthUser.rejected,  (s,a)=>{ s.status='failed'; s.user=null; s.role=null; s.error=a.payload; })
-      .addCase(logout.fulfilled,        s => { s.user=null; s.role=null; s.status='idle'; })
-      .addCase(logout.rejected,         (s,a)=>{ s.error=a.payload; });
-  }
 });
 
 export const { resetAuth, resetStatus, setUser } = authSlice.actions;

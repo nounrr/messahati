@@ -51,6 +51,8 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/role/{role}', [UserController::class, 'getUsersByRole']);
 Route::get('/roles', [UserController::class, 'getRoles']);
+Route::post('/users/update', [UserController::class, 'update']);
+Route::post('/users/change-password', [UserController::class, 'changePassword']);
 
 // Routes pour les départements
 

@@ -25,6 +25,7 @@ import modelPermissionReducer from './modelPermissions/modelPermissionSlice';
 import chatReducer from './chat/chatSlice';
 import authReducer from './auth/authSlice';
 import chargeReducer from './charges/chargeSlice';
+import departmentReducer from './departements/departementSlice';
 
 const store = configureStore({
     reducer: {
@@ -54,6 +55,7 @@ const store = configureStore({
         chat: chatReducer,
         auth: authReducer,
         charges: chargeReducer,
+        departments: departmentReducer,
     },
 });
 

@@ -32,9 +32,17 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-        // dd($request->session()->all());
-// 
-        return redirect()->intended(route('reclamations.view', absolute: false));
+
+        // Générer un token Sanctum
+        $user = auth()->user();
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        // Stocker le token dans la session
+        $request->session()->put('token', $token);
+
+        // Rediriger avec le token
+        return redirect()->intended(route('reclamations.view', absolute: false))
+            ->with('token', $token);
     }
 
     /**
@@ -42,6 +50,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Récupérer l'utilisateur
+        $user = auth()->user();
+        
+        // Supprimer tous les tokens de l'utilisateur
+        if ($user) {
+            $user->tokens()->delete();
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

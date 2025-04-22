@@ -11,8 +11,13 @@ import { MdEmail, MdLock, MdVisibility, MdVisibilityOff } from 'react-icons/md';
 
 import { fetchAuthUser, resetAuth } from '@/Redux/auth/authSlice';
 import InputError from '@/Components/Child/InputError';
+import InputLabel from '@/Components/Child/InputLabel';
+import PrimaryButton from '@/Components/Child/PrimaryButton';
+import TextInput from '@/Components/Child/TextInput';
+import GuestLayout from '@/Layouts/GuestLayout';
+import Checkbox from '@/Components/Child/Checkbox';
 
-export default function Login({ status }) {
+export default function Login({ status, canResetPassword }) {
   /* -------------------- Inertia Hook -------------------- */
   const { data, setData, post, processing, errors, reset } = useForm({
     email:     '',
@@ -34,14 +39,28 @@ export default function Login({ status }) {
   const submit = e => {
     e.preventDefault();
     post(route('login'), {
-      onSuccess: () => dispatch(fetchAuthUser()),
-      onError:   () => reset('password'),
+      onSuccess: (response) => {
+        // Stocker le token si présent dans la réponse
+        if (response.props.token) {
+          localStorage.setItem('token', response.props.token);
+          dispatch(fetchAuthUser());
+        }
+      },
+      onFinish: () => reset('password'),
     });
   };
 
+  /* -------------------- Storing token on mount ------------- */
+  useEffect(() => {
+    const token = document.querySelector('meta[name="token"]')?.content;
+    if (token) {
+      localStorage.setItem('token', token);
+    }
+  }, []);
+
   /* -------------------- Render -------------------------- */
   return (
-    <section className="auth bg-base d-flex flex-wrap">
+    <GuestLayout>
       <Head title="Connexion" />
 
       {/* Colonne image (desktop) */}
@@ -66,7 +85,7 @@ export default function Login({ status }) {
 
             <h4 className="text-2xl font-semibold mb-2">Connectez‑vous à votre compte</h4>
             <p className="text-lg text-gray-500">
-              Heureux de vous revoir ! Veuillez saisir vos identifiants.
+              Heureux de vous revoir ! Veuillez saisir vos identifiants.
             </p>
           </div>
 
@@ -75,14 +94,15 @@ export default function Login({ status }) {
             {/* Email */}
             <div className="mb-4 relative">
               <MdEmail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-              <input
+              <TextInput
+                id="email"
                 type="email"
                 name="email"
                 value={data.email}
                 onChange={e => setData('email', e.target.value)}
                 placeholder="E‑mail"
                 autoComplete="username"
-                required
+                isFocused={true}
                 className="pl-10 pr-4 py-3 w-full rounded-lg border border-gray-300 bg-neutral-50 focus:ring-primary focus:border-primary"
               />
               <InputError message={errors.email} className="mt-2" />
@@ -91,14 +111,14 @@ export default function Login({ status }) {
             {/* Password */}
             <div className="mb-4 relative">
               <MdLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
-              <input
+              <TextInput
+                id="password"
                 type={showPass ? 'text' : 'password'}
                 name="password"
                 value={data.password}
                 onChange={e => setData('password', e.target.value)}
                 placeholder="Mot de passe"
                 autoComplete="current-password"
-                required
                 className="pl-10 pr-10 py-3 w-full rounded-lg border border-gray-300 bg-neutral-50 focus:ring-primary focus:border-primary"
               />
               <button
@@ -114,32 +134,36 @@ export default function Login({ status }) {
             {/* Remember + Forgot */}
             <div className="flex items-center justify-between mb-6 text-sm">
               <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
+                <Checkbox
+                  name="remember"
                   checked={data.remember}
                   onChange={e => setData('remember', e.target.checked)}
-                  className="form-check-input border-gray-300"
                 />
                 Se souvenir de moi
               </label>
 
-              {/* Supprimez ce lien si vous n’avez pas la route */}
-              <Link href={route('password.request')} className="text-primary-600 font-medium">
-                Mot de passe oublié ?
-              </Link>
+              {/* Supprimez ce lien si vous n'avez pas la route */}
+              {canResetPassword && (
+                <Link
+                  href={route('password.request')}
+                  className="text-primary-600 font-medium"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              )}
             </div>
 
             {/* Bouton */}
-            <button
+            <PrimaryButton
               type="submit"
               disabled={processing}
               className="btn btn-primary w-full py-3 rounded-lg text-sm disabled:opacity-50"
             >
               {processing ? 'Connexion…' : 'Se connecter'}
-            </button>
+            </PrimaryButton>
           </form>
         </div>
       </div>
-    </section>
+    </GuestLayout>
   );
 }
