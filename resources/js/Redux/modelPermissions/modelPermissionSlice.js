@@ -5,7 +5,7 @@ import axiosInstance from '../../utils/axiosInstance';
 export const fetchModelPermissions = createAsyncThunk(
     'modelPermissions/fetchModelPermissions',
     async () => {
-        const response = await axiosInstance.get('/api/model-permissions');
+        const response = await axiosInstance.get('/model-permissions');
         return response.data;
     }
 );
@@ -14,7 +14,7 @@ export const fetchModelPermissions = createAsyncThunk(
 export const fetchUserModelPermissions = createAsyncThunk(
     'modelPermissions/fetchUserModelPermissions',
     async (userId) => {
-        const response = await axiosInstance.get(`/api/model-permissions/user/${userId}`);
+        const response = await axiosInstance.get(`/model-permissions/user/${userId}`);
         return { userId, permissions: response.data };
     }
 );
@@ -24,7 +24,7 @@ export const assignPermissionToUser = createAsyncThunk(
     'modelPermissions/assignPermissionToUser',
     async ({ userId, permissionId }, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/api/model-permissions', {
+            const response = await axiosInstance.post('/model-permissions', {
                 model_id: userId,
                 permission_id: permissionId,
                 model_type: 'App\\Models\\User'
@@ -41,7 +41,7 @@ export const removePermissionFromUser = createAsyncThunk(
     'modelPermissions/removePermissionFromUser',
     async ({ userId, permissionId }, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.delete('/api/model-permissions', {
+            const response = await axiosInstance.delete('/model-permissions', {
                 data: {
                     model_id: userId,
                     permission_id: permissionId,

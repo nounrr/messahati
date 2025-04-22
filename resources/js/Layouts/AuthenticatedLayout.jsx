@@ -79,6 +79,18 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Rendez-vous
                                 </NavLink>
+                                <NavLink
+                                    href={route('roles.view')}
+                                    active={route().current('roles.*')}
+                                >
+                                    Rôles
+                                </NavLink>
+                                <NavLink
+                                    href={route('assign-roles.view')}
+                                    active={route().current('assign-roles.*')}
+                                >
+                                    Assigner Rôles
+                                </NavLink>
                             </div>
                         </div>
 
@@ -199,6 +211,18 @@ export default function AuthenticatedLayout({ header, children }) {
                             active={route().current('rdv.*')}
                         >
                             Rendez-vous
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('roles.view')}
+                            active={route().current('roles.*')}
+                        >
+                            Rôles
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('assign-roles.view')}
+                            active={route().current('assign-roles.*')}
+                        >
+                            Assigner Rôles
                         </ResponsiveNavLink>
                     </div>
 

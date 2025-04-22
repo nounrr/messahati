@@ -5,6 +5,7 @@ import { fetchAllRoles as fetchRoles, assignRoleToUser, removeRoleFromUser } fro
 import { fetchAllPermissions as fetchPermissions, assignPermissionToUser, getUserPermissions } from '../../Redux/permissions/permissionSlice';
 import Swal from 'sweetalert2';
 import { FaSearch, FaChevronLeft, FaChevronRight, FaKey, FaTrash } from 'react-icons/fa';
+import MasterLayout from '@/masterLayout/MasterLayout';
 
 const AssignRoleLayer = () => {
     const dispatch = useDispatch();
@@ -27,6 +28,27 @@ const AssignRoleLayer = () => {
     const [selectedRole, setSelectedRole] = useState(null);
     const [showRoleModal, setShowRoleModal] = useState(false);
     const modalRef = useRef(null);
+
+    // Function to get badge color based on role name
+    const getRoleBadgeColor = (roleName) => {
+        const colors = {
+            'admin': 'bg-danger',
+            'manager': 'bg-warning',
+            'employee': 'bg-success',
+            'user': 'bg-info',
+            'editor': 'bg-purple',
+            'viewer': 'bg-secondary',
+            'contributor': 'bg-teal',
+            'moderator': 'bg-pink',
+            'developer': 'bg-indigo',
+        };
+        
+        // Convert role name to lowercase for case-insensitive matching
+        const role = roleName.toLowerCase();
+        
+        // Return the matching color or default to primary if no match
+        return colors[role] || 'bg-primary';
+    };
 
     useEffect(() => {
         dispatch(fetchUsers());
@@ -134,26 +156,20 @@ const AssignRoleLayer = () => {
 
     const handleOpenPermissionModal = (user) => {
         setSelectedUser(user);
-        // Récupérer les rôles de l'utilisateur
+        // Récupérer les permissions de l'utilisateur
         dispatch(getUserPermissions(user.id));
         
         // Récupérer les permissions directes de l'utilisateur
-        const userPermissions = user.permissions || [];
-        
-        // Récupérer les permissions des rôles de l'utilisateur
-        const rolePermissions = userPermissions[user.id]?.reduce((acc, role) => {
-            return [...acc, ...(role.permissions || [])];
-        }, []) || [];
+        const userDirectPermissions = user.permissions || [];
         
         // Combiner toutes les permissions
-        const allPermissions = [...new Set([...userPermissions, ...rolePermissions])];
-        
-        setSelectedPermissions(allPermissions.map(p => p.id));
+        setSelectedPermissions(userDirectPermissions.map(p => p.id));
         setShowPermissionModal(true);
     };
 
     const handleOpenRoleModal = (user) => {
         setSelectedUser(user);
+        dispatch(getUserPermissions(user.id));
         setShowRoleModal(true);
     };
 
@@ -337,11 +353,13 @@ const AssignRoleLayer = () => {
                                     </div>
                                 </td>
                                 <td className="text-center">
-                                        {userPermissions[user.id]?.map(role => (
-                                            <span key={role.id} className="badge bg-primary me-1">
-                                                {role.name}
-                                            </span>
-                                        )) || 'No Role'}
+                                        {user.roles && user.roles.length > 0 ? 
+                                            user.roles.map(role => (
+                                                <span key={role.id} className={`badge ${getRoleBadgeColor(role.name)} me-1`}>
+                                                    {role.name}
+                                                </span>
+                                            )) 
+                                            : 'No Role'}
                                 </td>
                                 <td className="text-center">
                                         <div className="d-flex justify-content-center gap-2">
@@ -534,7 +552,7 @@ const AssignRoleLayer = () => {
                                 ></button>
                             </div>
                             <div className="modal-body p-24">
-                                {userPermissions[selectedUser?.id]?.length > 0 ? (
+                                {selectedUser && selectedUser.roles && selectedUser.roles.length > 0 ? (
                                     <div className="table-responsive">
                                         <table className="table bordered-table sm-table mb-0">
                                             <thead>
@@ -544,9 +562,13 @@ const AssignRoleLayer = () => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {userPermissions[selectedUser?.id]?.map(role => (
+                                                {selectedUser.roles.map(role => (
                                                     <tr key={role.id}>
-                                                        <td>{role.name}</td>
+                                                        <td>
+                                                            <span className={`badge ${getRoleBadgeColor(role.name)} me-1`}>
+                                                                {role.name}
+                                                            </span>
+                                                        </td>
                                                         <td className="text-center">
                                                             <button
                                                                 className="btn btn-outline-danger-600 btn-sm"

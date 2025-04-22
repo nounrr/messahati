@@ -17,7 +17,6 @@ const RoleAccessLayer = () => {
     // Form state
     const [formData, setFormData] = useState({
         name: '',
-        description: '',
         status: 'active'
     });
     const [isEditing, setIsEditing] = useState(false);
@@ -63,7 +62,6 @@ const RoleAccessLayer = () => {
         // Reset form
         setFormData({
             name: '',
-            description: '',
             status: 'active'
         });
         setIsEditing(false);
@@ -77,7 +75,6 @@ const RoleAccessLayer = () => {
     const handleEdit = (role) => {
         setFormData({
             name: role.name,
-            description: role.description || '',
             status: role.status
         });
         setIsEditing(true);
@@ -188,7 +185,6 @@ const RoleAccessLayer = () => {
                             setIsEditing(false);
                             setFormData({
                                 name: '',
-                                description: '',
                                 status: 'active'
                             });
                             openModal();
@@ -233,7 +229,6 @@ const RoleAccessLayer = () => {
                                     </th>
                                     <th scope="col">Create Date</th>
                                     <th scope="col">Role </th>
-                                    <th scope="col">Description</th>
                                     <th scope="col" className="text-center">
                                         Status
                                     </th>
@@ -260,11 +255,7 @@ const RoleAccessLayer = () => {
                                     </td>
                                                     <td>{formatDate(role.created_at)}</td>
                                                     <td>{role.name}</td>
-                                    <td>
-                                        <p className="max-w-500-px">
-                                                            {role.description || 'No description provided'}
-                                        </p>
-                                    </td>
+                                   
                                     <td className="text-center">
                                                         <span className={`${role.status === 'active' ? 'bg-success-focus text-success-600 border border-success-main' : 'bg-danger-focus text-danger-600 border border-danger-main'} px-24 py-4 radius-4 fw-medium text-sm`}>
                                                             {role.status === 'active' ? 'Active' : 'Inactive'}
@@ -424,24 +415,7 @@ const RoleAccessLayer = () => {
                                             required
                                         />
                                     </div>
-                                    <div className="col-12 mb-20">
-                                        <label
-                                            htmlFor="desc"
-                                            className="form-label fw-semibold text-primary-light text-sm mb-8"
-                                        >
-                                            Description
-                                        </label>
-                                        <textarea
-                                            className="form-control"
-                                            id="desc"
-                                            rows={4}
-                                            cols={50}
-                                            placeholder="Write some text"
-                                            name="description"
-                                            value={formData.description}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
+                                   
                                     <div className="col-12 mb-20">
                                         <label className="form-label fw-semibold text-primary-light text-sm mb-8">
                                             Status{" "}

@@ -1,12 +1,49 @@
 import React, { useEffect, useState } from "react";
-import { Icon } from "@iconify/react/dist/iconify.js";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import ThemeToggleButton from "../helper/ThemeToggleButton";
+import { Link, NavLink, useLocation, Outlet } from "react-router-dom";
+// import ThemeToggleButton from "./ThemeToggleButton";
+import 'jquery';
+import { useSelector } from "react-redux";
+import { 
+  AiOutlineHome,
+  AiOutlineUser,
+  AiOutlineCalendar,
+  AiOutlineFileText,
+  AiOutlineMedicineBox,
+  AiOutlineDollar,
+  AiOutlineBarChart,
+  AiOutlineSetting,
+  AiOutlineMenu,
+  AiOutlineClose,
+  AiOutlineUserSwitch,
+  AiOutlineLogout
+} from 'react-icons/ai';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
-const MasterLayout = ({ children }) => {
+const MasterLayout = () => {
   let [sidebarActive, seSidebarActive] = useState(false);
   let [mobileMenu, setMobileMenu] = useState(false);
   const location = useLocation(); // Hook to get the current route
+  const { user } = useSelector((state) => state.auth);
+
+  // Fonction pour vérifier si l'utilisateur a un rôle spécifique
+  const hasRole = (roleName) => {
+    return user && user.roles && user.roles.some(role => role.name === roleName);
+  };
+
+  // Fonction pour vérifier si l'utilisateur a une permission spécifique
+  const hasPermission = (permissionName) => {
+    return user && user.permissions && user.permissions.includes(permissionName);
+  };
+
+  // Fonction pour vérifier si l'utilisateur a l'un des rôles spécifiés
+  const hasAnyRole = (roleNames) => {
+    return user && user.roles && user.roles.some(role => roleNames.includes(role.name));
+  };
+
+  // Fonction pour vérifier si l'utilisateur a l'une des permissions spécifiées
+  const hasAnyPermission = (permissionNames) => {
+    return user && user.permissions && user.permissions.some(permission => permissionNames.includes(permission));
+  };
 
   useEffect(() => {
     const handleDropdownClick = (event) => {
@@ -102,7 +139,7 @@ const MasterLayout = ({ children }) => {
           type='button'
           className='sidebar-close-btn'
         >
-          <Icon icon='radix-icons:cross-2' />
+          <AiOutlineClose />
         </button>
         <div>
           <Link to='/' className='sidebar-logo'>
@@ -125,10 +162,10 @@ const MasterLayout = ({ children }) => {
         </div>
         <div className='sidebar-menu-area'>
           <ul className='sidebar-menu' id='sidebar-menu'>
+            {/* Dashboard - accessible à tous les utilisateurs connectés */}
             <li className='dropdown'>
               <Link to='#'>
-                <Icon
-                  icon='solar:home-smile-angle-outline'
+                <AiOutlineHome
                   className='menu-icon'
                 />
                 <span>Dashboard</span>
@@ -142,1831 +179,424 @@ const MasterLayout = ({ children }) => {
                     }
                   >
                     <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                    AI
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-2'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    CRM
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-3'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    eCommerce
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-4'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />
-                    Cryptocurrency
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-5'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-success-main w-auto' />{" "}
-                    Investment
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-6'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-purple w-auto' />{" "}
-                    LMS
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-7'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    NFT &amp; Gaming
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-8'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Medical
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-9'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Analytics
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-10'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    POS & Inventory
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/index-11'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Finance & Banking
+                    Tableau de bord
                   </NavLink>
                 </li>
               </ul>
             </li>
 
-            <li className='sidebar-menu-group-title'>Application</li>
-            <li>
-              <NavLink
-                to='/email'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='mage:email' className='menu-icon' />
-                <span>Email</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/chat-message'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='bi:chat-dots' className='menu-icon' />
-                <span>Chat</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/calendar-main'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='solar:calendar-outline' className='menu-icon' />
-                <span>Calendar</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/kanban'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon
-                  icon='material-symbols:map-outline'
+            {/* Patients - accessible aux admins, doctors, secretaries, nurses et patients */}
+            {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('nurse') || hasRole('patient') || hasPermission('view patient')) && (
+              <li className='dropdown'>
+                <Link to='#'>
+                <AiOutlineUser
                   className='menu-icon'
                 />
-                <span>Kanban</span>
-              </NavLink>
+                  <span>Patients</span>
+              </Link>
+              <ul className='sidebar-submenu'>
+                  {(hasRole('admin') || hasRole('secretary') || hasPermission('create patient')) && (
+                <li>
+                  <NavLink
+                        to='/patients/create'
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
+                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                        Ajouter un patient
+                  </NavLink>
+                </li>
+                  )}
+                  {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('nurse') || hasRole('patient') || hasPermission('view patient')) && (
+                <li>
+                  <NavLink
+                        to='/patients'
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
+                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
+                        Liste des patients
+                  </NavLink>
+                </li>
+                  )}
+              </ul>
             </li>
+            )}
 
-            {/* Invoice Dropdown */}
+            {/* Rendez-vous - accessible aux admins, doctors, secretaries et patients */}
+            {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('patient') || hasPermission('view appointment')) && (
             <li className='dropdown'>
               <Link to='#'>
-                <Icon icon='hugeicons:invoice-03' className='menu-icon' />
-                <span>Invoice</span>
+                  <AiOutlineCalendar
+                    className='menu-icon'
+                  />
+                  <span>Rendez-vous</span>
+              </Link>
+              <ul className='sidebar-submenu'>
+                  {(hasRole('admin') || hasRole('secretary') || hasPermission('create appointment')) && (
+                <li>
+                  <NavLink
+                        to='/appointments/create'
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
+                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                        Nouveau rendez-vous
+                  </NavLink>
+                </li>
+                  )}
+                  {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('patient') || hasPermission('view appointment')) && (
+                <li>
+                  <NavLink
+                        to='/appointments'
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
+                        <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
+                        Liste des rendez-vous
+                  </NavLink>
+                </li>
+                  )}
+              </ul>
+            </li>
+            )}
+
+            {/* Consultations - accessible aux admins et doctors */}
+            {(hasRole('admin') || hasRole('doctor') || hasPermission('create consultation')) && (
+            <li className='dropdown'>
+              <Link to='#'>
+                  <AiOutlineFileText
+                    className='menu-icon'
+                  />
+                  <span>Consultations</span>
               </Link>
               <ul className='sidebar-submenu'>
                 <li>
                   <NavLink
-                    to='/invoice-list'
+                      to='/consultations/create'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    List
+                      <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                      Nouvelle consultation
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to='/invoice-preview'
+                      to='/consultations'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
                     <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                    Preview
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/invoice-add'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Add new
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/invoice-edit'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Edit
+                      Liste des consultations
                   </NavLink>
                 </li>
               </ul>
             </li>
+            )}
 
-            {/* Ai Application Dropdown */}
+            {/* Dossiers médicaux - accessible aux admins, doctors et nurses */}
+            {(hasRole('admin') || hasRole('doctor') || hasRole('nurse') || hasPermission('access medical record')) && (
             <li className='dropdown'>
               <Link to='#'>
-                <i className='ri-robot-2-line mr-10' />
-
-                <span>Ai Application</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/text-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Text Generator
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/code-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Code Generator
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/image-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Image Generator
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/voice-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Voice Generator
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/video-generator'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-success-main w-auto' />{" "}
-                    Video Generator
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            {/* Crypto Currency Dropdown */}
-            <li className='dropdown'>
-              <Link to='#'>
-                <i className='ri-btc-line mr-10' />
-                <span>Crypto Currency</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/wallet'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Wallet
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/marketplace'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                    Marketplace
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/marketplace-details'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                    Marketplace Details
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/portfolio'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                    Portfolios
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            <li className='sidebar-menu-group-title'>UI Elements</li>
-
-            {/* Components Dropdown */}
-            <li className='dropdown'>
-              <Link to='#'>
-                <Icon
-                  icon='solar:document-text-outline'
+                <AiOutlineFileText
                   className='menu-icon'
                 />
-                <span>Components</span>
+                  <span>Dossiers médicaux</span>
               </Link>
               <ul className='sidebar-submenu'>
                 <li>
                   <NavLink
-                    to='/typography'
+                      to='/medical-records'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
                     <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                    Typography
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/colors'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Colors
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/button'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-success-main w-auto' />{" "}
-                    Button
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/dropdown'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-lilac-600 w-auto' />{" "}
-                    Dropdown
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/alert'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Alerts
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/card'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Card
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/carousel'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Carousel
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/avatar'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-success-main w-auto' />{" "}
-                    Avatars
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/progress'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Progress bar
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/tabs'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Tab &amp; Accordion
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/pagination'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />
-                    Pagination
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/badges'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Badges
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/tooltip'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-lilac-600 w-auto' />{" "}
-                    Tooltip &amp; Popover
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/videos'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-cyan w-auto' />{" "}
-                    Videos
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/star-rating'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-indigo w-auto' />{" "}
-                    Star Ratings
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/tags'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-purple w-auto' />{" "}
-                    Tags
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/list'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-red w-auto' />{" "}
-                    List
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/calendar'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-yellow w-auto' />{" "}
-                    Calendar
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/radio'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-orange w-auto' />{" "}
-                    Radio
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/switch'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-pink w-auto' />{" "}
-                    Switch
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/image-upload'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Upload
+                      Liste des dossiers
                   </NavLink>
                 </li>
               </ul>
             </li>
+            )}
 
-            {/* Forms Dropdown */}
+            {/* Prescriptions - accessible aux admins, doctors et patients */}
+            {(hasRole('admin') || hasRole('doctor') || hasRole('patient') || hasPermission('view prescription')) && (
             <li className='dropdown'>
               <Link to='#'>
-                <Icon icon='heroicons:document' className='menu-icon' />
-                <span>Forms</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/form'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Input Forms
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/form-layout'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Input Layout
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/form-validation'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-success-main w-auto' />{" "}
-                    Form Validation
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/wizard'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Form Wizard
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            {/* Table Dropdown */}
-            <li className='dropdown'>
-              <Link to='#'>
-                <Icon icon='mingcute:storage-line' className='menu-icon' />
-                <span>Table</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/table-basic'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Basic Table
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/table-data'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Data Table
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            {/* Chart Dropdown */}
-            <li className='dropdown'>
-              <Link to='#'>
-                <Icon icon='solar:pie-chart-outline' className='menu-icon' />
-                <span>Chart</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/line-chart'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Line Chart
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/column-chart'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Column Chart
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/pie-chart'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-success-main w-auto' />{" "}
-                    Pie Chart
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            <li>
-              <NavLink
-                to='/widgets'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='fe:vector' className='menu-icon' />
-                <span>Widgets</span>
-              </NavLink>
-            </li>
-
-            {/* Users Dropdown */}
-            <li className='dropdown'>
-              <Link to='#'>
-                <Icon
-                  icon='flowbite:users-group-outline'
+                <AiOutlineMedicineBox
                   className='menu-icon'
                 />
-                <span>Users</span>
+                  <span>Prescriptions</span>
               </Link>
               <ul className='sidebar-submenu'>
+                  {(hasRole('admin') || hasRole('doctor') || hasPermission('create prescription')) && (
                 <li>
                   <NavLink
-                    to='/users-list'
+                        to='/prescriptions/create'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Users List
+                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                        Nouvelle prescription
                   </NavLink>
                 </li>
+                  )}
+                  {(hasRole('admin') || hasRole('doctor') || hasRole('patient') || hasPermission('view prescription')) && (
                 <li>
                   <NavLink
-                    to='/users-grid'
+                        to='/prescriptions'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Users Grid
+                        <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
+                        Liste des prescriptions
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink
-                    to='/add-user'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Add User
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/view-profile'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    View Profile
-                  </NavLink>
-                </li>
+                  )}
               </ul>
             </li>
+            )}
 
-            {/* Role & Access Dropdown */}
+            {/* Factures et paiements - accessible aux admins, accountants et patients */}
+            {(hasRole('admin') || hasRole('accountant') || hasRole('patient') || hasPermission('view payments')) && (
             <li className='dropdown'>
               <Link to='#'>
-                <i className='ri-user-settings-line' />
-                <span>Role &amp; Access</span>
+                <AiOutlineDollar
+                  className='menu-icon'
+                />
+                  <span>Factures & Paiements</span>
               </Link>
               <ul className='sidebar-submenu'>
+                  {(hasRole('admin') || hasRole('accountant') || hasPermission('create invoice')) && (
                 <li>
                   <NavLink
-                    to='/role-access'
+                        to='/invoices/create'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Role &amp; Access
+                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                        Nouvelle facture
                   </NavLink>
                 </li>
+                  )}
+                  {(hasRole('admin') || hasRole('accountant') || hasPermission('view payments')) && (
                 <li>
                   <NavLink
-                    to='/assign-role'
+                        to='/invoices'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Assign Role
+                        <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
+                        Liste des factures
                   </NavLink>
                 </li>
+                  )}
+                  {(hasRole('admin') || hasRole('accountant') || hasPermission('view payments')) && (
+                <li>
+                  <NavLink
+                        to='/payments'
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
+                        <i className='ri-circle-fill circle-icon text-success-main w-auto' />
+                        Paiements
+                  </NavLink>
+                </li>
+                  )}
+                  {(hasRole('admin') || hasRole('accountant') || hasPermission('manage refunds')) && (
+                <li>
+                  <NavLink
+                        to='/refunds'
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
+                        <i className='ri-circle-fill circle-icon text-danger-main w-auto' />
+                        Remboursements
+                  </NavLink>
+                </li>
+                  )}
               </ul>
             </li>
+            )}
 
-            <li className='sidebar-menu-group-title'>Application</li>
-
-            {/* Authentication Dropdown */}
+            {/* Rapports - accessible aux admins, doctors et accountants */}
+            {(hasRole('admin') || hasRole('doctor') || hasRole('accountant') || hasPermission('generate medical reports') || hasPermission('generate financial reports')) && (
             <li className='dropdown'>
               <Link to='#'>
-                <Icon icon='simple-line-icons:vector' className='menu-icon' />
-                <span>Authentication</span>
+                <AiOutlineBarChart
+                  className='menu-icon'
+                />
+                  <span>Rapports</span>
               </Link>
               <ul className='sidebar-submenu'>
+                  {(hasRole('admin') || hasRole('doctor') || hasPermission('generate medical reports')) && (
                 <li>
                   <NavLink
-                    to='/sign-in'
+                        to='/reports/medical'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Sign In
+                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                        Rapports médicaux
                   </NavLink>
                 </li>
+                  )}
+                  {(hasRole('admin') || hasRole('accountant') || hasPermission('generate financial reports')) && (
                 <li>
                   <NavLink
-                    to='/sign-up'
+                        to='/reports/financial'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Sign Up
+                        <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
+                        Rapports financiers
                   </NavLink>
                 </li>
+                  )}
+                  {(hasRole('admin') || hasPermission('view statistics')) && (
                 <li>
                   <NavLink
-                    to='/forgot-password'
+                        to='/reports/statistics'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Forgot Password
+                        <i className='ri-circle-fill circle-icon text-info-main w-auto' />
+                        Statistiques
                   </NavLink>
                 </li>
+                  )}
               </ul>
             </li>
+            )}
 
-            {/* gallery */}
-
+            {/* Administration - accessible uniquement aux admins */}
+            {hasRole('admin') && (
             <li className='dropdown'>
               <Link to='#'>
-                <Icon
-                  icon='flowbite:users-group-outline'
+                <AiOutlineSetting
                   className='menu-icon'
                 />
-                <span>Gallery</span>
+                  <span>Administration</span>
               </Link>
               <ul className='sidebar-submenu'>
                 <li>
                   <NavLink
-                    to='/gallery-grid'
+                      to='/admin/users'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Gallery Grid
+                      <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                      Utilisateurs
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to='/gallery'
+                      to='/admin/roles'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Gallery Grid Desc
+                      <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
+                      Rôles & Permissions
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
-                    to='/gallery-masonry'
+                      to='/admin/settings'
                     className={(navData) =>
                       navData.isActive ? "active-page" : ""
                     }
                   >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Gallery Grid
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/gallery-hover'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Gallery Hover Effect
+                      <i className='ri-circle-fill circle-icon text-info-main w-auto' />
+                      Paramètres
                   </NavLink>
                 </li>
               </ul>
             </li>
-
-            <li>
-              <NavLink
-                to='/pricing'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon
-                  icon='hugeicons:money-send-square'
-                  className='menu-icon'
-                />
-                <span>Pricing</span>
-              </NavLink>
-            </li>
-
-            {/* Blog */}
-
-            <li className='dropdown'>
-              <Link to='#'>
-                <Icon
-                  icon='flowbite:users-group-outline'
-                  className='menu-icon'
-                />
-                <span>Blog</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/blog'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Blog
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/blog-details'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Blog Details
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/add-blog'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Add Blog
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            <li>
-              <NavLink
-                to='/testimonials'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon
-                  icon='mage:message-question-mark-round'
-                  className='menu-icon'
-                />
-                <span>Testimonials</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/faq'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon
-                  icon='mage:message-question-mark-round'
-                  className='menu-icon'
-                />
-                <span>FAQs.</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/error'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='streamline:straight-face' className='menu-icon' />
-                <span>404</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/terms-condition'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='octicon:info-24' className='menu-icon' />
-                <span>Terms &amp; Conditions</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/coming-soon'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <i className='ri-rocket-line menu-icon'></i>
-                <span>Coming Soon</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/access-denied'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <i className='ri-folder-lock-line menu-icon'></i>
-                <span>Access Denied</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/maintenance'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <i className='ri-hammer-line menu-icon'></i>
-                <span>Maintenance</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to='/blank-page'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <i className='ri-checkbox-multiple-blank-line menu-icon'></i>
-                <span>Blank Page</span>
-              </NavLink>
-            </li>
-
-            {/* Settings Dropdown */}
-            <li className='dropdown'>
-              <Link to='#'>
-                <Icon
-                  icon='icon-park-outline:setting-two'
-                  className='menu-icon'
-                />
-                <span>Settings</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/company'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Company
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/notification'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Notification
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/notification-alert'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                    Notification Alert
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/theme'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Theme
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/currencies'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Currencies
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/language'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Languages
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to='/payment-gateway'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                    Payment Gateway
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
+            )}
           </ul>
         </div>
       </aside>
 
-      <main
-        className={sidebarActive ? "dashboard-main active" : "dashboard-main"}
-      >
-        <div className='navbar-header'>
-          <div className='row align-items-center justify-content-between'>
-            <div className='col-auto'>
-              <div className='d-flex flex-wrap align-items-center gap-4'>
+      {/* Main Content */}
+      <main className='main-content'>
+        {/* Header */}
+        <header className='header'>
+          <div className='header-left'>
                 <button
-                  type='button'
-                  className='sidebar-toggle'
                   onClick={sidebarControl}
-                >
-                  {sidebarActive ? (
-                    <Icon
-                      icon='iconoir:arrow-right'
-                      className='icon text-2xl non-active'
-                    />
-                  ) : (
-                    <Icon
-                      icon='heroicons:bars-3-solid'
-                      className='icon text-2xl non-active '
-                    />
-                  )}
-                </button>
-                <button
-                  onClick={mobileMenuControl}
                   type='button'
-                  className='sidebar-mobile-toggle'
+              className='sidebar-toggle-btn'
                 >
-                  <Icon icon='heroicons:bars-3-solid' className='icon' />
+              <AiOutlineMenu />
                 </button>
-                <form className='navbar-search'>
-                  <input type='text' name='search' placeholder='Search' />
-                  <Icon icon='ion:search-outline' className='icon' />
-                </form>
               </div>
-            </div>
-            <div className='col-auto'>
-              <div className='d-flex flex-wrap align-items-center gap-3'>
-                {/* ThemeToggleButton */}
-                <ThemeToggleButton />
-                <div className='dropdown d-none d-sm-inline-block'>
-                  <button
-                    className='has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center'
-                    type='button'
-                    data-bs-toggle='dropdown'
-                  >
-                    <img
-                      src='assets/images/lang-flag.png'
-                      alt='Wowdash'
-                      className='w-24 h-24 object-fit-cover rounded-circle'
-                    />
-                  </button>
-                  <div className='dropdown-menu to-top dropdown-menu-sm'>
-                    <div className='py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2'>
-                      <div>
-                        <h6 className='text-lg text-primary-light fw-semibold mb-0'>
-                          Choose Your Language
-                        </h6>
-                      </div>
-                    </div>
-                    <div className='max-h-400-px overflow-y-auto scroll-sm pe-8'>
-                      <div className='form-check style-check d-flex align-items-center justify-content-between mb-16'>
-                        <label
-                          className='form-check-label line-height-1 fw-medium text-secondary-light'
-                          htmlFor='english'
-                        >
-                          <span className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                            <img
-                              src='assets/images/flags/flag1.png'
-                              alt=''
-                              className='w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0'
-                            />
-                            <span className='text-md fw-semibold mb-0'>
-                              English
-                            </span>
-                          </span>
-                        </label>
-                        <input
-                          className='form-check-input'
-                          type='radio'
-                          name='crypto'
-                          id='english'
-                        />
-                      </div>
-                      <div className='form-check style-check d-flex align-items-center justify-content-between mb-16'>
-                        <label
-                          className='form-check-label line-height-1 fw-medium text-secondary-light'
-                          htmlFor='japan'
-                        >
-                          <span className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                            <img
-                              src='assets/images/flags/flag2.png'
-                              alt=''
-                              className='w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0'
-                            />
-                            <span className='text-md fw-semibold mb-0'>
-                              Japan
-                            </span>
-                          </span>
-                        </label>
-                        <input
-                          className='form-check-input'
-                          type='radio'
-                          name='crypto'
-                          id='japan'
-                        />
-                      </div>
-                      <div className='form-check style-check d-flex align-items-center justify-content-between mb-16'>
-                        <label
-                          className='form-check-label line-height-1 fw-medium text-secondary-light'
-                          htmlFor='france'
-                        >
-                          <span className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                            <img
-                              src='assets/images/flags/flag3.png'
-                              alt=''
-                              className='w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0'
-                            />
-                            <span className='text-md fw-semibold mb-0'>
-                              France
-                            </span>
-                          </span>
-                        </label>
-                        <input
-                          className='form-check-input'
-                          type='radio'
-                          name='crypto'
-                          id='france'
-                        />
-                      </div>
-                      <div className='form-check style-check d-flex align-items-center justify-content-between mb-16'>
-                        <label
-                          className='form-check-label line-height-1 fw-medium text-secondary-light'
-                          htmlFor='germany'
-                        >
-                          <span className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                            <img
-                              src='assets/images/flags/flag4.png'
-                              alt=''
-                              className='w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0'
-                            />
-                            <span className='text-md fw-semibold mb-0'>
-                              Germany
-                            </span>
-                          </span>
-                        </label>
-                        <input
-                          className='form-check-input'
-                          type='radio'
-                          name='crypto'
-                          id='germany'
-                        />
-                      </div>
-                      <div className='form-check style-check d-flex align-items-center justify-content-between mb-16'>
-                        <label
-                          className='form-check-label line-height-1 fw-medium text-secondary-light'
-                          htmlFor='korea'
-                        >
-                          <span className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                            <img
-                              src='assets/images/flags/flag5.png'
-                              alt=''
-                              className='w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0'
-                            />
-                            <span className='text-md fw-semibold mb-0'>
-                              South Korea
-                            </span>
-                          </span>
-                        </label>
-                        <input
-                          className='form-check-input'
-                          type='radio'
-                          name='crypto'
-                          id='korea'
-                        />
-                      </div>
-                      <div className='form-check style-check d-flex align-items-center justify-content-between mb-16'>
-                        <label
-                          className='form-check-label line-height-1 fw-medium text-secondary-light'
-                          htmlFor='bangladesh'
-                        >
-                          <span className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                            <img
-                              src='assets/images/flags/flag6.png'
-                              alt=''
-                              className='w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0'
-                            />
-                            <span className='text-md fw-semibold mb-0'>
-                              Bangladesh
-                            </span>
-                          </span>
-                        </label>
-                        <input
-                          className='form-check-input'
-                          type='radio'
-                          name='crypto'
-                          id='bangladesh'
-                        />
-                      </div>
-                      <div className='form-check style-check d-flex align-items-center justify-content-between mb-16'>
-                        <label
-                          className='form-check-label line-height-1 fw-medium text-secondary-light'
-                          htmlFor='india'
-                        >
-                          <span className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                            <img
-                              src='assets/images/flags/flag7.png'
-                              alt=''
-                              className='w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0'
-                            />
-                            <span className='text-md fw-semibold mb-0'>
-                              India
-                            </span>
-                          </span>
-                        </label>
-                        <input
-                          className='form-check-input'
-                          type='radio'
-                          name='crypto'
-                          id='india'
-                        />
-                      </div>
-                      <div className='form-check style-check d-flex align-items-center justify-content-between'>
-                        <label
-                          className='form-check-label line-height-1 fw-medium text-secondary-light'
-                          htmlFor='canada'
-                        >
-                          <span className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                            <img
-                              src='assets/images/flags/flag8.png'
-                              alt=''
-                              className='w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0'
-                            />
-                            <span className='text-md fw-semibold mb-0'>
-                              Canada
-                            </span>
-                          </span>
-                        </label>
-                        <input
-                          className='form-check-input'
-                          type='radio'
-                          name='crypto'
-                          id='canada'
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {/* Language dropdown end */}
+          <div className='header-right'>
+           
+            <div className='header-right-right'>
                 <div className='dropdown'>
                   <button
-                    className='has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center'
                     type='button'
+                  className='dropdown-toggle-btn'
                     data-bs-toggle='dropdown'
-                  >
-                    <Icon
-                      icon='mage:email'
-                      className='text-primary-light text-xl'
-                    />
+                  aria-expanded='false'
+                >
+                  <img
+                    src='assets/images/avatar.png'
+                    alt='avatar'
+                    className='avatar-img'
+                  />
+                  <span className='user-name'>{user?.name || 'Utilisateur'}</span>
                   </button>
-                  <div className='dropdown-menu to-top dropdown-menu-lg p-0'>
-                    <div className='m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2'>
-                      <div>
-                        <h6 className='text-lg text-primary-light fw-semibold mb-0'>
-                          Message
-                        </h6>
-                      </div>
-                      <span className='text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center'>
-                        05
-                      </span>
-                    </div>
-                    <div className='max-h-400-px overflow-y-auto scroll-sm pe-4'>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                            <img
-                              src='assets/images/notification/profile-3.png'
-                              alt=''
-                            />
-                            <span className='w-8-px h-8-px bg-success-main rounded-circle position-absolute end-0 bottom-0' />
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Kathryn Murphy
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                              hey! there i’m...
-                            </p>
-                          </div>
-                        </div>
-                        <div className='d-flex flex-column align-items-end'>
-                          <span className='text-sm text-secondary-light flex-shrink-0'>
-                            12:30 PM
-                          </span>
-                          <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-warning-main rounded-circle'>
-                            8
-                          </span>
-                        </div>
-                      </Link>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                            <img
-                              src='assets/images/notification/profile-4.png'
-                              alt=''
-                            />
-                            <span className='w-8-px h-8-px  bg-neutral-300 rounded-circle position-absolute end-0 bottom-0' />
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Kathryn Murphy
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                              hey! there i’m...
-                            </p>
-                          </div>
-                        </div>
-                        <div className='d-flex flex-column align-items-end'>
-                          <span className='text-sm text-secondary-light flex-shrink-0'>
-                            12:30 PM
-                          </span>
-                          <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-warning-main rounded-circle'>
-                            2
-                          </span>
-                        </div>
-                      </Link>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                            <img
-                              src='assets/images/notification/profile-5.png'
-                              alt=''
-                            />
-                            <span className='w-8-px h-8-px bg-success-main rounded-circle position-absolute end-0 bottom-0' />
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Kathryn Murphy
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                              hey! there i’m...
-                            </p>
-                          </div>
-                        </div>
-                        <div className='d-flex flex-column align-items-end'>
-                          <span className='text-sm text-secondary-light flex-shrink-0'>
-                            12:30 PM
-                          </span>
-                          <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-neutral-400 rounded-circle'>
-                            0
-                          </span>
-                        </div>
-                      </Link>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                            <img
-                              src='assets/images/notification/profile-6.png'
-                              alt=''
-                            />
-                            <span className='w-8-px h-8-px bg-neutral-300 rounded-circle position-absolute end-0 bottom-0' />
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Kathryn Murphy
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                              hey! there i’m...
-                            </p>
-                          </div>
-                        </div>
-                        <div className='d-flex flex-column align-items-end'>
-                          <span className='text-sm text-secondary-light flex-shrink-0'>
-                            12:30 PM
-                          </span>
-                          <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-neutral-400 rounded-circle'>
-                            0
-                          </span>
-                        </div>
-                      </Link>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                            <img
-                              src='assets/images/notification/profile-7.png'
-                              alt=''
-                            />
-                            <span className='w-8-px h-8-px bg-success-main rounded-circle position-absolute end-0 bottom-0' />
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Kathryn Murphy
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                              hey! there i’m...
-                            </p>
-                          </div>
-                        </div>
-                        <div className='d-flex flex-column align-items-end'>
-                          <span className='text-sm text-secondary-light flex-shrink-0'>
-                            12:30 PM
-                          </span>
-                          <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-warning-main rounded-circle'>
-                            8
-                          </span>
-                        </div>
-                      </Link>
-                    </div>
-                    <div className='text-center py-12 px-16'>
-                      <Link
-                        to='#'
-                        className='text-primary-600 fw-semibold text-md'
-                      >
-                        See All Message
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-                {/* Message dropdown end */}
-                <div className='dropdown'>
-                  <button
-                    className='has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center'
-                    type='button'
-                    data-bs-toggle='dropdown'
-                  >
-                    <Icon
-                      icon='iconoir:bell'
-                      className='text-primary-light text-xl'
-                    />
-                  </button>
-                  <div className='dropdown-menu to-top dropdown-menu-lg p-0'>
-                    <div className='m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2'>
-                      <div>
-                        <h6 className='text-lg text-primary-light fw-semibold mb-0'>
-                          Notifications
-                        </h6>
-                      </div>
-                      <span className='text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center'>
-                        05
-                      </span>
-                    </div>
-                    <div className='max-h-400-px overflow-y-auto scroll-sm pe-4'>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                            <Icon
-                              icon='bitcoin-icons:verify-outline'
-                              className='icon text-xxl'
-                            />
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Congratulations
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                              Your profile has been Verified. Your profile has
-                              been Verified
-                            </p>
-                          </div>
-                        </div>
-                        <span className='text-sm text-secondary-light flex-shrink-0'>
-                          23 Mins ago
-                        </span>
-                      </Link>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                            <img
-                              src='assets/images/notification/profile-1.png'
-                              alt=''
-                            />
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Ronald Richards
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                              You can stitch between artboards
-                            </p>
-                          </div>
-                        </div>
-                        <span className='text-sm text-secondary-light flex-shrink-0'>
-                          23 Mins ago
-                        </span>
-                      </Link>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                            AM
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Arlene McCoy
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                              Invite you to prototyping
-                            </p>
-                          </div>
-                        </div>
-                        <span className='text-sm text-secondary-light flex-shrink-0'>
-                          23 Mins ago
-                        </span>
-                      </Link>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                            <img
-                              src='assets/images/notification/profile-2.png'
-                              alt=''
-                            />
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Annette Black
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                              Invite you to prototyping
-                            </p>
-                          </div>
-                        </div>
-                        <span className='text-sm text-secondary-light flex-shrink-0'>
-                          23 Mins ago
-                        </span>
-                      </Link>
-                      <Link
-                        to='#'
-                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                      >
-                        <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                          <span className='w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                            DR
-                          </span>
-                          <div>
-                            <h6 className='text-md fw-semibold mb-4'>
-                              Darlene Robertson
-                            </h6>
-                            <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                              Invite you to prototyping
-                            </p>
-                          </div>
-                        </div>
-                        <span className='text-sm text-secondary-light flex-shrink-0'>
-                          23 Mins ago
-                        </span>
-                      </Link>
-                    </div>
-                    <div className='text-center py-12 px-16'>
-                      <Link
-                        to='#'
-                        className='text-primary-600 fw-semibold text-md'
-                      >
-                        See All Notification
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-                {/* Notification dropdown end */}
-                <div className='dropdown'>
-                  <button
-                    className='d-flex justify-content-center align-items-center rounded-circle'
-                    type='button'
-                    data-bs-toggle='dropdown'
-                  >
-                    <img
-                      src='assets/images/user.png'
-                      alt='image_user'
-                      className='w-40-px h-40-px object-fit-cover rounded-circle'
-                    />
-                  </button>
-                  <div className='dropdown-menu to-top dropdown-menu-sm'>
-                    <div className='py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2'>
-                      <div>
-                        <h6 className='text-lg text-primary-light fw-semibold mb-2'>
-                          Shaidul Islam
-                        </h6>
-                        <span className='text-secondary-light fw-medium text-sm'>
-                          Admin
-                        </span>
-                      </div>
-                      <button type='button' className='hover-text-danger'>
-                        <Icon
-                          icon='radix-icons:cross-1'
-                          className='icon text-xl'
-                        />
-                      </button>
-                    </div>
-                    <ul className='to-top-list'>
-                      <li>
-                        <Link
-                          className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'
-                          to='/view-profile'
-                        >
-                          <Icon
-                            icon='solar:user-linear'
-                            className='icon text-xl'
-                          />{" "}
-                          My Profile
+                <ul className='dropdown-menu'>
+                  <li>
+                    <Link to='/profile' className='dropdown-item'>
+                      <AiOutlineUser className='dropdown-icon' />
+                      Mon profil
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'
-                          to='/email'
-                        >
-                          <Icon
-                            icon='tabler:message-check'
-                            className='icon text-xl'
-                          />{" "}
-                          Inbox
+                    <Link to='/settings' className='dropdown-item'>
+                      <AiOutlineSetting className='dropdown-icon' />
+                      Paramètres
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'
-                          to='/company'
-                        >
-                          <Icon
-                            icon='icon-park-outline:setting-two'
-                            className='icon text-xl'
-                          />
-                          Setting
-                        </Link>
+                    <hr className='dropdown-divider' />
                       </li>
                       <li>
-                        <Link
-                          className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-danger d-flex align-items-center gap-3'
-                          to='#'
-                        >
-                          <Icon icon='lucide:power' className='icon text-xl' />{" "}
-                          Log Out
+                    <Link to='/logout' className='dropdown-item'>
+                      <AiOutlineLogout className='dropdown-icon' />
+                      Déconnexion
                         </Link>
                       </li>
                     </ul>
                   </div>
                 </div>
-                {/* Profile dropdown end */}
               </div>
-            </div>
-          </div>
-        </div>
+        </header>
 
-        {/* dashboard-main-body */}
-        <div className='dashboard-main-body'>{children}</div>
-
-        {/* Footer section */}
-        <footer className='d-footer'>
-          <div className='row align-items-center justify-content-between'>
-            <div className='col-auto'>
-              <p className='mb-0'>© 2024 WowDash. All Rights Reserved.</p>
+        {/* Page Content */}
+        <div className='page-content'>
+          <Outlet />
             </div>
-            <div className='col-auto'>
-              <p className='mb-0'>
-                Made by <span className='text-primary-600'>wowtheme7</span>
-              </p>
-            </div>
-          </div>
-        </footer>
       </main>
     </section>
   );
