@@ -16,14 +16,16 @@ return new class extends Migration
             $table->string('cin')->unique();
             $table->string('name');
             $table->string('prenom');
+            $table->enum('sexe', ['femme','homme']);
             $table->string('email')->unique();
             $table->string('telephone');
             $table->string('adresse');
-            $table->date('date_inscription');
+            $table->date('date_naissance');
             $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
             $table->string('password');
             $table->string('img_path')->nullable();
-            $table->boolean('status');
+            $table->enum('status', ['congé', 'absent', 'actif', 'inactif'])->default('actif');
+            $table->boolean('status_maladie');
             $table->timestamp('email_verified_at')->nullable();  
             $table->rememberToken();
             $table->timestamps();

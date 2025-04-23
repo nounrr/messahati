@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ordonances', function (Blueprint $table) {
             $table->id();
-            $table->date('date_emission');
+            $table->date('date_expiration');
             $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('docteur_id');
 

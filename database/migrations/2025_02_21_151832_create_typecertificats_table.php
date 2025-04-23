@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('type_certificats', function (Blueprint $table) {
             $table->id();
             $table->string('type_certificat');
-            $table->string('description')->nullable();
+
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

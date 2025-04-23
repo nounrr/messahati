@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('partenaires', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
-            $table->string('adress')->nullable();
-            $table->foreignId('typepartenaires_id')->constrained()->onDelete('cascade')->on('type_partenaires')->references('id');
+            $table->string('adresse')->nullable();
             $table->string('telephone')->nullable();
+            $table->string('email')->nullable();
+            $table->text('img_path')->nullable();
+            $table->foreignId('typepartenaires_id')->constrained()->onDelete('cascade')->on('type_partenaires')->references('id');
             $table->timestamps();
         });
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->foreignId('clinique_id')->constrained('cliniques')->onDelete('cascade');          
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->string('img_path')->nullable();
             $table->timestamps();
         });

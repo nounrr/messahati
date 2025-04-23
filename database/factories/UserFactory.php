@@ -31,13 +31,20 @@ class UserFactory extends Factory
             'name' => fake()->lastName(),
             'prenom' => fake()->firstName(),
             'email' => fake()->unique()->safeEmail(),
+            'sexe' => fake()->randomElement(['Homme', 'Femme']),
             'telephone' => fake()->phoneNumber(),
             'adresse' => fake()->address(),
-            'date_inscription' => now(),
+            'date_naissance' => now(),
             'departement_id' => fake()->randomElement($departementIds),
             'password' => Hash::make('password'),
             'img_path' => 'default.png',
-            'status' => fake()->boolean(),
+            'status' => fake()->randomElement(['congé', 'absent', 'actif', 'inactif']), 
+            'status_maladie' => fake()->boolean(),
+
+
+
+
+            
         ];
     }
 

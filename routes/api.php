@@ -149,7 +149,7 @@ Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('fa
 Route::get('/rendezvous/report/{id}', [RendezvousController::class, 'generateReport'])->name('RendezVous');
 
 
-Route::get('/ordonance/{id}', [OrdonanceController::class, 'generatePDF'])->name('ordonnance.generate');
+Route::get('/ordonnance/{id}', [OrdonanceController::class, 'generatePDF'])->name('ordonnance.generate');
 Route::get('/certificat-medical/{id}', [CertificatsMedicaleController::class, 'generatePDF'])->name('certificat.generate');
 
 

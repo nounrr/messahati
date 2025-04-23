@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->date('date');
-            $table->boolean('statut');
+            $table->enum('statut', ['lire', 'non_lire'])->default('non_lire');
             $table->string('type');
             $table->json('data')->nullable();
             $table->timestamps();

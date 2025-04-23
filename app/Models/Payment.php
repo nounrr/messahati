@@ -13,3 +13,4 @@ class Payment extends Model
         return $this->belongsTo(Rendezvous::class,'rendez_vous_id');
 
 }
+}
