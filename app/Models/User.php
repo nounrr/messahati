@@ -63,6 +63,23 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Accesseur pour obtenir le rôle principal de l'utilisateur
+     * 
+     * @return string|null
+     */
+    public function getRoleAttribute()
+    {
+        $role = $this->roles->first();
+        return $role ? $role->name : null;
+    }
+
+    /**
+     * Ajouter le rôle aux attributs visibles lors d'une conversion en tableau ou JSON
+     */
+    protected $appends = ['role'];
+
     public function taches(){
             return $this->belongsToMany(Tache::class)->using(UserTache::class)->withPivot( 'status');
      }

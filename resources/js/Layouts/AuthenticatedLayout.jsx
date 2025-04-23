@@ -6,11 +6,17 @@ import { Link, usePage, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser, logout, resetAuth } from '../Redux/auth/authSlice';
+import ChatMainLayer from '@/Pages/Components/Chat/ChatMainLayer';
+import NotificationComponent from '../Components/NotificationComponent';
+import { Icon } from '@iconify/react';
+import { fetchNotifications, initializePusher, addNotification } from '../Redux/notifications/notificationSlice';
 
 export default function AuthenticatedLayout({ header, children }) {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
     const { auth } = usePage().props;
+    const [showNotifications, setShowNotifications] = useState(false);
+    const { items: notifications } = useSelector((state) => state.notifications);
 
     // Synchroniser l'utilisateur Inertia avec Redux
     useEffect(() => {
@@ -18,6 +24,32 @@ export default function AuthenticatedLayout({ header, children }) {
             dispatch(setUser(auth.user));
         }
     }, [auth, dispatch, user]);
+
+    // Initialiser Pusher et charger les notifications
+    useEffect(() => {
+        if (user) {
+            // Charger les notifications existantes
+            dispatch(fetchNotifications());
+
+            // Initialiser Pusher
+            dispatch(initializePusher(user.id));
+
+            // Écouter les nouvelles notifications
+            if (window.Echo) {
+                window.Echo.private(`notifications.${user.id}`)
+                    .listen('NotificationCreated', (e) => {
+                        dispatch(addNotification(e.notification));
+                    });
+            }
+
+            // Cleanup
+            return () => {
+                if (window.Echo) {
+                    window.Echo.leave(`notifications.${user.id}`);
+                }
+            };
+        }
+    }, [dispatch, user]);
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -66,10 +98,42 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Réclamations
                                 </NavLink>
+                                <NavLink
+                                    href={route('feedback.view')}
+                                    active={route().current('feedback.*')}
+                                >
+                                    Feedbacks
+                                </NavLink>
+                                <NavLink
+                                    href={route('rdv.view')}
+                                    active={route().current('rdv.*')}
+                                >
+                                    Rendez-vous
+                                </NavLink>
                             </div>
                         </div>
 
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                            {/* Bouton de notification */}
+                            <div className="relative ms-3">
+                                <button
+                                    onClick={() => setShowNotifications(!showNotifications)}
+                                    className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
+                                >
+                                    <Icon icon="solar:bell-outline" className="h-5 w-5" />
+                                    {notifications.length > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                            {notifications.length}
+                                        </span>
+                                    )}
+                                </button>
+                                {showNotifications && (
+                                    <div className="absolute right-0 mt-2 w-80 z-50">
+                                        <NotificationComponent onClose={() => setShowNotifications(false)} />
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="relative ms-3">
                                 <Dropdown>
                                     <Dropdown.Trigger>
@@ -175,6 +239,18 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Réclamations
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('feedback.view')}
+                            active={route().current('feedback.*')}
+                        >
+                            Feedbacks
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('rdv.view')}
+                            active={route().current('rdv.*')}
+                        >
+                            Rendez-vous
+                        </ResponsiveNavLink>
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">
@@ -211,6 +287,9 @@ export default function AuthenticatedLayout({ header, children }) {
             )}
 
             <main>{children}</main>
+            
+            {/* Chat component */}
+            <ChatMainLayer />
         </div>
     );
 }

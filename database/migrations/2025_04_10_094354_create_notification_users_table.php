@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('message');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('notification_id')->constrained()->onDelete('cascade');
+            $table->boolean('statut');
             $table->timestamps();
         });
     }

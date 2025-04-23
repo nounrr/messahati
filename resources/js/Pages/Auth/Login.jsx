@@ -1,143 +1,145 @@
-import { Icon } from "@iconify/react";
-import React, { useEffect } from "react";
+/* resources/js/Pages/Auth/Login.jsx
+   ---------------------------------------------------------------
+   Formulaire de connexion React + Inertia + Redux Toolkit,
+   utilisant les icônes react‑icons (MdEmail, MdLock, MdVisibility).
+-----------------------------------------------------------------*/
+
+import React, { useEffect, useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { MdEmail, MdLock, MdVisibility, MdVisibilityOff } from 'react-icons/md';
+
+import { fetchAuthUser, resetAuth } from '@/Redux/auth/authSlice';
 import InputError from '@/Components/Child/InputError';
-import { Button, Checkbox, Label, TextInput } from 'flowbite-react';
-import axios from 'axios';
 
-export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false,
+export default function Login({ status }) {
+  /* -------------------- Inertia Hook -------------------- */
+  const { data, setData, post, processing, errors, reset } = useForm({
+    email:     '',
+    password:  '',
+    remember:  false,
+  });
+
+  /* -------------------- Redux --------------------------- */
+  const dispatch = useDispatch();
+  const { status: authStatus } = useSelector(s => s.auth);
+
+  /* -------------------- Reset auth on mount ------------- */
+  useEffect(() => { dispatch(resetAuth()); }, []);
+
+  /* -------------------- Password visibility ------------- */
+  const [showPass, setShowPass] = useState(false);
+
+  /* -------------------- Submit -------------------------- */
+  const submit = e => {
+    e.preventDefault();
+    post(route('login'), {
+      onSuccess: () => dispatch(fetchAuthUser()),
+      onError:   () => reset('password'),
     });
+  };
 
-    useEffect(() => {
-        return () => {
-            reset('password');
-        };
-    }, []);
+  /* -------------------- Render -------------------------- */
+  return (
+    <section className="auth bg-base d-flex flex-wrap">
+      <Head title="Connexion" />
 
-    const submit = async (e) => {
-        e.preventDefault();
+      {/* Colonne image (desktop) */}
+      <div className="auth-left d-none d-lg-block">
+        <img src="/assets/images/auth/auth-img.png" alt="" className="h-screen object-cover" />
+      </div>
 
-        try {
-            const response = await axios.post('/api/login', data);
-            
-            if (response.data.token) {
-                // Store the token in localStorage
-                localStorage.setItem('token', response.data.token);
-                
-                // Redirect to dashboard
-                window.location.href = '/dashboard';
-            } else {
-                console.error('No token received');
-            }
-        } catch (error) {
-            console.error('Login error:', error.response?.data || error.message);
-            // Handle specific error cases
-            if (error.response?.status === 422) {
-                // Validation errors
-                const validationErrors = error.response.data.errors;
-                Object.keys(validationErrors).forEach(key => {
-                    errors[key] = validationErrors[key][0];
-                });
-            }
-        }
-    };
+      {/* Colonne formulaire */}
+      <div className="auth-right flex-grow-1 d-flex flex-column justify-content-center p-6 lg:p-16">
+        <div className="mx-auto w-full max-w-lg">
+          {/* Logo + message flash */}
+          <div className="text-center mb-10">
+            {status && (
+              <div className="mb-4 text-sm font-medium text-green-600">
+                {status}
+              </div>
+            )}
 
-    return (
-        <section className='auth bg-base d-flex flex-wrap'>
-            <div className='auth-left d-lg-block d-none'>
-                <div className='d-flex align-items-center flex-column justify-content-center'>
-                    <img className="h-screen object-cover" src='/assets/images/auth/auth-img.png' alt='' />
-                </div>
+            <Link href="/">
+              <img src="/assets/images/logo.png" alt="Logo" className="mb-6 h-14 mx-auto" />
+            </Link>
+
+            <h4 className="text-2xl font-semibold mb-2">Connectez‑vous à votre compte</h4>
+            <p className="text-lg text-gray-500">
+              Heureux de vous revoir ! Veuillez saisir vos identifiants.
+            </p>
+          </div>
+
+          {/* Formulaire */}
+          <form onSubmit={submit} noValidate>
+            {/* Email */}
+            <div className="mb-4 relative">
+              <MdEmail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+              <input
+                type="email"
+                name="email"
+                value={data.email}
+                onChange={e => setData('email', e.target.value)}
+                placeholder="E‑mail"
+                autoComplete="username"
+                required
+                className="pl-10 pr-4 py-3 w-full rounded-lg border border-gray-300 bg-neutral-50 focus:ring-primary focus:border-primary"
+              />
+              <InputError message={errors.email} className="mt-2" />
             </div>
-            <div className='auth-right py-32 px-24 d-flex flex-column justify-content-center'>
-                <div className='max-w-464-px mx-auto w-100'>
-                    <div className="text-center">
-                        {status && (
-                            <div className="mb-4 text-sm font-medium text-green-600">
-                                {status}
-                            </div>
-                        )}
-                        <Link href='/' className='mb-40 max-w-290-px'>
-                            <img src='/assets/images/logo.png' alt='' />
-                        </Link>
-                        <h4 className='mb-12'>Connectez-vous à votre compte</h4>
-                        <p className='mb-32 text-secondary-light text-lg'>
-                            Bon retour ! Veuillez entrer vos coordonnées
-                        </p>
-                    </div>
-                    <form onSubmit={submit}>
-                        <div className='icon-field mb-16'>
-                            <span className='icon top-50 translate-middle-y'>
-                                <Icon icon='mage:email' />
-                            </span>
-                            <TextInput
-                                id="email"
-                                type="email"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                required
-                                placeholder='Email'
-                                autoComplete="username"
-                            />
-                            {errors.email && <div className="text-red-500 text-sm mt-1">{errors.email}</div>}
-                        </div>
-                        <div className='position-relative mb-20'>
-                            <div className='icon-field'>
-                                <span className='icon top-50 translate-middle-y'>
-                                    <Icon icon='solar:lock-password-outline' />
-                                </span>
-                                <TextInput
-                                    id="password"
-                                    type="password"
-                                    value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
-                                    required
-                                    placeholder='Password'
-                                    autoComplete="current-password"
-                                />
-                            </div>
-                            <span
-                                className='toggle-password ri-eye-line cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light'
-                                data-toggle='#your-password'
-                            />
-                            {errors.password && <div className="text-red-500 text-sm mt-1">{errors.password}</div>}
-                        </div>
-                        <div className=''>
-                            <div className='d-flex justify-content-between gap-2'>
-                                <div className='form-check style-check d-flex align-items-center'>
-                                    <Checkbox
-                                        id="remember"
-                                        checked={data.remember}
-                                        onChange={(e) => setData('remember', e.target.checked)}
-                                    />
-                                    <Label htmlFor="remember" className="ml-2">
-                                        Remember me
-                                    </Label>
-                                </div>
-                                {canResetPassword && (
-                                    <Link href={route('password.request')} className='text-primary-600 fw-medium'>
-                                        Forgot Password?
-                                    </Link>
-                                )}
-                            </div>
-                        </div>
-                        <div>
-                            <Button
-                                type="submit"
-                                className="w-full btn-radius btn btn-primary text-sm btn-sm px-12 py-16 mt-32"
-                                disabled={processing}
-                            >
-                                Sign In
-                            </Button>
-                        </div>
-                    </form>
-                </div>
+
+            {/* Password */}
+            <div className="mb-4 relative">
+              <MdLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+              <input
+                type={showPass ? 'text' : 'password'}
+                name="password"
+                value={data.password}
+                onChange={e => setData('password', e.target.value)}
+                placeholder="Mot de passe"
+                autoComplete="current-password"
+                required
+                className="pl-10 pr-10 py-3 w-full rounded-lg border border-gray-300 bg-neutral-50 focus:ring-primary focus:border-primary"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass(!showPass)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+              >
+                {showPass ? <MdVisibilityOff size={22} /> : <MdVisibility size={22} />}
+              </button>
+              <InputError message={errors.password} className="mt-2" />
             </div>
-        </section>
-    );
+
+            {/* Remember + Forgot */}
+            <div className="flex items-center justify-between mb-6 text-sm">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={data.remember}
+                  onChange={e => setData('remember', e.target.checked)}
+                  className="form-check-input border-gray-300"
+                />
+                Se souvenir de moi
+              </label>
+
+              {/* Supprimez ce lien si vous n’avez pas la route */}
+              <Link href={route('password.request')} className="text-primary-600 font-medium">
+                Mot de passe oublié ?
+              </Link>
+            </div>
+
+            {/* Bouton */}
+            <button
+              type="submit"
+              disabled={processing}
+              className="btn btn-primary w-full py-3 rounded-lg text-sm disabled:opacity-50"
+            >
+              {processing ? 'Connexion…' : 'Se connecter'}
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
 }
-

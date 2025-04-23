@@ -13,15 +13,15 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
 
-            TypeTraitementSeeder::class,
-            MutuelSeeder::class,
-            CliniqueSeeder::class,
-            RolesAndPermissionsSeeder::class,
-            DepartementSeeder::class,
+            // TypeTraitementSeeder::class,
+            // MutuelSeeder::class,
+            // CliniqueSeeder::class,
+            // RolesAndPermissionsSeeder::class,
+            // DepartementSeeder::class,
             UserSeeder::class,    // UserSeeder runs after DepartementSeeder
-            TraitementSeeder::class,
-            RendezVousSeeder::class,
-            ReclamationSeeder::class,
+            // TraitementSeeder::class,
+            // RendezVousSeeder::class,
+            // ReclamationSeeder::class,
             NotificationSeeder::class,
             OrdonanceSeeder::class,
             TypeMedicamentSeeder::class,
@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
             UserTacheSeeder::class,
             ChargeSeeder::class,
             SalaireSeeder::class,
+            ModelHasPermissionSeeder::class,
 
         ]);
     }

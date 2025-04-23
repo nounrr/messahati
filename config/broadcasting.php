@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('BROADCAST_CONNECTION', 'null'),
+    'default' => env('BROADCAST_DRIVER', 'pusher'),
 
     /*
     |--------------------------------------------------------------------------
@@ -52,19 +52,20 @@ return [
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
-                'useTLS' => false,
-                'encrypted' => false,
-                'host' => 'api-mt1.pusher.com',
-                'port' => 80,
-                'scheme' => 'http'
-            ],
-            'client_options' => [
-                'verify' => false,
-                'curl' => [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'host' => '127.0.0.1',
+                'auth_endpoint' => '/custom/endpoint/auth',
+        'port' => 6001,
+        'scheme' => 'http',
+                'encrypted' => true,
+                'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
+                'curl_options' => [
                     CURLOPT_SSL_VERIFYHOST => 0,
                     CURLOPT_SSL_VERIFYPEER => 0,
                 ],
+            ],
+            'client_options' => [
+                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],
         ],
 
@@ -82,5 +83,4 @@ return [
         ],
 
     ],
-
 ];

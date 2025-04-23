@@ -1,13 +1,24 @@
 import axios from 'axios';
+function getCsrfToken() {
+  const metaTag = document.querySelector('meta[name="csrf-token"]');
+  return metaTag ? metaTag.getAttribute('content') : '';
+}
 
+// Fonction pour obtenir le token d'authentification
+function getAuthToken() {
+  return localStorage.getItem('token') || '';
+}
 const axiosInstance = axios.create({
   baseURL: '/api',              // API base URL
   withCredentials: true,        // Important for sending/receiving cookies
   headers: { 
     'X-Requested-With': 'XMLHttpRequest',
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'X-CSRF-TOKEN': getCsrfToken(),
+    'Authorization': `Bearer ${getAuthToken()}`
   },
+  
 });
 
 // Add request interceptor for CSRF token

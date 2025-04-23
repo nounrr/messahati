@@ -30,6 +30,7 @@ use App\Http\Controllers\CertificatsMedicaleController;
 use App\Http\Controllers\AuditLogCliniqueController;
 use App\Http\Controllers\AttachementController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ModelPermissionController;
 
 // Route for importing partenaires
 Route::post('/partenaires/import', [PartenaireController::class, 'import'])->name('partenaires.import');
@@ -38,9 +39,11 @@ Route::post('/type-traitements/import', [TypeTraitementController::class, 'impor
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user(); // Retourne l'utilisateur authentifié
+    $user = $request->user()->load('roles');
+    return $user;
 });
 
+Route::post('/notifications/{id}/markasread', [NotificationController::class, 'markAsRead']);
 
 // Routes d'authentification
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -114,7 +117,7 @@ Route::apiResource('mutuels', MutuelController::class)
 Route::delete('mutuels', [MutuelController::class, 'destroy']);
 
 // Routes pour les notifications
-Route::resource('notifications', NotificationController::class);
+// Route::resource('notifications', NotificationController::class);
 
 // Routes pour les messages
 Route::resource('messages', MessageController::class);
@@ -152,7 +155,14 @@ Route::post('/remove-role', [RoleController::class, 'removeRole'])->name('api.ro
 Route::post('/assign-role/{userId}', [RoleController::class, 'assign'])->name('api.assign.role');
 Route::get('/user-permissions/{id}', [RolePermissionController::class, 'userPermissions'])->name('api.user.permissions');
 
-Route::middleware('auth:sanctum')->group(function () {
+// Routes protégées par auth:sanctum
+// Route::middleware('auth:sanctum')->group(function () {
+    // Routes pour les notifications
+    Route::get('/notifications/user/{userId}', [NotificationController::class, 'getUserNotifications']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'delete']);
+    Route::resource('notifications', NotificationController::class);
+
+    // Routes pour le chat
     Route::post('/send-message', [ChatController::class, 'send']);
     Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages']);
     Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
@@ -160,6 +170,66 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/messages/{user}', [ChatController::class, 'getMessages']);
     Route::post('/chat/messages', [ChatController::class, 'sendMessage']);
     Route::post('/chat/messages/read', [ChatController::class, 'markAsRead']);
-});
 
-// Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);
+    // Autres routes protégées...
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/role/{role}', [UserController::class, 'getUsersByRole']);
+    Route::get('/roles', [UserController::class, 'getRoles']);
+    Route::resource('departements', DepartementController::class);
+    Route::delete('/departements/bulk', [DepartementController::class, 'destroy']);
+    Route::apiResource('charges', ChargeController::class)->except(['create', 'edit', 'show']);
+    Route::put('charges', [ChargeController::class, 'update']);
+    Route::delete('charges', [ChargeController::class, 'destroy']);
+    Route::resource('cliniques', CliniqueController::class);
+    Route::resource('type-traitements', TypeTraitementController::class);
+    Route::resource('type-certificats', TypeCertificatController::class);
+    Route::resource('type-medicaments', TypeMedicamentController::class);
+    Route::resource('type-partenaires', TypePartenaireController::class);
+    Route::resource('traitements', TraitementController::class);
+    Route::resource('taches', TachController::class);
+    Route::resource('salaires', SalaireController::class)->except(['create', 'edit', 'show']);
+    Route::put('salaires', [SalaireController::class, 'update']);
+    Route::delete('salaires', [SalaireController::class, 'destroy']);
+    Route::resource('rendez-vous', RendezVousController::class);
+    Route::resource('reclamations', ReclamationController::class);
+    Route::delete('/reclamations', [ReclamationController::class, 'destroy']);
+    Route::resource('payments', PaymentController::class);
+    Route::resource('partenaires', PartenaireController::class);
+    Route::delete('/partenaires', [PartenaireController::class, 'destroy']);
+    Route::resource('ordonances', OrdonanceController::class);
+    Route::resource('medicaments', MedicamentController::class);
+    Route::apiResource('mutuels', MutuelController::class)->except(['create', 'edit']);
+    Route::delete('mutuels', [MutuelController::class, 'destroy']);
+    Route::resource('messages', MessageController::class);
+    Route::resource('certificats-medicaux', CertificatsMedicaleController::class);
+    Route::resource('audit-log-cliniques', AuditLogCliniqueController::class);
+    Route::resource('attachements', AttachementController::class);
+    Route::resource('feedbacks', FeedbackController::class);
+
+    // Routes pour les rôles et permissions
+    Route::prefix('roles')->group(function () {
+        Route::get('/', [RolePermissionController::class, 'roles']);
+        Route::post('/', [RolePermissionController::class, 'store']);
+        Route::put('/{id}', [RolePermissionController::class, 'update']);
+        Route::delete('/{id}', [RolePermissionController::class, 'destroy']);
+    });
+
+    Route::prefix('permissions')->group(function () {
+        Route::get('/', [RolePermissionController::class, 'permissions']);
+    });
+
+    Route::post('/assign-role', [RolePermissionController::class, 'assignRoleToUser']);
+    Route::post('/assign-permission', [RolePermissionController::class, 'assignPermissionToUser']);
+    Route::post('/remove-role', [RoleController::class, 'removeRole']);
+    Route::post('/assign-role/{userId}', [RoleController::class, 'assign']);
+    Route::get('/user-permissions/{id}', [RolePermissionController::class, 'userPermissions']);
+
+    // Routes pour les model_has_permissions
+    Route::prefix('model-permissions')->group(function () {
+        Route::get('/', [ModelPermissionController::class, 'index']);
+        Route::get('/user/{userId}', [ModelPermissionController::class, 'getUserPermissions']);
+        Route::post('/', [ModelPermissionController::class, 'store']);
+        Route::delete('/', [ModelPermissionController::class, 'destroy']);
+        Route::delete('/bulk', [ModelPermissionController::class, 'bulkDestroy']);
+    });
+;

@@ -8,5 +8,20 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class NotificationUser extends Pivot
 {
     protected $table = 'notification_users'; 
-    protected $fillable = ['user_id', 'notification_id', 'message'];
+    protected $fillable = [
+        'notification_id',
+        'user_id',
+        'message',
+        'statut'
+    ];
+
+    public function notification()
+    {
+        return $this->belongsTo(Notification::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

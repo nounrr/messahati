@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Notification;
 use App\Models\User;
+use App\Events\NotificationCreated;
 use Illuminate\Support\Facades\DB;
 
 class NotificationService
@@ -55,26 +56,36 @@ class NotificationService
         }
 
         // Utiliser une transaction pour garantir l'intégrité des données
-        DB::transaction(function () use ($emetteurId, $destinataireId, $messageEmetteur, $messageDestinataire) {
+        DB::transaction(function () use ($emetteurId, $destinataireId, $type, $messageEmetteur, $messageDestinataire) {
             // Notification pour l'émetteur
-            $notificationEmetteur = new Notification();
-            $notificationEmetteur->date = now();
-            $notificationEmetteur->statut = true;
-            $notificationEmetteur->save();
+            $notificationEmetteur = Notification::create([
+                'date' => now(),
+                'statut' => false,
+                'type' => $type
+            ]);
 
             $notificationEmetteur->users()->attach($emetteurId, [
-                'message' => $messageEmetteur
+                'message' => $messageEmetteur,
+                'statut' => false
             ]);
+
+            // Déclencher l'événement pour l'émetteur
+            broadcast(new NotificationCreated($notificationEmetteur, $emetteurId));
 
             // Notification pour le destinataire
-            $notificationDestinataire = new Notification();
-            $notificationDestinataire->date = now();
-            $notificationDestinataire->statut = true;
-            $notificationDestinataire->save();
+            $notificationDestinataire = Notification::create([
+                'date' => now(),
+                'statut' => false,
+                'type' => $type
+            ]);
 
             $notificationDestinataire->users()->attach($destinataireId, [
-                'message' => $messageDestinataire
+                'message' => $messageDestinataire,
+                'statut' => false
             ]);
+
+            // Déclencher l'événement pour le destinataire
+            broadcast(new NotificationCreated($notificationDestinataire, $destinataireId));
         });
     }
 } 

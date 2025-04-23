@@ -7,13 +7,19 @@ use App\Models\RendezVous;
 use App\Models\Notification;
 use App\Models\NotificationUser;
 use App\Services\NotificationService;
+use App\Events\RendezVousCreated;
 
 class RendezVousController extends Controller
 {
     // Liste des rendez-vous
     public function index()
     {
-        $rendezVous = RendezVous::all();
+        $rendezVous = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])->get();
         return response()->json($rendezVous);
     }
 
@@ -55,17 +61,34 @@ class RendezVousController extends Controller
                 'rendez-vous',
                 ['date_heure' => date('d/m/Y H:i', strtotime($data['date_heure']))]
             );
+            event(new RendezVousCreated($rendezVous, $rendezVous->docteur_id, $rendezVous->patient_id ));
+
 
             $createdItems[] = $rendezVous;
         }
 
-        return response()->json($createdItems, 201);
+        // Charger les relations pour les éléments créés
+        $createdItemsWithRelations = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])
+            ->whereIn('id', collect($createdItems)->pluck('id'))
+            ->get();
+
+        return response()->json($createdItemsWithRelations, 201);
     }
 
     // Affiche un rendez-vous spécifique
     public function show(string $id)
     {
-        $rendezVous = RendezVous::findOrFail($id);
+        $rendezVous = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])->findOrFail($id);
         return response()->json($rendezVous);
     }
 
@@ -90,7 +113,7 @@ class RendezVousController extends Controller
             'updates.*.statut' => 'required|boolean'
         ]);
 
-        $updatedItems = [];
+        $updatedIds = [];
 
         foreach ($request->updates as $data) {
             $rendezVous = RendezVous::findOrFail($data['id']);
@@ -113,7 +136,17 @@ class RendezVousController extends Controller
             $updatedItems[] = $rendezVous;
         }
 
-        return response()->json($updatedItems, 200);
+        // Charger les relations pour les éléments mis à jour
+        $updatedItemsWithRelations = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])
+            ->whereIn('id', $updatedIds)
+            ->get();
+
+        return response()->json($updatedItemsWithRelations, 200);
     }
 
     // Suppression d'un ou plusieurs rendez-vous

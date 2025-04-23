@@ -7,7 +7,6 @@ use App\Models\Notification;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -25,7 +24,7 @@ class ReclamationCreated implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new PrivateChannel('reclamations.' . $this->reclamation->user_id);
+        return new Channel('reclamations.' . $this->reclamation->user_id);
     }
 
     public function broadcastWith()

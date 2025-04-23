@@ -1,12 +1,78 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axiosInstance';
 
-// Fetch all notifications
+// Fetch user notifications
 export const fetchNotifications = createAsyncThunk(
     'notifications/fetchNotifications',
-    async () => {
-        const response = await axiosInstance.get('/notifications');
-        return response.data;
+    async (_, { getState }) => {
+        const userId = getState().auth.user?.id;
+        if (!userId) {
+            throw new Error('User not authenticated');
+        }
+
+        try {
+            const response = await axiosInstance.get(`/notifications/user/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            throw error;
+        }
+    }
+);
+
+// Mark notification as read
+export const markNotificationAsRead = createAsyncThunk(
+    'notifications/markAsRead',
+    async (notificationId, { getState }) => {
+        const userId = getState().auth.user?.id;
+        if (!userId) {
+            throw new Error('User not authenticated');
+        }
+
+        try {
+            const response = await axiosInstance.post(`/notifications/${notificationId}/markasread`, {
+                user_id: userId
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+            throw error;
+        }
+    }
+);
+
+// Delete notification
+export const deleteNotification = createAsyncThunk(
+    'notifications/deleteNotification',
+    async (notificationId, { getState }) => {
+        const userId = getState().auth.user?.id;
+        if (!userId) {
+            throw new Error('User not authenticated');
+        }
+
+        try {
+            const response = await axiosInstance.delete(`/notifications/${notificationId}`, {
+                data: { user_id: userId },
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+            throw error;
+        }
     }
 );
 
@@ -122,7 +188,32 @@ const notificationSlice = createSlice({
         status: 'idle',
         error: null,
     },
-    reducers: {},
+    reducers: {
+        // Action pour ajouter une nouvelle notification reçue via Pusher
+        addNotification: (state, action) => {
+            state.items.unshift(action.payload);
+        },
+        // Action pour initialiser Echo/Pusher
+        initializePusher: (state, action) => {
+            const userId = action.payload;
+            if (window.Echo) {
+                window.Echo.private(`notifications.${userId}`)
+                    .listen('NotificationCreated', (e) => {
+                        console.log('Notification PUSHER reçue 🎉:', e); // <-- ajoute ceci
+
+                        state.items.unshift(e.notification);
+                    });
+                    window.Echo.private('rendez-vous-channel')
+            .listen('RendezVousCreated', (e) => {
+                console.log('📅 Rendez-vous reçu via Pusher :', e);
+                state.items.unshift(e.notification);
+
+                // tu peux ajouter ici une logique pour stocker les rendez-vous dans Redux
+            });
+            }
+            
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchNotifications.pending, (state) => {
@@ -155,8 +246,18 @@ const notificationSlice = createSlice({
             })
             .addCase(importNotifications.fulfilled, (state, action) => {
                 state.items.push(...action.payload);
+            })
+            .addCase(markNotificationAsRead.fulfilled, (state, action) => {
+                const index = state.items.findIndex(item => item.id === action.payload.id);
+                if (index !== -1) {
+                    state.items[index] = action.payload;
+                }
+            })
+            .addCase(deleteNotification.fulfilled, (state, action) => {
+                state.items = state.items.filter(item => item.id !== action.payload.id);
             });
     },
 });
 
+export const { addNotification, initializePusher } = notificationSlice.actions;
 export default notificationSlice.reducer; 
