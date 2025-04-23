@@ -2,7 +2,7 @@ import '../css/app.css';
 import '../css/extra.css';
 import './bootstrap';
 import 'react-quill/dist/quill.snow.css';
-import "jsvectormap/dist/css/jsvectormap.css";
+
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-modal-video/css/modal-video.min.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
