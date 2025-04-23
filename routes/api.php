@@ -51,6 +51,9 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/role/{role}', [UserController::class, 'getUsersByRole']);
 Route::get('/roles', [UserController::class, 'getRoles']);
+Route::post('/users', [UserController::class, 'store']);
+Route::put('/users', [UserController::class, 'update']);
+Route::delete('/users', [UserController::class, 'destroy']);
 
 // Routes pour les départements
 
@@ -140,6 +143,7 @@ Route::prefix('roles')->group(function () {
     Route::post('/', [RolePermissionController::class, 'store'])->name('api.roles.store');
     Route::put('/{id}', [RolePermissionController::class, 'update'])->name('api.roles.update');
     Route::delete('/{id}', [RolePermissionController::class, 'destroy'])->name('api.roles.destroy');
+    Route::post('/{id}/permissions', [RolePermissionController::class, 'updateRolePermissions']);
 });
 
 Route::prefix('permissions')->group(function () {

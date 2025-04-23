@@ -10,6 +10,21 @@ export const fetchAllPermissions = createAsyncThunk(
     }
 );
 
+// Update role permissions
+export const updateRolePermissions = createAsyncThunk(
+    'permissions/updateRolePermissions',
+    async ({ roleId, permissions }, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.post(`/roles/${roleId}/permissions`, {
+                permissions
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 // Assign permission to user
 export const assignPermissionToUser = createAsyncThunk(
     'permissions/assignPermissionToUser',
@@ -60,6 +75,9 @@ const permissionSlice = createSlice({
             .addCase(fetchAllPermissions.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
+            })
+            .addCase(updateRolePermissions.fulfilled, (state) => {
+                state.status = 'succeeded';
             })
             .addCase(assignPermissionToUser.fulfilled, (state) => {
                 state.status = 'succeeded';

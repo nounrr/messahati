@@ -24,23 +24,13 @@ export const createUsers = createAsyncThunk(
     'users/createUsers',
     async (users, { rejectWithValue }) => {
         try {
-            const formData = new FormData();
-            users.forEach((user, index) => {
-                Object.entries(user).forEach(([key, value]) => {
-                    if (key === 'photo' && value instanceof File) {
-                        formData.append(`users[${index}][photo]`, value);
-                    } else {
-                        formData.append(`users[${index}][${key}]`, value);
-                    }
-                });
-            });
-
-            const response = await axiosInstance.post('/users', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            // Transformer les utilisateurs au format attendu par l'API
+            const payload = { users };
+            
+            const response = await axiosInstance.post('/users', payload);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: error.message });
         }
     }
 );
@@ -50,23 +40,13 @@ export const updateUsers = createAsyncThunk(
     'users/updateUsers',
     async (users, { rejectWithValue }) => {
         try {
-            const formData = new FormData();
-            users.forEach((user, index) => {
-                Object.entries(user).forEach(([key, value]) => {
-                    if (key === 'photo' && value instanceof File) {
-                        formData.append(`users[${index}][photo]`, value);
-                    } else {
-                        formData.append(`users[${index}][${key}]`, value);
-                    }
-                });
-            });
-
-            const response = await axiosInstance.put('/users', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            // Transformer les utilisateurs au format attendu par l'API
+            const payload = { users };
+            
+            const response = await axiosInstance.put('/users', payload);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: error.message });
         }
     }
 );

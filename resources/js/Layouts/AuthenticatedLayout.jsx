@@ -91,6 +91,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Assigner Rôles
                                 </NavLink>
+                                <NavLink
+                                    href={route('users.view')}
+                                    active={route().current('users.*')}
+                                >
+                                    Utilisateurs
+                                </NavLink>
                             </div>
                         </div>
 
@@ -223,6 +229,12 @@ export default function AuthenticatedLayout({ header, children }) {
                             active={route().current('assign-roles.*')}
                         >
                             Assigner Rôles
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('users.view')}
+                            active={route().current('users.*')}
+                        >
+                            Utilisateurs
                         </ResponsiveNavLink>
                     </div>
 

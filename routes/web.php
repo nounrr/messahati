@@ -207,7 +207,9 @@ Route::get('/charges', function () {
     return Inertia::render('ListTable/ListeCharges');
 })->name('charges.view'); //Done
 
-
+Route::get('/users', function () {
+    return Inertia::render('ListTable/ListeUsers');
+})->name('users.view'); //Added users list
 
 Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
 

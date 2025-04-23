@@ -14,10 +14,9 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('rendez_vous_id')->constrained('rendez_vous')->onDelete('cascade');
-            $table->float('montant');
-            $table->date('date');
+            $table->float('montant')->nullable();
+            $table->date('date')->nullable();
             $table->boolean('status');
-            $table->enum('payment_method', ['espece', 'carte-bancaire', 'cheque']);
             $table->timestamps();
         });
         

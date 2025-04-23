@@ -21,7 +21,7 @@ return new class extends Migration
             $table->dateTime('date_heure');
             $table->foreign('departement_id')->references('id')->on('departements')->onDelete('cascade');
             $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
-            $table->boolean('statut');
+            $table->enum('status', ['confirme', 'annule', 'en_attente'])->default('en_attente');
             $table->timestamps();
         });
     }

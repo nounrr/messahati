@@ -2,9 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUsers } from '../../Redux/users/userSlice';
 import { fetchAllRoles as fetchRoles, assignRoleToUser, removeRoleFromUser } from '../../Redux/roles/roleSlice';
-import { fetchAllPermissions as fetchPermissions, assignPermissionToUser, getUserPermissions } from '../../Redux/permissions/permissionSlice';
+import { fetchAllPermissions as fetchPermissions, assignPermissionToUser, getUserPermissions, updateRolePermissions } from '../../Redux/permissions/permissionSlice';
 import Swal from 'sweetalert2';
-import { FaSearch, FaChevronLeft, FaChevronRight, FaKey, FaTrash } from 'react-icons/fa';
+import { FaSearch, FaChevronLeft, FaChevronRight, FaKey, FaTrash, FaCheck, FaPlus } from 'react-icons/fa';
 import MasterLayout from '@/masterLayout/MasterLayout';
 
 const AssignRoleLayer = () => {
@@ -16,7 +16,7 @@ const AssignRoleLayer = () => {
     const error = usersError || rolesError || permissionsError;
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
+    const [roleFilter, setRoleFilter] = useState('');
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -50,6 +50,12 @@ const AssignRoleLayer = () => {
         return colors[role] || 'bg-primary';
     };
 
+    // Function to check if user has a specific role
+    const userHasRole = (user, roleName) => {
+        if (!user.roles || !user.roles.length) return false;
+        return user.roles.some(role => role.name === roleName);
+    };
+
     useEffect(() => {
         dispatch(fetchUsers());
         dispatch(fetchRoles());
@@ -66,8 +72,8 @@ const AssignRoleLayer = () => {
         setSearchTerm(e.target.value);
     };
 
-    const handleStatusFilter = (e) => {
-        setStatusFilter(e.target.value);
+    const handleRoleFilter = (e) => {
+        setRoleFilter(e.target.value);
     };
 
     const handleItemsPerPage = (e) => {
@@ -113,6 +119,54 @@ const AssignRoleLayer = () => {
         }
     };
 
+    const handleToggleRole = async (userId, roleName, hasRole) => {
+        try {
+            if (hasRole) {
+                // Confirmation avec SweetAlert
+                const result = await Swal.fire({
+                    title: 'Are you sure?',
+                    text: `Do you want to remove the role "${roleName}" from this user?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, remove it!'
+                });
+
+                if (result.isConfirmed) {
+                    await dispatch(removeRoleFromUser({ userId, role: roleName })).unwrap();
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Role Removed',
+                        text: `The role "${roleName}" has been successfully removed from the user.`,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            } else {
+                await dispatch(assignRoleToUser({ userId, role: roleName })).unwrap();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Role Assigned',
+                    text: `The role "${roleName}" has been successfully assigned to the user.`,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+            
+            // Rafraîchir la liste des utilisateurs
+            dispatch(fetchUsers());
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Failed to update role. Please try again.',
+            });
+        }
+    };
+
     const handleRemoveRole = async (userId, roleName) => {
         try {
             // Confirmation avec SweetAlert
@@ -154,16 +208,27 @@ const AssignRoleLayer = () => {
         }
     };
 
-    const handleOpenPermissionModal = (user) => {
+    const handleOpenPermissionModal = (user, roleName = null) => {
         setSelectedUser(user);
+        setLoadingPermissions(true);
+        
         // Récupérer les permissions de l'utilisateur
-        dispatch(getUserPermissions(user.id));
+        dispatch(getUserPermissions(user.id))
+            .then((action) => {
+                if (action.payload && action.payload.permissions) {
+                    // Extraire les IDs des permissions pour les pré-cocher
+                    const permissionIds = action.payload.permissions.map(permission => permission.id);
+                    setSelectedPermissions(permissionIds);
+                } else {
+                    setSelectedPermissions([]);
+                }
+                setLoadingPermissions(false);
+            })
+            .catch(() => {
+                setLoadingPermissions(false);
+                setSelectedPermissions([]);
+            });
         
-        // Récupérer les permissions directes de l'utilisateur
-        const userDirectPermissions = user.permissions || [];
-        
-        // Combiner toutes les permissions
-        setSelectedPermissions(userDirectPermissions.map(p => p.id));
         setShowPermissionModal(true);
     };
 
@@ -200,22 +265,81 @@ const AssignRoleLayer = () => {
 
         setLoadingPermissions(true);
         try {
-            await dispatch(assignPermissionToUser({
-                userId: selectedUser.id,
-                permissions: selectedPermissions
-            })).unwrap();
+            if (selectedRole) {
+                // Si un rôle est sélectionné, on met à jour les permissions du rôle
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Mise à jour des permissions du rôle',
+                    text: `La mise à jour des permissions du rôle ${selectedRole.name} affectera tous les utilisateurs ayant ce rôle.`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Continuer',
+                    cancelButtonText: 'Annuler'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            // Appeler l'API pour mettre à jour les permissions du rôle
+                            await dispatch(updateRolePermissions({
+                                roleId: selectedRole.id,
+                                permissions: selectedPermissions
+                            })).unwrap();
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Permissions mises à jour',
-                text: 'Les permissions ont été mises à jour avec succès',
-                timer: 2000,
-                showConfirmButton: false
-            });
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Permissions mises à jour',
+                                text: `Les permissions du rôle ${selectedRole.name} ont été mises à jour avec succès`,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
 
-            // Rafraîchir les données de l'utilisateur
-            dispatch(fetchUsers());
-            handleClosePermissionModal();
+                            // Rafraîchir les données
+                            dispatch(fetchUsers());
+                            dispatch(fetchRoles());
+                            handleClosePermissionModal();
+                        } catch (error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erreur',
+                                text: error.message || 'Une erreur est survenue lors de la mise à jour des permissions du rôle'
+                            });
+                        } finally {
+                            setLoadingPermissions(false);
+                        }
+                    } else {
+                        setLoadingPermissions(false);
+                    }
+                });
+            } else {
+                // Si aucun rôle n'est sélectionné, on met à jour les permissions directes de l'utilisateur
+                // Trouver toutes les permissions sélectionnées
+                const selectedPermissionNames = permissions
+                    .filter(p => selectedPermissions.includes(p.id))
+                    .map(p => p.name);
+
+                // Traiter chaque permission individuellement
+                for (const permissionName of selectedPermissionNames) {
+                    try {
+                        await dispatch(assignPermissionToUser({
+                            userId: selectedUser.id,
+                            permission: permissionName
+                        })).unwrap();
+                    } catch (error) {
+                        console.error(`Erreur lors de l'ajout de la permission ${permissionName}:`, error);
+                        // Continuer avec les autres permissions même si une échoue
+                    }
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Permissions mises à jour',
+                    text: 'Les permissions de l\'utilisateur ont été mises à jour avec succès',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // Rafraîchir les données de l'utilisateur
+                dispatch(fetchUsers());
+                handleClosePermissionModal();
+            }
         } catch (error) {
             Swal.fire({
                 icon: 'error',
@@ -234,14 +358,38 @@ const AssignRoleLayer = () => {
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             user.email?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = !statusFilter || user.status === statusFilter;
-        return matchesSearch && matchesStatus;
+        const matchesRole = !roleFilter || user.roles.some(role => role.name === roleFilter);
+        return matchesSearch && matchesRole;
     });
 
     const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, filteredUsers.length);
     const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+    // Ajout d'une fonction pour changer le rôle sélectionné dans le modal
+    const handleRoleChange = (e) => {
+        const roleName = e.target.value;
+        if (roleName === "") {
+            setSelectedRole(null);
+            // Charger les permissions directes de l'utilisateur
+            const userDirectPermissions = selectedUser.permissions || [];
+            setSelectedPermissions(userDirectPermissions.map(p => p.id));
+        } else {
+            const role = roles.find(r => r.name === roleName);
+            setSelectedRole(role);
+            // Charger les permissions du rôle sélectionné
+            console.log("Selected role:", role);
+            if (role && role.permissions && role.permissions.length > 0) {
+                const permissionIds = role.permissions.map(p => p.id);
+                console.log("Setting role permission IDs:", permissionIds);
+                setSelectedPermissions(permissionIds);
+            } else {
+                console.log("No permissions found for role, setting empty array");
+                setSelectedPermissions([]);
+            }
+        }
+    };
 
     if (status === 'loading') {
         return <div className="card h-100 p-24 d-flex justify-content-center align-items-center">
@@ -267,7 +415,7 @@ const AssignRoleLayer = () => {
                         value={itemsPerPage}
                         onChange={handleItemsPerPage}
                     >
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                        {Array.from({ length: 20 }, (_, i) => (i + 1) * 10).map(num => (
                             <option key={num} value={num}>{num}</option>
                         ))}
                     </select>
@@ -284,12 +432,13 @@ const AssignRoleLayer = () => {
                     </form>
                     <select
                         className="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px"
-                        value={statusFilter}
-                        onChange={handleStatusFilter}
+                        value={roleFilter}
+                        onChange={handleRoleFilter}
                     >
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                        <option value="">All Roles</option>
+                        {roles.map(role => (
+                            <option key={role.id} value={role.name}>{role.name}</option>
+                        ))}
                     </select>
                 </div>
             </div>
@@ -370,26 +519,35 @@ const AssignRoleLayer = () => {
                                             data-bs-toggle="dropdown"
                                             aria-expanded="false"
                                         >
-                                            Assign Role
+                                            Manage Roles
                                         </button>
                                                 <ul className="dropdown-menu">
-                                                    {roles.map(role => (
-                                                        <li key={role.id}>
-                                        <button
-                                                    className="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900"
-                                                                onClick={() => handleAssignRole(user.id, role.name)}
-                                                            >
-                                                                {role.name}
-                                        </button>
-                                        <button
-                                                    className="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900"
-                                                                onClick={() => handleOpenPermissionModal(user)}
-                                                            >
-                                                                View {role.name} Permissions
-                                        </button>
-                                            </li>
-                                                    ))}
-                                        </ul>
+                                                    {roles.map(role => {
+                                                        const hasRole = userHasRole(user, role.name);
+                                                        return (
+                                                            <li key={role.id}>
+                                                                <button
+                                                                    className={`dropdown-item px-16 py-8 rounded d-flex align-items-center justify-content-between 
+                                                                        ${hasRole ? 'bg-light text-primary' : 'text-secondary-light bg-hover-neutral-200 text-hover-neutral-900'}`}
+                                                                    onClick={() => handleToggleRole(user.id, role.name, hasRole)}
+                                                                >
+                                                                    <span>{role.name}</span>
+                                                                    {hasRole ? (
+                                                                        <FaTrash className="text-danger" />
+                                                                    ) : (
+                                                                        <FaPlus className="text-success" />
+                                                                    )}
+                                                                </button>
+                                                                <button
+                                                                    className="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900"
+                                                                    onClick={() => handleOpenPermissionModal(user, role.name)}
+                                                                >
+                                                                    View {role.name} Permissions
+                                                                </button>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
                                     </div>
                                         <button
                                                 className="btn btn-outline-secondary-600 not-active px-18 py-11 d-flex align-items-center gap-2"
@@ -452,9 +610,7 @@ const AssignRoleLayer = () => {
                         <div className="modal-content radius-12">
                             <div className="modal-header border-bottom py-16 px-24">
                                 <h5 className="modal-title fw-semibold text-secondary-dark">
-                                    {selectedRole 
-                                        ? `Permissions for ${selectedUser?.name} (${selectedRole.name})` 
-                                        : `Manage Permissions for ${selectedUser?.name}`}
+                                    Manage Permissions for {selectedUser?.name}
                                 </h5>
                                 <button
                                     type="button"
@@ -527,7 +683,7 @@ const AssignRoleLayer = () => {
                                             Saving...
                                         </>
                                     ) : (
-                                        'Save Changes'
+                                        'Save Permissions'
                                     )}
                                 </button>
                             </div>

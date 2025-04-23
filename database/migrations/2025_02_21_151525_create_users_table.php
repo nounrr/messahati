@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
             $table->string('password');
             $table->string('img_path')->nullable();
-            $table->boolean('status');
+            $table->enum('status', ['actif', 'inactif', 'congé', 'absent'])->default('actif');
             $table->timestamp('email_verified_at')->nullable();  
             $table->rememberToken();
             $table->timestamps();

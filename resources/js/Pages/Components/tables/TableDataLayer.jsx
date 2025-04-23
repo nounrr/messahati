@@ -9,8 +9,10 @@ const TableDataLayer = ({
     onView,
     onEdit,
     onDelete,
+    showCheckbox = false,
     selectableRows = false,
     pageLength = 100,
+    onSelectedRowsChange,
     onSelectionChange,
     isLoading = false
 }) => {
@@ -122,6 +124,9 @@ const TableDataLayer = ({
         selectAllRowsItemText: 'Tous',
     };
 
+    // Utiliser le handler de sélection approprié
+    const handleSelectionChange = onSelectedRowsChange || onSelectionChange;
+
     return (
         <div className="card basic-data-table">
             <div className="card-header">
@@ -131,8 +136,8 @@ const TableDataLayer = ({
                 <DataTable
                     columns={finalColumns}
                     data={data}
-                    selectableRows={selectableRows}
-                    onSelectedRowsChange={onSelectionChange}
+                    selectableRows={showCheckbox || selectableRows}
+                    onSelectedRowsChange={handleSelectionChange}
                     pagination
                     paginationPerPage={pageLength}
                     paginationComponentOptions={paginationComponentOptions}

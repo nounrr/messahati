@@ -6,6 +6,7 @@ export const fetchAllRoles = createAsyncThunk(
     'roles/fetchAllRoles',
     async () => {
         const response = await axiosInstance.get('/roles');
+        console.log("Fetched roles with permissions:", response.data);
         return response.data;
     }
 );
