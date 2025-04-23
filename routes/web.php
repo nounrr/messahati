@@ -140,6 +140,11 @@ Route::get('/chat', function () {
 
 // Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);
 
+Route::get('/rendez-vous', function () {
+    return Inertia::render('ListTable/ListeRendezVous');
+})->name('rendez-vous.view'); //done
+
+
 // Route pour les types de partenaires
 Route::get('/type-partenaires', function () {
     return Inertia::render('ListTable/ListeTypePartenaires');
@@ -192,7 +197,7 @@ Route::get('/partenaires', function () {
 })->name('partenaire.view');
 
 Route::get('/ordonnances', function () {
-    return Inertia::render('ListTable/ListeOrdonnance');
+    return Inertia::render('Ordonnances/Index');
 })->name('ordonnance.view');
 
 Route::get('/payments', function () {
@@ -210,5 +215,9 @@ Route::get('/charges', function () {
 
 
 Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
+
+Route::get('/', function () {
+    return Inertia::render('Ordonnances/Index');
+});
 
 require __DIR__.'/auth.php';

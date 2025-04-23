@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ordonances', function (Blueprint $table) {
-            $table->id();
-            $table->date('date_expiration');
-            $table->text('description')->nullable();
-            $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
+        Schema::table('ordonances_medicaments', function (Blueprint $table) {
+            $table->string('posologie')->nullable()->after('medicament_id');
             $table->timestamps();
         });
     }
@@ -25,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ordonances');
+        Schema::table('ordonances_medicaments', function (Blueprint $table) {
+            $table->dropColumn('posologie');
+            $table->dropTimestamps();
+        });
     }
-};
+}; 

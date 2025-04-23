@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\RendezVous;
+use Carbon\Carbon;
+use App\Models\Traitement;
+use App\Models\TypeTraitement;
+use App\Models\User;
 
 class RendezVousController extends Controller
 {
@@ -133,15 +137,45 @@ class RendezVousController extends Controller
         if ($id) {
             $rendezVous = RendezVous::findOrFail($id);
             $rendezVous->delete();
-        } else {
-            $validatedData = $request->validate([
-                'ids' => 'required|array',
-                'ids.*' => 'required|exists:rendez_vous,id',
-            ]);
-
-            RendezVous::whereIn('id', $validatedData['ids'])->delete();
+            return response()->json(['message' => 'Rendez-vous supprimé avec succès.']);
         }
 
-        return response()->json(['message' => 'Rendez-vous supprimés avec succès.']);
+        $validatedData = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'required|integer|exists:rendez_vous,id',
+        ]);
+
+        try {
+            RendezVous::whereIn('id', $validatedData['ids'])->delete();
+            return response()->json(['message' => 'Rendez-vous supprimés avec succès.', 'ids' => $validatedData['ids']]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la suppression des rendez-vous.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+// Liste des rendez-vous en attente (date_heure null et créés aujourd'hui)
+    public function getListeAttends()
+    {
+        $today = Carbon::today();
+        $rendezVous = RendezVous::whereDate('created_at', $today)
+        ->get();
+        return response()->json($rendezVous);
+    }
+
+// Liste des rendez-vous du jour non confirmés
+    public function getListRendezVous()
+    {
+        $today = Carbon::today();
+        $rendezVous = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement',
+            'traitement.typeTraitement'
+        ])
+        ->whereDate('date_heure', $today)
+        ->where('statut', '!=', 1)
+        ->get();
+        return response()->json($rendezVous);
     }
 }

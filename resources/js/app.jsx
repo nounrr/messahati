@@ -11,17 +11,11 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import RouteScrollToTop from './helper/RouteScrollToTop';
-import MasterLayout from './masterLayout/MasterLayout';
 import { Provider } from 'react-redux';
 import store from './Redux/store';
-import AuthProvider from './AuthProvider';
-import AuthenticatedLayout from './Layouts/AuthenticatedLayout';
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => `${title}`,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.jsx`,
@@ -32,17 +26,8 @@ createInertiaApp({
 
         root.render(
             <Provider store={store}>
-        <BrowserRouter>
-            <MasterLayout>
                 <App {...props} />
-            </MasterLayout>
-        </BrowserRouter>
-
-        </Provider>
-    
-    );
-    },
-    progress: {
-        color: '#4B5563',
+            </Provider>
+        );
     },
 });

@@ -15,7 +15,13 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('roles')->get();
+        $users = User::with(['roles', 'departement'])->get();
+        
+        // Ajouter le rôle principal à chaque utilisateur
+        $users->each(function ($user) {
+            $user->role = $user->getRoleAttribute();
+        });
+        
         return response()->json($users);
     }
 

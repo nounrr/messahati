@@ -11,8 +11,11 @@ const TableDataLayer = ({
     onDelete,
     selectableRows = false,
     pageLength = 100,
-    onSelectionChange,
-    isLoading = false
+    onSelectedRowsChange,
+    isLoading = false,
+    selectableRowsHighlight = false,
+    selectableRowsVisibleOnly = false,
+    selectableRowsSingle = false
 }) => {
     // Personnalisation du style pour correspondre à l'ancien design
     const customStyles = {
@@ -36,6 +39,7 @@ const TableDataLayer = ({
         rows: {
             style: {
                 minHeight: '50px',
+                cursor: 'pointer',
             },
             selectedHighlightStyle: {
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -73,55 +77,6 @@ const TableDataLayer = ({
         },
     };
 
-    // Personnalisation des colonnes pour inclure les actions
-    const finalColumns = onView || onEdit || onDelete ? [
-        ...columns,
-        {
-            name: 'Actions',
-            cell: (row) => (
-                <div className="flex space-x-2">
-                    {onView && (
-                        <button
-                            onClick={() => onView(row)}
-                            className="w-8 h-8 bg-primary-light text-primary-600 rounded-full flex items-center justify-center"
-                        >
-                            <Icon icon="iconamoon:eye-light" />
-                        </button>
-                    )}
-                    {onEdit && (
-                        <button
-                            onClick={() => onEdit(row)}
-                            className="w-8 h-8 bg-success-focus text-success-main rounded-full flex items-center justify-center"
-                        >
-                            <Icon icon="lucide:edit" />
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button
-                            onClick={() => onDelete(row)}
-                            className="w-8 h-8 bg-danger-focus text-danger-main rounded-full flex items-center justify-center"
-                        >
-                            <Icon icon="mingcute:delete-2-line" />
-                        </button>
-                    )}
-                </div>
-            ),
-            ignoreRowClick: true,
-            allowOverflow: true,
-            button: true,
-            width: '200px',
-            grow: 1
-        },
-    ] : columns;
-
-    // Personnalisation de la pagination
-    const paginationComponentOptions = {
-        rowsPerPageText: 'Afficher',
-        rangeSeparatorText: 'sur',
-        selectAllRowsItem: true,
-        selectAllRowsItemText: 'Tous',
-    };
-
     return (
         <div className="card basic-data-table">
             <div className="card-header">
@@ -129,20 +84,30 @@ const TableDataLayer = ({
             </div>
             <div className="card-body">
                 <DataTable
-                    columns={finalColumns}
+                    columns={columns}
                     data={data}
                     selectableRows={selectableRows}
-                    onSelectedRowsChange={onSelectionChange}
+                    onSelectedRowsChange={onSelectedRowsChange}
                     pagination
                     paginationPerPage={pageLength}
-                    paginationComponentOptions={paginationComponentOptions}
+                    paginationComponentOptions={{
+                        rowsPerPageText: 'Afficher',
+                        rangeSeparatorText: 'sur',
+                        selectAllRowsItem: true,
+                        selectAllRowsItemText: 'Tous',
+                    }}
                     customStyles={customStyles}
                     highlightOnHover
                     pointerOnHover
                     responsive
                     noHeader
                     progressPending={isLoading}
-                    selectableRowsHighlight
+                    selectableRowsHighlight={selectableRowsHighlight}
+                    selectableRowsVisibleOnly={selectableRowsVisibleOnly}
+                    selectableRowsSingle={selectableRowsSingle}
+                    selectableRowsComponentProps={{
+                        indeterminate: isLoading,
+                    }}
                 />
             </div>
         </div>

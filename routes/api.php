@@ -88,8 +88,18 @@ Route::resource('salaires', SalaireController::class) ->except(['create', 'edit'
 Route::put   ('salaires', [SalaireController::class, 'update']);   
 Route::delete('salaires', [SalaireController::class, 'destroy']);  
 
+Route::get('rendez-vous/attends', [RendezVousController::class, 'getListeAttends']);
+Route::get('rendez-vous/list', [RendezVousController::class, 'getListRendezVous']);
+
 // Routes pour les rendez-vous
-Route::resource('rendez-vous', RendezVousController::class);
+Route::prefix('rendez-vous')->group(function () {
+    Route::get('/', [RendezVousController::class, 'index']);
+    Route::post('/', [RendezVousController::class, 'store']);
+    Route::put('/', [RendezVousController::class, 'update']);
+    Route::delete('/', [RendezVousController::class, 'destroy']);
+    Route::delete('/{id}', [RendezVousController::class, 'destroy']);
+    Route::get('/{id}', [RendezVousController::class, 'show']);
+});
 
 // Routes pour les réclamations - protégées par auth:sanctum
 // routes/api.php
@@ -105,7 +115,12 @@ Route::resource('partenaires', PartenaireController::class);
 Route::delete('/partenaires', [PartenaireController::class, 'destroy'])->name('partenaires.destroy.multiple');
 
 // Routes pour les ordonnances
-Route::resource('ordonances', OrdonanceController::class);
+Route::prefix('ordonances')->group(function () {
+    Route::get('/', [OrdonanceController::class, 'index']);
+    Route::post('/', [OrdonanceController::class, 'store']);
+    Route::put('/{id}', [OrdonanceController::class, 'update']);
+    Route::delete('/{id}', [OrdonanceController::class, 'destroy']);
+});
 
 // Routes pour les médicaments
 Route::resource('medicaments', MedicamentController::class);

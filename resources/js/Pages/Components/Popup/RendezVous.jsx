@@ -9,9 +9,10 @@ import { X } from 'lucide-react';
 
 function RendezVous({ onClose }) {
     const dispatch = useDispatch();
-    const users = useSelector((state) => state.users.items);
+    const { items: users, status: usersStatus, error: usersError } = useSelector((state) => state.users);
     const departements = useSelector((state) => state.departements.items);
     const traitements = useSelector((state) => state.traitements.items);
+    const [isLoading, setIsLoading] = useState(true);
     const [rendezVous, setRendezVous] = useState([{
         patient_id: '',
         docteur_id: '',
@@ -22,10 +23,36 @@ function RendezVous({ onClose }) {
     }]);
 
     useEffect(() => {
-        dispatch(fetchUsers());
-        dispatch(fetchDepartements());
-        dispatch(fetchTraitements());
+        const loadData = async () => {
+            setIsLoading(true);
+            try {
+                await Promise.all([
+                    dispatch(fetchUsers()).unwrap(),
+                    dispatch(fetchDepartements()).unwrap(),
+                    dispatch(fetchTraitements()).unwrap()
+                ]);
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                Swal.fire('Erreur', 'Impossible de charger les données nécessaires.', 'error');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        loadData();
     }, [dispatch]);
+
+    // Filtrer les utilisateurs pour n'avoir que les patients et les docteurs
+    const patients = users.filter(user => user.role === 'patient');
+    const docteurs = users.filter(user => user.role === 'docteur');
+
+    // Log pour le débogage
+    useEffect(() => {
+        console.log('Users:', users);
+        console.log('Docteurs filtrés:', docteurs);
+        console.log('Patients filtrés:', patients);
+        console.log('Premier utilisateur structure:', users[0]);
+    }, [users]);
 
     const handleAddField = () => {
         setRendezVous([...rendezVous, {
@@ -83,10 +110,6 @@ function RendezVous({ onClose }) {
                 Swal.fire('Erreur', 'Une erreur s\'est produite.', 'error');
             });
     };
-
-    // Filtrer les utilisateurs pour n'avoir que les patients et les docteurs
-    const patients = users.filter(user => user.role === 'patient');
-    const docteurs = users.filter(user => user.role === 'docteur');
 
     return (
         <div className="bg-white rounded-xl shadow-lg p-6">

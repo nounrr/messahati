@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ordonances', function (Blueprint $table) {
-            $table->id();
-            $table->date('date_expiration');
-            $table->text('description')->nullable();
-            $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
+        Schema::table('departements', function (Blueprint $table) {
+            $table->boolean('status')->default(true)->after('img_path');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ordonances');
+        Schema::table('departements', function (Blueprint $table) {
+            $table->dropColumn('status');
+        });
     }
-};
+}; 

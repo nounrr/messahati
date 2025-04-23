@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Medicament extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'nom_medicament',
         'dosage',
@@ -32,9 +35,15 @@ class Medicament extends Model
         'remplacement', // Nouveau champ ajouté
     ];
 
+    protected $casts = [
+        'date_expiration' => 'datetime'
+    ];
+
     public function ordonances()
     {
-        return $this->belongsToMany(Ordonance::class);
+        return $this->belongsToMany(Ordonance::class, 'ordonances_medicaments')
+            ->withPivot('posologie')
+            ->withTimestamps();
     }
 
     public function typemedicament()

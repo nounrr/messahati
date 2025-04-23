@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Icon } from "@iconify/react/dist/iconify.js";
 import { Link, NavLink, useLocation, Outlet } from "react-router-dom";
 import ThemeToggleButton from "./ThemeToggleButton";
 import { useSelector } from "react-redux";
+import { 
+  AiOutlineHome,
+  AiOutlineUser,
+  AiOutlineCalendar,
+  AiOutlineFileText,
+  AiOutlineMedicineBox,
+  AiOutlineDollar,
+  AiOutlineBarChart,
+  AiOutlineSetting,
+  AiOutlineMenu,
+  AiOutlineClose,
+  AiOutlineUserSwitch,
+  AiOutlineLogout
+} from 'react-icons/ai';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const MasterLayout = () => {
@@ -125,7 +138,7 @@ const MasterLayout = () => {
           type='button'
           className='sidebar-close-btn'
         >
-          <Icon icon='radix-icons:cross-2' />
+          <AiOutlineClose />
         </button>
         <div>
           <Link to='/' className='sidebar-logo'>
@@ -152,7 +165,7 @@ const MasterLayout = () => {
             <li className='dropdown'>
               <Link to='#'>
                 <Icon
-                  icon='solar:home-smile-angle-outline'
+                  icon={AiOutlineHome}
                   className='menu-icon'
                 />
                 <span>Dashboard</span>
@@ -176,355 +189,355 @@ const MasterLayout = () => {
             {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('nurse') || hasRole('patient') || hasPermission('view patient')) && (
               <li className='dropdown'>
                 <Link to='#'>
-                  <Icon
-                    icon='solar:users-group-rounded-outline'
-                    className='menu-icon'
-                  />
+                <Icon
+                    icon={AiOutlineUser}
+                  className='menu-icon'
+                />
                   <span>Patients</span>
-                </Link>
-                <ul className='sidebar-submenu'>
+              </Link>
+              <ul className='sidebar-submenu'>
                   {(hasRole('admin') || hasRole('secretary') || hasPermission('create patient')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/patients/create'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
                         Ajouter un patient
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
                   {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('nurse') || hasRole('patient') || hasPermission('view patient')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/patients'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
-                        <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
+                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
                         Liste des patients
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
-                </ul>
-              </li>
+              </ul>
+            </li>
             )}
 
             {/* Rendez-vous - accessible aux admins, doctors, secretaries et patients */}
             {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('patient') || hasPermission('view appointment')) && (
-              <li className='dropdown'>
-                <Link to='#'>
+            <li className='dropdown'>
+              <Link to='#'>
                   <Icon
-                    icon='solar:calendar-outline'
+                    icon={AiOutlineCalendar}
                     className='menu-icon'
                   />
                   <span>Rendez-vous</span>
-                </Link>
-                <ul className='sidebar-submenu'>
+              </Link>
+              <ul className='sidebar-submenu'>
                   {(hasRole('admin') || hasRole('secretary') || hasPermission('create appointment')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/appointments/create'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
                         Nouveau rendez-vous
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
                   {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('patient') || hasPermission('view appointment')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/appointments'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
                         Liste des rendez-vous
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
-                </ul>
-              </li>
+              </ul>
+            </li>
             )}
 
             {/* Consultations - accessible aux admins et doctors */}
             {(hasRole('admin') || hasRole('doctor') || hasPermission('create consultation')) && (
-              <li className='dropdown'>
-                <Link to='#'>
+            <li className='dropdown'>
+              <Link to='#'>
                   <Icon
-                    icon='solar:stethoscope-outline'
+                    icon={AiOutlineFileText}
                     className='menu-icon'
                   />
                   <span>Consultations</span>
-                </Link>
-                <ul className='sidebar-submenu'>
-                  <li>
-                    <NavLink
+              </Link>
+              <ul className='sidebar-submenu'>
+                <li>
+                  <NavLink
                       to='/consultations/create'
-                      className={(navData) =>
-                        navData.isActive ? "active-page" : ""
-                      }
-                    >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                       <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
                       Nouvelle consultation
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
                       to='/consultations'
-                      className={(navData) =>
-                        navData.isActive ? "active-page" : ""
-                      }
-                    >
-                      <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
+                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
                       Liste des consultations
-                    </NavLink>
-                  </li>
-                </ul>
-              </li>
+                  </NavLink>
+                </li>
+              </ul>
+            </li>
             )}
 
             {/* Dossiers médicaux - accessible aux admins, doctors et nurses */}
             {(hasRole('admin') || hasRole('doctor') || hasRole('nurse') || hasPermission('access medical record')) && (
-              <li className='dropdown'>
-                <Link to='#'>
-                  <Icon
-                    icon='solar:folder-with-files-outline'
-                    className='menu-icon'
-                  />
+            <li className='dropdown'>
+              <Link to='#'>
+                <Icon
+                    icon={AiOutlineFileText}
+                  className='menu-icon'
+                />
                   <span>Dossiers médicaux</span>
-                </Link>
-                <ul className='sidebar-submenu'>
-                  <li>
-                    <NavLink
+              </Link>
+              <ul className='sidebar-submenu'>
+                <li>
+                  <NavLink
                       to='/medical-records'
-                      className={(navData) =>
-                        navData.isActive ? "active-page" : ""
-                      }
-                    >
-                      <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
+                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
                       Liste des dossiers
-                    </NavLink>
-                  </li>
-                </ul>
-              </li>
+                  </NavLink>
+                </li>
+              </ul>
+            </li>
             )}
 
             {/* Prescriptions - accessible aux admins, doctors et patients */}
             {(hasRole('admin') || hasRole('doctor') || hasRole('patient') || hasPermission('view prescription')) && (
-              <li className='dropdown'>
-                <Link to='#'>
-                  <Icon
-                    icon='solar:pill-outline'
-                    className='menu-icon'
-                  />
+            <li className='dropdown'>
+              <Link to='#'>
+                <Icon
+                    icon={AiOutlineMedicineBox}
+                  className='menu-icon'
+                />
                   <span>Prescriptions</span>
-                </Link>
-                <ul className='sidebar-submenu'>
+              </Link>
+              <ul className='sidebar-submenu'>
                   {(hasRole('admin') || hasRole('doctor') || hasPermission('create prescription')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/prescriptions/create'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
                         Nouvelle prescription
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
                   {(hasRole('admin') || hasRole('doctor') || hasRole('patient') || hasPermission('view prescription')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/prescriptions'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
                         Liste des prescriptions
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
-                </ul>
-              </li>
+              </ul>
+            </li>
             )}
 
             {/* Factures et paiements - accessible aux admins, accountants et patients */}
             {(hasRole('admin') || hasRole('accountant') || hasRole('patient') || hasPermission('view payments')) && (
-              <li className='dropdown'>
-                <Link to='#'>
-                  <Icon
-                    icon='solar:bill-list-outline'
-                    className='menu-icon'
-                  />
+            <li className='dropdown'>
+              <Link to='#'>
+                <Icon
+                    icon={AiOutlineDollar}
+                  className='menu-icon'
+                />
                   <span>Factures & Paiements</span>
-                </Link>
-                <ul className='sidebar-submenu'>
+              </Link>
+              <ul className='sidebar-submenu'>
                   {(hasRole('admin') || hasRole('accountant') || hasPermission('create invoice')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/invoices/create'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
                         Nouvelle facture
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
                   {(hasRole('admin') || hasRole('accountant') || hasPermission('view payments')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/invoices'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
                         Liste des factures
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
                   {(hasRole('admin') || hasRole('accountant') || hasPermission('view payments')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/payments'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-success-main w-auto' />
                         Paiements
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
                   {(hasRole('admin') || hasRole('accountant') || hasPermission('manage refunds')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/refunds'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-danger-main w-auto' />
                         Remboursements
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
-                </ul>
-              </li>
+              </ul>
+            </li>
             )}
 
             {/* Rapports - accessible aux admins, doctors et accountants */}
             {(hasRole('admin') || hasRole('doctor') || hasRole('accountant') || hasPermission('generate medical reports') || hasPermission('generate financial reports')) && (
-              <li className='dropdown'>
-                <Link to='#'>
-                  <Icon
-                    icon='solar:chart-outline'
-                    className='menu-icon'
-                  />
+            <li className='dropdown'>
+              <Link to='#'>
+                <Icon
+                    icon={AiOutlineBarChart}
+                  className='menu-icon'
+                />
                   <span>Rapports</span>
-                </Link>
-                <ul className='sidebar-submenu'>
+              </Link>
+              <ul className='sidebar-submenu'>
                   {(hasRole('admin') || hasRole('doctor') || hasPermission('generate medical reports')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/reports/medical'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
                         Rapports médicaux
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
                   {(hasRole('admin') || hasRole('accountant') || hasPermission('generate financial reports')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/reports/financial'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
                         Rapports financiers
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
                   {(hasRole('admin') || hasPermission('view statistics')) && (
-                    <li>
-                      <NavLink
+                <li>
+                  <NavLink
                         to='/reports/statistics'
-                        className={(navData) =>
-                          navData.isActive ? "active-page" : ""
-                        }
-                      >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                         <i className='ri-circle-fill circle-icon text-info-main w-auto' />
                         Statistiques
-                      </NavLink>
-                    </li>
+                  </NavLink>
+                </li>
                   )}
-                </ul>
-              </li>
+              </ul>
+            </li>
             )}
 
             {/* Administration - accessible uniquement aux admins */}
             {hasRole('admin') && (
-              <li className='dropdown'>
-                <Link to='#'>
-                  <Icon
-                    icon='solar:settings-outline'
-                    className='menu-icon'
-                  />
+            <li className='dropdown'>
+              <Link to='#'>
+                <Icon
+                    icon={AiOutlineSetting}
+                  className='menu-icon'
+                />
                   <span>Administration</span>
-                </Link>
-                <ul className='sidebar-submenu'>
-                  <li>
-                    <NavLink
+              </Link>
+              <ul className='sidebar-submenu'>
+                <li>
+                  <NavLink
                       to='/admin/users'
-                      className={(navData) =>
-                        navData.isActive ? "active-page" : ""
-                      }
-                    >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                       <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
                       Utilisateurs
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
                       to='/admin/roles'
-                      className={(navData) =>
-                        navData.isActive ? "active-page" : ""
-                      }
-                    >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                       <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
                       Rôles & Permissions
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
                       to='/admin/settings'
-                      className={(navData) =>
-                        navData.isActive ? "active-page" : ""
-                      }
-                    >
+                    className={(navData) =>
+                      navData.isActive ? "active-page" : ""
+                    }
+                  >
                       <i className='ri-circle-fill circle-icon text-info-main w-auto' />
                       Paramètres
-                    </NavLink>
-                  </li>
-                </ul>
-              </li>
+                  </NavLink>
+                </li>
+              </ul>
+            </li>
             )}
           </ul>
         </div>
@@ -535,24 +548,24 @@ const MasterLayout = () => {
         {/* Header */}
         <header className='header'>
           <div className='header-left'>
-            <button
-              onClick={sidebarControl}
-              type='button'
+                <button
+                  onClick={sidebarControl}
+                  type='button'
               className='sidebar-toggle-btn'
-            >
-              <Icon icon='radix-icons:hamburger-menu' />
-            </button>
-          </div>
+                >
+              <AiOutlineMenu />
+                </button>
+              </div>
           <div className='header-right'>
             <div className='header-right-left'>
-              <ThemeToggleButton />
-            </div>
+                <ThemeToggleButton />
+                      </div>
             <div className='header-right-right'>
-              <div className='dropdown'>
-                <button
-                  type='button'
+                <div className='dropdown'>
+                  <button
+                    type='button'
                   className='dropdown-toggle-btn'
-                  data-bs-toggle='dropdown'
+                    data-bs-toggle='dropdown'
                   aria-expanded='false'
                 >
                   <img
@@ -561,45 +574,39 @@ const MasterLayout = () => {
                     className='avatar-img'
                   />
                   <span className='user-name'>{user?.name || 'Utilisateur'}</span>
-                </button>
+                  </button>
                 <ul className='dropdown-menu'>
                   <li>
                     <Link to='/profile' className='dropdown-item'>
-                      <Icon icon='solar:user-outline' className='dropdown-icon' />
+                      <AiOutlineUser className='dropdown-icon' />
                       Mon profil
-                    </Link>
-                  </li>
-                  <li>
+                        </Link>
+                      </li>
+                      <li>
                     <Link to='/settings' className='dropdown-item'>
-                      <Icon
-                        icon='solar:settings-outline'
-                        className='dropdown-icon'
-                      />
+                      <AiOutlineSetting className='dropdown-icon' />
                       Paramètres
-                    </Link>
-                  </li>
-                  <li>
+                        </Link>
+                      </li>
+                      <li>
                     <hr className='dropdown-divider' />
-                  </li>
-                  <li>
+                      </li>
+                      <li>
                     <Link to='/logout' className='dropdown-item'>
-                      <Icon
-                        icon='solar:logout-outline'
-                        className='dropdown-icon'
-                      />
+                      <AiOutlineLogout className='dropdown-icon' />
                       Déconnexion
-                    </Link>
-                  </li>
-                </ul>
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
         </header>
 
         {/* Page Content */}
         <div className='page-content'>
           <Outlet />
-        </div>
+            </div>
       </main>
     </section>
   );
