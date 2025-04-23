@@ -11,6 +11,6 @@ class Payment extends Model
     protected $fillable=['montant','date','status'];
 
     public function rendezvous(){
-        return $this->belongsTo(Rendezvous::class);
+        return $this->belongsTo(Rendezvous::class, 'rendez_vous_id');
     }
 }

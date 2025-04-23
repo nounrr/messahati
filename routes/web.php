@@ -5,6 +5,7 @@ use App\Http\Controllers\DepartementController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Statestiques\StatestiquesDashboard;
 
 
 Route::get('/export', [DepartementController::class, 'export'])->name('departements.export');
@@ -71,7 +72,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
+    
+    // Route pour les statistiques
+    Route::get('/statistiques', function () {
+        return Inertia::render('Statestiques/Statestiques');
+    })->name('statistiques');
+    
+    // Route pour les statistiques de revenus
+    Route::get('/statistiques/revenus', [App\Http\Controllers\Statestiques\StatestiqueDiagramme\StatistiqueRevenue::class, 'getRevenus'])->name('statistiques.revenus');
 });
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\FeedbackController;

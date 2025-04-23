@@ -34,10 +34,14 @@ class User extends Authenticatable
         'email',
         'telephone',
         'adresse',
-        'date_inscription',
+        'date_naissance',
         'img_path',
         'status',
-        'password'
+        'password',
+        'Age',
+        'sexe',
+        'status_maladie',
+        'departement_id'
     ];
 
     /**
@@ -55,13 +59,12 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'date_naissance' => 'date',
+        'Age' => 'float'
+    ];
     public function taches(){
             return $this->belongsToMany(Tache::class)->using(UserTache::class)->withPivot( 'status');
      }

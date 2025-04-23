@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Departement;
+use Carbon\Carbon;
 
 class UserFactory extends Factory
 {
@@ -15,16 +16,18 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $date_naissance = $this->faker->dateTimeBetween('-80 years', '-18 years')->format('Y-m-d');
+        
         return [
             'cin' => strtoupper($this->faker->bothify('??######')),
             'name' => $this->faker->lastName(),
             'prenom' => $this->faker->firstName(),
             'sexe' => $this->faker->randomElement(['femme', 'homme']),
-            'Age' => $this->faker->numberBetween(18, 90),
+            'Age' => Carbon::parse($date_naissance)->age,
             'email' => $this->faker->unique()->safeEmail(),
             'telephone' => $this->faker->phoneNumber(),
             'adresse' => $this->faker->address(),
-            'date_inscription' => $this->faker->date(),
+            'date_naissance' => $date_naissance,
             'departement_id' => Departement::inRandomOrder()->first()->id ?? Departement::factory(),
             'password' => Hash::make('password'), // ou bcrypt('password')
             'img_path' => 'default.png',

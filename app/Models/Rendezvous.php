@@ -13,6 +13,9 @@ class Rendezvous extends Model
     public function patient(){
         return $this->belongsTo(User::class,"patient_id");
     }
+    public function user(){
+        return $this->belongsTo(User::class,"patient_id");
+    }
     public function docteur(){
         return $this->belongsTo(User::class,"docteur_id");
     }

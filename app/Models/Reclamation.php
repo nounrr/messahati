@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Reclamation extends Model
 {
-    use HasFatory;
+    use HasFactory;
     protected $fillable = [
         'titre',
         'description',

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('titre');
             $table->text('description');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('statut')->default('en_attente')->change();
+            $table->string('statut')->default('en_attente');
             $table->timestamps();
         });
     }

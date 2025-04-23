@@ -100,4 +100,5 @@ class FeedbackController extends Controller
         Feedback::findOrFail($id)->delete();
         return redirect()->route('feedback.index')->with('success', 'Feedback supprimé avec succès');
     }
+    
 }

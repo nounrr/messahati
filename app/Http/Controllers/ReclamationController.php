@@ -110,4 +110,5 @@ class ReclamationController extends Controller
         $reclamation->delete();
         return response()->json(null, 204);
     }
+
 }

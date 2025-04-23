@@ -16,5 +16,9 @@ class Medicament extends Model
     public function typemedicament(){
         return $this->belongsTo(TypeMedicament::class);
     }
+    public function ventes()
+    {
+        return $this->hasMany(Vente::class);
+    }
 
 }

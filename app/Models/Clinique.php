@@ -9,5 +9,10 @@ class Clinique extends Model
 {
     use HasFactory;
     protected $fillable=['nom','adresse','email','site_web','description','logo_path'];
+
+    public function materiels()
+    {
+        return $this->HasMany(Materiel::class);
+    }
    
 }

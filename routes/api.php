@@ -28,13 +28,16 @@ use App\Http\Controllers\TypeMedicamentController;
 use App\Http\Controllers\TypePartenaireController;
 use App\Http\Controllers\TypeTraitementController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\StatistiqueRevenue;
-use App\Http\Controllers\StatestiqueAge;
-use App\Http\Controllers\StatistiquesTraitements;
-use App\Http\Controllers\StatistiquesDepartement;
-use App\Http\Controllers\StatistiquesConsultation;
-use App\Http\Controllers\StatistiquePayments;
-use App\Http\Controllers\StatistiqueHealthSituation;
+use App\Http\Controllers\Statestiques\StatestiqueDiagramme\StatistiqueRevenue;
+use App\Http\Controllers\Statestiques\StatestiqueDiagramme\StatestiqueAge;
+use App\Http\Controllers\Statestiques\StatestiqueDiagramme\StatistiquesTraitements;
+use App\Http\Controllers\Statestiques\StatestiqueDiagramme\StatistiquesDepartement;
+use App\Http\Controllers\Statestiques\StatestiqueDiagramme\StatistiquesConsultation;
+use App\Http\Controllers\Statestiques\StatestiqueDiagramme\StatistiquePayments;
+use App\Http\Controllers\Statestiques\StatestiqueDiagramme\StatistiqueHealthSituation;
+use App\Http\Controllers\Statestiques\StatestiquesDashboard;
+use App\Http\Controllers\Auth\RegisteredUserController;
+
 
 // Route pour obtenir l'utilisateur authentifié
 Route::get('/user', function (Request $request) {
@@ -123,6 +126,9 @@ Route::resource('feedbacks', feedbackController::class);
 
     Route::post('/assign-role', [RolePermissionController::class, 'assignRoleToUser']);
     Route::post('/assign-permission', [RolePermissionController::class, 'assignPermissionToUser']);
+
+    //Statestiques
+
 //route pou les statestique de revenue 
 Route::get('/revenus', [StatistiqueRevenue::class, 'getRevenus']);
 //route pour statestique de age 
@@ -136,11 +142,51 @@ Route::get('/consultations-par-jour', [StatistiquesConsultation::class, 'consult
 // route pur  state de paiment 
 Route::get('/payements', [StatistiquePayments::class, 'paiementsParJour']);
 // route pour state de situation de health 
-
-Route::get('/HealthCore', [StatistiqueHealthSituation::class, 'statistiquesSante']);
-
+Route::get('/HealthCore', [StatistiqueHealthSituation::class, 'getHealthCore']);
 
 
+//dashbord comptabilite 
+
+Route::get('/users/employe-quitte', [StatestiquesDashboard::class, 'employeQuitteAujourdHui']);
+Route::get('/users/total-avance', [StatestiquesDashboard::class, 'totalEmployeAvecAvance']);
+Route::get('/users/total-paye', [StatestiquesDashboard::class, 'totalEmployePaye']);
+//dashboerd  Medicament 
+
+Route::get('/dashboard/medicaments', [StatestiquesDashboard::class, 'statsMedicaments']);
+Route::get('/medicaments/epuise', [StatestiquesDashboard::class, 'medicamentsEpuise']);
+Route::get('/medicaments/presque-epuise', [StatestiquesDashboard::class, 'medicamentsPresqueEpuise']);
+Route::get('/ventes/aujourdhui', [StatestiquesDashboard::class, 'totalVenteAujourdhui']);
+// dashboerd RH
+
+Route::get('/dashboard-rh/total-presents', [StatestiquesDashboard::class, 'totalEmployesPresents']);
+Route::get('/dashboard-rh/absents', [StatestiquesDashboard::class, 'employesAbsents']);
+Route::get('/dashboard-rh/reclamations', [StatestiquesDashboard::class, 'reclamationsDuJour']);
+
+//dashboard agent Client
+Route::get('/dashboard/rating-medecin', [StatestiquesDashboard::class, 'getMedecinRating']);
+Route::get('/dashboard/rating-infirmiere', [StatestiquesDashboard::class, 'getInfirmiereRating']);
+Route::get('/dashboard/reclamations-today', [StatestiquesDashboard::class, 'getReclamationsToday']);
+
+//dashboard directeur 
+
+
+Route::get('/stats/patients-actifs', [StatestiquesDashboard::class, 'totalPatientsActifs']);
+Route::get('/stats/rendez-vous', [StatestiquesDashboard::class, 'totalRendezVousAujourdhui']);
+Route::get('/stats/lits-occupes', [StatestiquesDashboard::class, 'capaciteLitsOccupes']);
+Route::get('/stats/stock', [StatestiquesDashboard::class, 'disponibiliteStock']);
+
+// dashboard medcin , infermier et receptionniste
+
+Route::get('/stats/rendez-vous-suivant', [StatestiquesDashboard::class, 'rendezVousSuivant']);
+Route::get('/stats/rendez-vous-jour-prevu', [StatestiquesDashboard::class, 'totalRendezVousAujourdhuiPrevus']);
+Route::get('/stats/patients-passes', [StatestiquesDashboard::class, 'patientsPassesAujourdhui']);
+
+// Routes pour les statistiques
+Route::get('/statistiques/revenus', [StatistiqueRevenue::class, 'getRevenus']);
+
+/// Dans routes/api.php
+
+Route::get('/dashboard-stats', [StatestiquesDashboard::class, 'dashboardStats']);
 
 
 

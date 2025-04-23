@@ -6,6 +6,38 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
+use Database\Seeders\TypeTraitementSeeder;
+use Database\Seeders\MutuelSeeder;
+use Database\Seeders\CliniqueSeeder;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\DepartementSeeder;
+use Database\Seeders\TraitementSeeder;
+use Database\Seeders\RendezVousSeeder;
+use Database\Seeders\ReclamationSeeder;
+use Database\Seeders\NotificationSeeder;
+use Database\Seeders\OrdonanceSeeder;
+use Database\Seeders\TypeMedicamentSeeder;
+use Database\Seeders\MedicamentSeeder;
+use Database\Seeders\TypeCertificatSeeder;
+use Database\Seeders\CertificatMedicaleSeeder;
+use Database\Seeders\OrdonanceMedicamentSeeder;
+use Database\Seeders\PaymentSeeder;
+use Database\Seeders\FeedbackSeeder;
+use Database\Seeders\TacheSeeder;
+use Database\Seeders\AuditLogCliniqueSeeder;
+use Database\Seeders\TypePartenaireSeeder;
+use Database\Seeders\PartenaireSeeder;
+use Database\Seeders\MessageSeeder;
+use Database\Seeders\MutuelUserSeeder;
+use Database\Seeders\NotificationUserSeeder;
+use Database\Seeders\AttachementSeeder;
+use Database\Seeders\UserTacheSeeder;
+use Database\Seeders\ChargeSeeder;
+use Database\Seeders\SalaireSeeder;
+use Database\Seeders\VenteSeeder;
+use Database\Seeders\MaterielSeeder;
+use Database\Seeders\StatistiquesSeeder;
+use Database\Seeders\StatistiquesDataSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,7 +54,8 @@ class DatabaseSeeder extends Seeder
             CliniqueSeeder::class,
             RolesAndPermissionsSeeder::class,
             DepartementSeeder::class,
-            UserSeeder::class,    // UserSeeder runs after DepartementSeeder
+            StatistiquesSeeder::class,
+            UserSeeder::class,
             TraitementSeeder::class,
             RendezVousSeeder::class,
             ReclamationSeeder::class,
@@ -46,6 +79,9 @@ class DatabaseSeeder extends Seeder
             UserTacheSeeder::class,
             ChargeSeeder::class,
             SalaireSeeder::class,
+            VenteSeeder::class,
+            MaterielSeeder::class,
+            StatistiquesDataSeeder::class,
         ]);
     }
 }

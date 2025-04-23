@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('rendez_vous_id')->constrained('rendez_vous')->onDelete('cascade');
             $table->float('montant');
             $table->date('date');
-            $table->boolean('status');
+            $table->string('payment_method');
+            $table->string('status');
             $table->timestamps();
         });
     }

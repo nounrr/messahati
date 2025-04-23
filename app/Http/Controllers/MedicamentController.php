@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Models\Medicament;
 
 class MedicamentController extends Controller
@@ -130,4 +131,8 @@ class MedicamentController extends Controller
 
         return redirect()->route('medicaments.index')->with('success', 'Médicament supprimé avec succès.');
     }
+    
+
+    
+
 }
