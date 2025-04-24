@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\Departement;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -23,18 +24,27 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $departementIds = Departement::pluck('id')->toArray();
+        
         return [
             'cin' => strtoupper(fake()->bothify('??######')),
             'name' => fake()->lastName(),
             'prenom' => fake()->firstName(),
             'email' => fake()->unique()->safeEmail(),
+            'sexe' => fake()->randomElement(['Homme', 'Femme']),
             'telephone' => fake()->phoneNumber(),
             'adresse' => fake()->address(),
-            'date_inscription' => now(),
-            'departement_id' => fake()->numberBetween(1, 3), // à adapter selon tes départements
-            'password' => Hash::make('password'), // ou bcrypt('password')
-            'img_path' => 'default.png', // ou une image de test
-            'status' => fake()->boolean(), // à adapter si c'est booléen
+            'date_naissance' => now(),
+            'departement_id' => fake()->randomElement($departementIds),
+            'password' => Hash::make('password'),
+            'img_path' => 'default.png',
+            'status' => fake()->randomElement(['congé', 'absent', 'actif', 'inactif']), 
+            'status_maladie' => fake()->boolean(),
+
+
+
+
+            
         ];
     }
 

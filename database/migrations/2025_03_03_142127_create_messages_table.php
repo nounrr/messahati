@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('contenu');
             $table->date('date_envoie');
             $table->time('heure_envoie');
-            $table->boolean('status');
+            $table->enum('status', ['lire', 'non_lire'])->default('non_lire');
             $table->timestamps();
         });
     }

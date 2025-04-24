@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->enum('status', ['active', 'inactive'])->default('active')->after('guard_name');
+        Schema::create('vendus', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('medicament_id')->constrained('medicaments')->onDelete('cascade');
+            $table->integer('quantite');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->dropColumn('status');
-        });
+        Schema::dropIfExists('vendus');
     }
-}; 
+};

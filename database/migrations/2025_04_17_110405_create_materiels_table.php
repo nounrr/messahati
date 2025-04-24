@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('type_certificats', function (Blueprint $table) {
+        Schema::create('materiels', function (Blueprint $table) {
             $table->id();
-            $table->string('type_certificat');
-
-            $table->text('description')->nullable();
+            $table->foreignId('clinique_id')->constrained('cliniques')->onDelete('cascade');
+            $table->string('libelle');
+            $table->integer('quantite');
+            $table->boolean('status');//le materiel utilise ou il reste dans stock
             $table->timestamps();
+
         });
     }
 
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('typecertificats');
+        Schema::dropIfExists('_materiels');
     }
 };

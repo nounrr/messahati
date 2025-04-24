@@ -2,175 +2,75 @@ import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { Link, usePage, router } from '@inertiajs/react';
 
-
 const MasterLayout = ({ children }) => {
   const [sidebarActive, setSidebarActive] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const { auth } = usePage().props;
-  // Structure des menus avec permissions et groupes
+
   const menuGroups = [
     {
       title: "Principal",
       items: [
-        {
-          title: "Dashboard",
-          route: "dashboard",
-          icon: "solar:home-smile-angle-outline",
-          permission: null // Pas de permission spécifique requise
-        },
-        {
-          title: "Rendez-vous",
-          route: "rdv.view",
-          icon: "solar:calendar-dot-line-outline",
-          permission: "view appointment"
-        },
-        {
-          title: "Chat",
-          route: "chat.view",
-          icon: "solar:chat-round-dots-outline",
-          permission: null
-        }
+        { title: "Dashboard", route: "dashboard", icon: "solar:home-smile-angle-outline", permission: null },
+        { title: "Rendez-vous", route: "rdv.view", icon: "solar:calendar-dot-line-outline", permission: "view appointment" },
+        { title: "Chat", route: "chat.view", icon: "solar:chat-round-dots-outline", permission: null }
       ]
     },
     {
       title: "Administration",
       items: [
-        {
-          title: "Utilisateurs",
-          route: "users.view",
-          icon: "solar:users-group-rounded-outline",
-          permission: "create user"
-        },
-        {
-          title: "Rôles & Permissions",
-          route: "roles.view",
-          icon: "solar:lock-keyhole-minimalistic-outline",
-          permission: "assign roles"
-        },
-        {
-          title: "Audit",
-          route: "audit.view",
-          icon: "solar:history-outline",
-          permission: null
-        }
+        { title: "Utilisateurs", route: "users.view", icon: "solar:users-group-rounded-outline", permission: "create user" },
+        { title: "Rôles & Permissions", route: "roles.view", icon: "solar:lock-keyhole-minimalistic-outline", permission: "assign roles" },
+        { title: "Audit", route: "audit.view", icon: "solar:history-outline", permission: null }
       ]
     },
     {
       title: "Gestion",
       items: [
-        {
-          title: "Départements",
-          route: "departement.view",
-          icon: "solar:buildings-2-outline",
-          permission: null
-        },
-        {
-          title: "Partenaires",
-          route: "partenaire.view",
-          icon: "solar:handshake-outline",
-          permission: null
-        },
-        {
-          title: "Mutuels",
-          route: "mutuels.view", 
-          icon: "solar:shield-user-outline",
-          permission: null
-        }
+        { title: "Départements", route: "departement.view", icon: "solar:buildings-2-outline", permission: null },
+        { title: "Partenaires", route: "partenaire.view", icon: "solar:handshake-outline", permission: null },
+        { title: "Mutuels", route: "mutuels.view", icon: "solar:shield-user-outline", permission: null }
       ]
     },
     {
       title: "Médical",
       items: [
-        {
-          title: "Traitements",
-          route: "traitements.view",
-          icon: "solar:pills-outline",
-          permission: null
-        },
-        {
-          title: "Type Traitements",
-          route: "type-traitements.view",
-          icon: "solar:medicine-outline",
-          permission: null
-        },
-        {
-          title: "Ordonnances",
-          route: "ordonnance.view",
-          icon: "solar:file-text-outline",
-          permission: "view prescription"
-        },
-        {
-          title: "Certificats",
-          route: "certificat.view",
-          icon: "solar:diploma-verified-outline",
-          permission: null
-        }
+        { title: "Traitements", route: "traitements.view", icon: "solar:pills-outline", permission: null },
+        { title: "Type Traitements", route: "type-traitements.view", icon: "solar:medicine-outline", permission: null },
+        { title: "Ordonnances", route: "ordonnance.view", icon: "solar:file-text-outline", permission: "view prescription" },
+        { title: "Certificats", route: "certificat.view", icon: "solar:diploma-verified-outline", permission: null }
       ]
     },
     {
       title: "Finance",
       items: [
-        {
-          title: "Paiements",
-          route: "payment.view",
-          icon: "solar:card-outline",
-          permission: "view payments"
-        },
-        {
-          title: "Charges",
-          route: "charges.view",
-          icon: "solar:bill-list-outline",
-          permission: null
-        },
-        {
-          title: "Salaires",
-          route: "salaire.view",
-          icon: "solar:wallet-money-outline",
-          permission: null
-        }
+        { title: "Paiements", route: "payment.view", icon: "solar:card-outline", permission: "view payments" },
+        { title: "Charges", route: "charges.view", icon: "solar:bill-list-outline", permission: null },
+        { title: "Salaires", route: "salaire.view", icon: "solar:wallet-money-outline", permission: null }
       ]
     },
     {
       title: "Retour",
       items: [
-        {
-          title: "Feedbacks",
-          route: "feedback.view",
-          icon: "solar:chat-square-like-outline",
-          permission: null
-        },
-        {
-          title: "Statistiques",
-          route: "statistiques",
-          icon: "solar:chart-outline",
-          permission: "view statistics"
-        }
+        { title: "Feedbacks", route: "feedback.view", icon: "solar:chat-square-like-outline", permission: null },
+        { title: "Statistiques", route: "statistiques", icon: "solar:chart-outline", permission: "view statistics" }
       ]
     }
   ];
 
-  // Vérifier si l'utilisateur a la permission
   const hasPermission = (permission) => {
-    if (!permission) return true; // Si pas de permission requise
+    if (!permission) return true;
     if (!auth || !auth.user) return false;
-    
-    // Vérification basée sur les rôles/permissions de l'utilisateur
-    // Cette logique doit être adaptée selon votre système de permissions
     const userPermissions = auth.user.permissions || [];
     const userRoles = auth.user.roles || [];
-    
-    // Vérifier si la permission est directement attribuée
-    if (userPermissions.some(p => p.name === permission)) {
-      return true;
-    }
-    
-    // Vérifier si un des rôles de l'utilisateur a cette permission
-    return userRoles.some(role => 
+
+    if (userPermissions.some(p => p.name === permission)) return true;
+
+    return userRoles.some(role =>
       role.permissions && role.permissions.some(p => p.name === permission)
     );
   };
 
-  // Gestion du toggle du sidebar
   const toggleSidebar = () => {
     setSidebarActive(!sidebarActive);
   };
@@ -179,19 +79,16 @@ const MasterLayout = ({ children }) => {
     setMobileMenu(false);
   };
 
-  // Vérifier si un groupe a au moins un élément accessible
   const hasAccessibleItems = (group) => {
     return group.items.some(item => hasPermission(item.permission));
   };
 
   useEffect(() => {
-    // Gestion des dropdowns du menu
     const handleDropdownClick = (event) => {
-      // Only prevent default if it's not a Link component
       if (!event.target.closest('a[href]')) {
         event.preventDefault();
       }
-      
+
       const clickedDropdown = event.currentTarget.closest(".dropdown");
       if (!clickedDropdown) return;
 
@@ -222,26 +119,17 @@ const MasterLayout = ({ children }) => {
     };
   }, []);
 
-  // Listen for URL changes to close mobile menu
   useEffect(() => {
     const handleUrlChange = () => {
-      if (mobileMenu) {
-        setMobileMenu(false);
-      }
+      if (mobileMenu) setMobileMenu(false);
     };
 
     router.on('navigate', handleUrlChange);
-    
-    return () => {
-      router.off('navigate', handleUrlChange);
-    };
+    return () => router.off('navigate', handleUrlChange);
   }, [mobileMenu]);
 
   return (
-    
     <section className={mobileMenu ? "overlay active" : "overlay"}>
-      {/* Sidebar */}
-  
       <aside className={`sidebar ${sidebarActive ? 'active' : ''} ${mobileMenu ? 'sidebar-open' : ''}`}>
         <button onClick={toggleMobileMenu} className='sidebar-close-btn'>
           <Icon icon='radix-icons:cross-2' />
@@ -252,31 +140,24 @@ const MasterLayout = ({ children }) => {
           </Link>
         </div>
         <div className='sidebar-menu-area'>
-          
           <ul className='sidebar-menu'>
-          <div className="profile flex">
-          <div className='dropdown'>
-              <button className='rounded-full'>
-                <img src='/assets/images/user.png' alt='user' className='w-10 h-10 rounded-full' />
-              </button>
+            <div className="profile flex">
+              <div className='dropdown'>
+                <button className='rounded-full'>
+                  <img src='/assets/images/user.png' alt='user' className='w-10 h-10 rounded-full' />
+                </button>
+              </div>
+              <div className="info">
+                {/* <h2>{auth.user.name} {auth.user.prenom}</h2> */}
+              </div>
             </div>
-            <div className="info">
-              <h2>{auth.user.name} {auth.user.prenom}</h2>
-            </div>
-          </div>
-            {menuGroups.map((group, groupIndex) => 
-              // Afficher le groupe uniquement s'il contient au moins un élément accessible
+            {menuGroups.map((group, groupIndex) =>
               hasAccessibleItems(group) && (
                 <li key={groupIndex} className='menu-group'>
                   {!sidebarActive && <div className='menu-group-title'>{group.title}</div>}
-                  
-                  {group.items.map((item, itemIndex) => 
+                  {group.items.map((item, itemIndex) =>
                     hasPermission(item.permission) && (
-                      <Link 
-                        key={itemIndex} 
-                        href={route(item.route)}
-                        className='menu-item'
-                      >
+                      <Link key={itemIndex} href={route(item.route)} className='menu-item'>
                         <Icon icon={item.icon} className='menu-icon' />
                         <span className='menu-title'>{item.title}</span>
                       </Link>
@@ -289,10 +170,7 @@ const MasterLayout = ({ children }) => {
         </div>
 
         <style jsx>{`
-          .menu-group {
-            margin-bottom: 16px;
-          }
-          
+          .menu-group { margin-bottom: 16px; }
           .menu-group-title {
             font-size: 12px;
             text-transform: uppercase;
@@ -300,7 +178,6 @@ const MasterLayout = ({ children }) => {
             padding: 8px 16px;
             margin-top: 8px;
           }
-          
           .menu-item {
             display: flex;
             align-items: center;
@@ -310,25 +187,13 @@ const MasterLayout = ({ children }) => {
             border-radius: 6px;
             margin: 4px 10px;
           }
-          
-          .menu-item:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-          }
-          
-          .menu-icon {
-            font-size: 20px;
-            margin-right: 10px;
-          }
-          
-          .menu-title {
-            white-space: nowrap;
-          }
+          .menu-item:hover { background-color: rgba(0, 0, 0, 0.05); }
+          .menu-icon { font-size: 20px; margin-right: 10px; }
+          .menu-title { white-space: nowrap; }
         `}</style>
       </aside>
 
-      {/* Main Content */}
       <main className={`dashboard-main ${sidebarActive ? 'active' : ''}`}>
-        {/* Header */}
         <div className='navbar-header flex justify-between items-center p-4 bg-white shadow'>
           <div className='flex items-center gap-4'>
             <button onClick={toggleSidebar}>
@@ -347,18 +212,14 @@ const MasterLayout = ({ children }) => {
               <button className='rounded-full bg-gray-200 w-10 h-10 flex items-center justify-center'>
                 <Icon icon='iconoir:bell' />
               </button>
-              {/* Exemple simple de dropdown */}
             </div>
-            
           </div>
         </div>
 
-        {/* Page Content */}
         <div className='dashboard-main-body p-6'>
           {children}
         </div>
 
-        {/* Footer */}
         <footer className='p-4 text-center text-gray-500'>
           © 2024 Messhati. All Rights Reserved.
         </footer>
