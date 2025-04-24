@@ -290,12 +290,12 @@ function ListeFeedbacks() {
     );
 
     return (
-        <AuthenticatedLayout
+        <div
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Gestion des Feedbacks</h2>}
         >
             <Head title="Feedbacks" />
             {content}
-        </AuthenticatedLayout>
+        </div>
     );
 }
 

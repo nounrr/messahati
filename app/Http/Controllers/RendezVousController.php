@@ -9,6 +9,13 @@ use App\Models\Payment;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
+
+
+use Carbon\Carbon;
+ use App\Models\Traitement;
+ use App\Models\TypeTraitement;
 
 class RendezVousController extends Controller
 {
@@ -292,4 +299,77 @@ class RendezVousController extends Controller
 
         return response()->json(['message' => 'Rendez-vous supprimés avec succès.']);
     }
+    public function getListRendezVous()
+     {
+         $today = Carbon::today();
+         $rendezVous = RendezVous::with([
+             'patient', 
+             'docteur', 
+             'departement', 
+             'traitement',
+             'traitement.typeTraitement'
+         ])
+         ->whereDate('date_heure', $today)
+         ->where('statut', '!=', "Confirmé")
+         ->get();
+         return response()->json($rendezVous);
+     }
+
+     public function getListeAttends()
+     {
+         $today = Carbon::today();
+         $rendezVous = RendezVous::with([
+             'patient', 
+             'docteur.departement', 
+             'departement', 
+             'traitement.typetraitement',
+             'payment'
+         ])
+         ->whereDate('created_at', $today)
+         ->get();
+         return response()->json($rendezVous);
+     }
+
+     public function generateReport($id)
+     {
+         try {
+             Log::info('Tentative de génération de rapport pour le rendez-vous ID: ' . $id);
+     
+             // Récupérer le rendez-vous avec ses relations
+             $rendezvous = Rendezvous::with(['patient', 'docteur', 'departement','traitement'])->findOrFail($id);
+     
+             Log::info('Rendez-vous trouvé:', [
+                 'id' => $rendezvous->id,
+                 'patient' => $rendezvous->patient->name ?? 'Inconnu',
+ 
+                 'docteur' => $rendezvous->docteur->name ?? 'Inconnu',
+                 'departement' => $rendezvous->departement->nom ?? 'Inconnu',
+                 'traitement' => $rendezvous->traitement->description ?? 'Inconnu',
+ 
+             ]);
+     
+             // Préparer les données pour la vue
+             $data = [
+                 'rendezvous' => $rendezvous,
+             ];
+     
+             // Charger la vue et générer le PDF
+             $pdf = Pdf::loadView('RendezVous', $data);
+     
+             Log::info('PDF généré avec succès');
+     
+             // Télécharger le fichier PDF
+             return $pdf->download('rapport_rendezvous.pdf');
+         } catch (\Exception $e) {
+             Log::error('Erreur lors de la génération du rapport:', [
+                 'error' => $e->getMessage(),
+                 'trace' => $e->getTraceAsString()
+             ]);
+     
+             return response()->json([
+                 'error' => 'Erreur lors de la génération du rapport',
+                 'message' => $e->getMessage()
+             ], 500);
+         }
+     }
 }

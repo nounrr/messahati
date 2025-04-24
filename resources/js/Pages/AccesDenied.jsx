@@ -1,15 +1,15 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@inertiajs/react";
 
 const AccessDeniedLayer = () => {
   return (
     <div className='custom-bg'>
       <div className='container container--xl'>
         <div className='d-flex align-items-center justify-content-between py-24'>
-          <Link to='/' className=''>
+          <Link href={route('dashboard')} className=''>
             <img src='assets/images/logo.png' alt='' />
           </Link>
-          <Link to='/' className='btn btn-primary btn-outline-primary-600 text-sm'>
+          <Link href={route('dashboard')} className='btn btn-primary btn-outline-primary-600 text-sm'>
             {" "}
             Go To Home{" "}
           </Link>
@@ -26,7 +26,7 @@ const AccessDeniedLayer = () => {
               much trouble, contact your site executive to demand access.
             </p>
             <Link
-              to='/'
+              href={route('dashboard')}
               className='btn btn-primary px-32 py-16 flex-shrink-0 d-inline-flex align-items-center justify-content-center gap-8 mt-28'
             >
               <i className='ri-home-4-line' /> Go Back To Home

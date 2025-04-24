@@ -54,12 +54,8 @@ export default function Dashboard() {
     const error = usersError || permissionsError || rolesError || modelPermissionsError;
     
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
-                </h2>
-            }
+        <div
+           
         >
             <Head title="Dashboard" />
 
@@ -269,6 +265,6 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </div>
     );
 }

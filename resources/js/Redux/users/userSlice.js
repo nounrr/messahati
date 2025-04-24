@@ -104,6 +104,49 @@ export const importUsers = createAsyncThunk(
     }
 );
 
+// Change password
+export const changePassword = createAsyncThunk(
+    'users/changePassword',
+    async (passwordData, { rejectWithValue }) => {
+        try {
+            // Vérifier si le token existe
+            const token = localStorage.getItem('token');
+            if (!token) {
+                return rejectWithValue({ message: 'Session expirée. Veuillez vous reconnecter.' });
+            }
+
+            // Vérifier si le token est valide
+            const response = await axiosInstance.post('/users/change-password', {
+                current_password: passwordData.current_password,
+                new_password: passwordData.new_password,
+                confirm_password: passwordData.confirm_password
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            // Gérer les erreurs d'authentification
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                return rejectWithValue({ message: 'Session expirée. Veuillez vous reconnecter.' });
+            }
+            
+            // Gérer les autres erreurs
+            if (error.response?.data?.message) {
+                return rejectWithValue(error.response.data);
+            }
+            
+            return rejectWithValue({ message: 'Une erreur est survenue lors du changement de mot de passe' });
+        }
+    }
+);
+
+
 const userSlice = createSlice({
     name: 'users',
     initialState: {
@@ -147,7 +190,16 @@ const userSlice = createSlice({
             })
             .addCase(importUsers.fulfilled, (state, action) => {
                 state.items.push(...action.payload);
+            })
+            .addCase(changePassword.fulfilled, (state, action) => {
+                // Handle successful password change
+                state.status = 'succeeded';
+            })
+            .addCase(changePassword.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload?.message || 'Failed to change password';
             });
+
     },
 });
 

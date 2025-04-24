@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\TypeTraitement;
 use App\Traits\ExcelExportImport;
 use App\Imports\TypeTraitementImport;
+use App\Exports\TypeTraitementExport;
 
 class TypeTraitementController extends Controller
 {

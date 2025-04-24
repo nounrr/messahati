@@ -1,12 +1,15 @@
 import Echo from 'laravel-echo';
-
 import Pusher from 'pusher-js';
+
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY,
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-    forceTLS: false, // <---
-    encrypted: false,
+    forceTLS: true,
+    authEndpoint: '/custom/endpoint/auth', 
+
+    encrypted: true,
 });
+window.Echo.connector.pusher.config.authEndpoint = null;

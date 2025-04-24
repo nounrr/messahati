@@ -1,602 +1,367 @@
 import React, { useEffect, useState } from "react";
-import { Link, NavLink, useLocation, Outlet } from "react-router-dom";
-// import ThemeToggleButton from "./ThemeToggleButton";
-import 'jquery';
-import { useSelector } from "react-redux";
-import { 
-  AiOutlineHome,
-  AiOutlineUser,
-  AiOutlineCalendar,
-  AiOutlineFileText,
-  AiOutlineMedicineBox,
-  AiOutlineDollar,
-  AiOutlineBarChart,
-  AiOutlineSetting,
-  AiOutlineMenu,
-  AiOutlineClose,
-  AiOutlineUserSwitch,
-  AiOutlineLogout
-} from 'react-icons/ai';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import { Icon } from "@iconify/react";
+import { Link, usePage, router } from '@inertiajs/react';
 
-const MasterLayout = () => {
-  let [sidebarActive, seSidebarActive] = useState(false);
-  let [mobileMenu, setMobileMenu] = useState(false);
-  const location = useLocation(); // Hook to get the current route
-  const { user } = useSelector((state) => state.auth);
 
-  // Fonction pour vérifier si l'utilisateur a un rôle spécifique
-  const hasRole = (roleName) => {
-    return user && user.roles && user.roles.some(role => role.name === roleName);
+const MasterLayout = ({ children }) => {
+  const [sidebarActive, setSidebarActive] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const { auth } = usePage().props;
+  // Structure des menus avec permissions et groupes
+  const menuGroups = [
+    {
+      title: "Principal",
+      items: [
+        {
+          title: "Dashboard",
+          route: "dashboard",
+          icon: "solar:home-smile-angle-outline",
+          permission: null // Pas de permission spécifique requise
+        },
+        {
+          title: "Rendez-vous",
+          route: "rdv.view",
+          icon: "solar:calendar-dot-line-outline",
+          permission: "view appointment"
+        },
+        {
+          title: "Chat",
+          route: "chat.view",
+          icon: "solar:chat-round-dots-outline",
+          permission: null
+        }
+      ]
+    },
+    {
+      title: "Administration",
+      items: [
+        {
+          title: "Utilisateurs",
+          route: "users.view",
+          icon: "solar:users-group-rounded-outline",
+          permission: "create user"
+        },
+        {
+          title: "Rôles & Permissions",
+          route: "roles.view",
+          icon: "solar:lock-keyhole-minimalistic-outline",
+          permission: "assign roles"
+        },
+        {
+          title: "Audit",
+          route: "audit.view",
+          icon: "solar:history-outline",
+          permission: null
+        }
+      ]
+    },
+    {
+      title: "Gestion",
+      items: [
+        {
+          title: "Départements",
+          route: "departement.view",
+          icon: "solar:buildings-2-outline",
+          permission: null
+        },
+        {
+          title: "Partenaires",
+          route: "partenaire.view",
+          icon: "solar:handshake-outline",
+          permission: null
+        },
+        {
+          title: "Mutuels",
+          route: "mutuels.view", 
+          icon: "solar:shield-user-outline",
+          permission: null
+        }
+      ]
+    },
+    {
+      title: "Médical",
+      items: [
+        {
+          title: "Traitements",
+          route: "traitements.view",
+          icon: "solar:pills-outline",
+          permission: null
+        },
+        {
+          title: "Type Traitements",
+          route: "type-traitements.view",
+          icon: "solar:medicine-outline",
+          permission: null
+        },
+        {
+          title: "Ordonnances",
+          route: "ordonnance.view",
+          icon: "solar:file-text-outline",
+          permission: "view prescription"
+        },
+        {
+          title: "Certificats",
+          route: "certificat.view",
+          icon: "solar:diploma-verified-outline",
+          permission: null
+        }
+      ]
+    },
+    {
+      title: "Finance",
+      items: [
+        {
+          title: "Paiements",
+          route: "payment.view",
+          icon: "solar:card-outline",
+          permission: "view payments"
+        },
+        {
+          title: "Charges",
+          route: "charges.view",
+          icon: "solar:bill-list-outline",
+          permission: null
+        },
+        {
+          title: "Salaires",
+          route: "salaire.view",
+          icon: "solar:wallet-money-outline",
+          permission: null
+        }
+      ]
+    },
+    {
+      title: "Retour",
+      items: [
+        {
+          title: "Feedbacks",
+          route: "feedback.view",
+          icon: "solar:chat-square-like-outline",
+          permission: null
+        },
+        {
+          title: "Statistiques",
+          route: "statistiques",
+          icon: "solar:chart-outline",
+          permission: "view statistics"
+        }
+      ]
+    }
+  ];
+
+  // Vérifier si l'utilisateur a la permission
+  const hasPermission = (permission) => {
+    if (!permission) return true; // Si pas de permission requise
+    if (!auth || !auth.user) return false;
+    
+    // Vérification basée sur les rôles/permissions de l'utilisateur
+    // Cette logique doit être adaptée selon votre système de permissions
+    const userPermissions = auth.user.permissions || [];
+    const userRoles = auth.user.roles || [];
+    
+    // Vérifier si la permission est directement attribuée
+    if (userPermissions.some(p => p.name === permission)) {
+      return true;
+    }
+    
+    // Vérifier si un des rôles de l'utilisateur a cette permission
+    return userRoles.some(role => 
+      role.permissions && role.permissions.some(p => p.name === permission)
+    );
   };
 
-  // Fonction pour vérifier si l'utilisateur a une permission spécifique
-  const hasPermission = (permissionName) => {
-    return user && user.permissions && user.permissions.includes(permissionName);
+  // Gestion du toggle du sidebar
+  const toggleSidebar = () => {
+    setSidebarActive(!sidebarActive);
   };
 
-  // Fonction pour vérifier si l'utilisateur a l'un des rôles spécifiés
-  const hasAnyRole = (roleNames) => {
-    return user && user.roles && user.roles.some(role => roleNames.includes(role.name));
+  const toggleMobileMenu = () => {
+    setMobileMenu(false);
   };
 
-  // Fonction pour vérifier si l'utilisateur a l'une des permissions spécifiées
-  const hasAnyPermission = (permissionNames) => {
-    return user && user.permissions && user.permissions.some(permission => permissionNames.includes(permission));
+  // Vérifier si un groupe a au moins un élément accessible
+  const hasAccessibleItems = (group) => {
+    return group.items.some(item => hasPermission(item.permission));
   };
 
   useEffect(() => {
+    // Gestion des dropdowns du menu
     const handleDropdownClick = (event) => {
-      event.preventDefault();
-      const clickedLink = event.currentTarget;
-      const clickedDropdown = clickedLink.closest(".dropdown");
-
+      // Only prevent default if it's not a Link component
+      if (!event.target.closest('a[href]')) {
+        event.preventDefault();
+      }
+      
+      const clickedDropdown = event.currentTarget.closest(".dropdown");
       if (!clickedDropdown) return;
 
       const isActive = clickedDropdown.classList.contains("open");
 
-      // Close all dropdowns
-      const allDropdowns = document.querySelectorAll(".sidebar-menu .dropdown");
-      allDropdowns.forEach((dropdown) => {
+      document.querySelectorAll(".sidebar-menu .dropdown").forEach(dropdown => {
         dropdown.classList.remove("open");
         const submenu = dropdown.querySelector(".sidebar-submenu");
-        if (submenu) {
-          submenu.style.maxHeight = "0px"; // Collapse submenu
-        }
+        if (submenu) submenu.style.maxHeight = "0px";
       });
 
-      // Toggle the clicked dropdown
       if (!isActive) {
         clickedDropdown.classList.add("open");
         const submenu = clickedDropdown.querySelector(".sidebar-submenu");
-        if (submenu) {
-          submenu.style.maxHeight = `${submenu.scrollHeight}px`; // Expand submenu
-        }
+        if (submenu) submenu.style.maxHeight = `${submenu.scrollHeight}px`;
       }
     };
 
-    // Attach click event listeners to all dropdown triggers
-    const dropdownTriggers = document.querySelectorAll(
-      ".sidebar-menu .dropdown > a, .sidebar-menu .dropdown > Link"
-    );
-
-    dropdownTriggers.forEach((trigger) => {
+    const dropdownTriggers = document.querySelectorAll(".sidebar-menu .dropdown > a");
+    dropdownTriggers.forEach(trigger => {
       trigger.addEventListener("click", handleDropdownClick);
     });
 
-    const openActiveDropdown = () => {
-      const allDropdowns = document.querySelectorAll(".sidebar-menu .dropdown");
-      allDropdowns.forEach((dropdown) => {
-        const submenuLinks = dropdown.querySelectorAll(".sidebar-submenu li a");
-        submenuLinks.forEach((link) => {
-          if (
-            link.getAttribute("href") === location.pathname ||
-            link.getAttribute("to") === location.pathname
-          ) {
-            dropdown.classList.add("open");
-            const submenu = dropdown.querySelector(".sidebar-submenu");
-            if (submenu) {
-              submenu.style.maxHeight = `${submenu.scrollHeight}px`; // Expand submenu
-            }
-          }
-        });
-      });
-    };
-
-    // Open the submenu that contains the active route
-    openActiveDropdown();
-
-    // Cleanup event listeners on unmount
     return () => {
-      dropdownTriggers.forEach((trigger) => {
+      dropdownTriggers.forEach(trigger => {
         trigger.removeEventListener("click", handleDropdownClick);
       });
     };
-  }, [location.pathname]);
+  }, []);
 
-  let sidebarControl = () => {
-    seSidebarActive(!sidebarActive);
-  };
+  // Listen for URL changes to close mobile menu
+  useEffect(() => {
+    const handleUrlChange = () => {
+      if (mobileMenu) {
+        setMobileMenu(false);
+      }
+    };
 
-  let mobileMenuControl = () => {
-    setMobileMenu(!mobileMenu);
-  };
+    router.on('navigate', handleUrlChange);
+    
+    return () => {
+      router.off('navigate', handleUrlChange);
+    };
+  }, [mobileMenu]);
 
   return (
-    <section className={mobileMenu ? "overlay active" : "overlay "}>
-      {/* sidebar */}
-      <aside
-        className={
-          sidebarActive
-            ? "sidebar active "
-            : mobileMenu
-            ? "sidebar sidebar-open"
-            : "sidebar"
-        }
-      >
-        <button
-          onClick={mobileMenuControl}
-          type='button'
-          className='sidebar-close-btn'
-        >
-          <AiOutlineClose />
+    
+    <section className={mobileMenu ? "overlay active" : "overlay"}>
+      {/* Sidebar */}
+  
+      <aside className={`sidebar ${sidebarActive ? 'active' : ''} ${mobileMenu ? 'sidebar-open' : ''}`}>
+        <button onClick={toggleMobileMenu} className='sidebar-close-btn'>
+          <Icon icon='radix-icons:cross-2' />
         </button>
-        <div>
-          <Link to='/' className='sidebar-logo'>
-            <img
-              src='assets/images/logo.png'
-              alt='site logo'
-              className='light-logo'
-            />
-            <img
-              src='assets/images/logo-light.png'
-              alt='site logo'
-              className='dark-logo'
-            />
-            <img
-              src='assets/images/logo-icon.png'
-              alt='site logo'
-              className='logo-icon'
-            />
+        <div className='sidebar-logo'>
+          <Link href={route('dashboard')}>
+            <img src={sidebarActive ? '/assets/images/logo-mobile.png' : '/assets/images/logo.png'} alt='Logo' />
           </Link>
         </div>
         <div className='sidebar-menu-area'>
-          <ul className='sidebar-menu' id='sidebar-menu'>
-            {/* Dashboard - accessible à tous les utilisateurs connectés */}
-            <li className='dropdown'>
-              <Link to='#'>
-                <AiOutlineHome
-                  className='menu-icon'
-                />
-                <span>Dashboard</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                    Tableau de bord
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-
-            {/* Patients - accessible aux admins, doctors, secretaries, nurses et patients */}
-            {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('nurse') || hasRole('patient') || hasPermission('view patient')) && (
-              <li className='dropdown'>
-                <Link to='#'>
-                <AiOutlineUser
-                  className='menu-icon'
-                />
-                  <span>Patients</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                  {(hasRole('admin') || hasRole('secretary') || hasPermission('create patient')) && (
-                <li>
-                  <NavLink
-                        to='/patients/create'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                        Ajouter un patient
-                  </NavLink>
-                </li>
+          
+          <ul className='sidebar-menu'>
+          <div className="profile flex">
+          <div className='dropdown'>
+              <button className='rounded-full'>
+                <img src='/assets/images/user.png' alt='user' className='w-10 h-10 rounded-full' />
+              </button>
+            </div>
+            <div className="info">
+              <h2>{auth.user.name} {auth.user.prenom}</h2>
+            </div>
+          </div>
+            {menuGroups.map((group, groupIndex) => 
+              // Afficher le groupe uniquement s'il contient au moins un élément accessible
+              hasAccessibleItems(group) && (
+                <li key={groupIndex} className='menu-group'>
+                  {!sidebarActive && <div className='menu-group-title'>{group.title}</div>}
+                  
+                  {group.items.map((item, itemIndex) => 
+                    hasPermission(item.permission) && (
+                      <Link 
+                        key={itemIndex} 
+                        href={route(item.route)}
+                        className='menu-item'
+                      >
+                        <Icon icon={item.icon} className='menu-icon' />
+                        <span className='menu-title'>{item.title}</span>
+                      </Link>
+                    )
                   )}
-                  {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('nurse') || hasRole('patient') || hasPermission('view patient')) && (
-                <li>
-                  <NavLink
-                        to='/patients'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                        Liste des patients
-                  </NavLink>
                 </li>
-                  )}
-              </ul>
-            </li>
-            )}
-
-            {/* Rendez-vous - accessible aux admins, doctors, secretaries et patients */}
-            {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('patient') || hasPermission('view appointment')) && (
-            <li className='dropdown'>
-              <Link to='#'>
-                  <AiOutlineCalendar
-                    className='menu-icon'
-                  />
-                  <span>Rendez-vous</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                  {(hasRole('admin') || hasRole('secretary') || hasPermission('create appointment')) && (
-                <li>
-                  <NavLink
-                        to='/appointments/create'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                        Nouveau rendez-vous
-                  </NavLink>
-                </li>
-                  )}
-                  {(hasRole('admin') || hasRole('doctor') || hasRole('secretary') || hasRole('patient') || hasPermission('view appointment')) && (
-                <li>
-                  <NavLink
-                        to='/appointments'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                        Liste des rendez-vous
-                  </NavLink>
-                </li>
-                  )}
-              </ul>
-            </li>
-            )}
-
-            {/* Consultations - accessible aux admins et doctors */}
-            {(hasRole('admin') || hasRole('doctor') || hasPermission('create consultation')) && (
-            <li className='dropdown'>
-              <Link to='#'>
-                  <AiOutlineFileText
-                    className='menu-icon'
-                  />
-                  <span>Consultations</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                      to='/consultations/create'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                      <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                      Nouvelle consultation
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                      to='/consultations'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                      Liste des consultations
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-            )}
-
-            {/* Dossiers médicaux - accessible aux admins, doctors et nurses */}
-            {(hasRole('admin') || hasRole('doctor') || hasRole('nurse') || hasPermission('access medical record')) && (
-            <li className='dropdown'>
-              <Link to='#'>
-                <AiOutlineFileText
-                  className='menu-icon'
-                />
-                  <span>Dossiers médicaux</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                      to='/medical-records'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                      Liste des dossiers
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-            )}
-
-            {/* Prescriptions - accessible aux admins, doctors et patients */}
-            {(hasRole('admin') || hasRole('doctor') || hasRole('patient') || hasPermission('view prescription')) && (
-            <li className='dropdown'>
-              <Link to='#'>
-                <AiOutlineMedicineBox
-                  className='menu-icon'
-                />
-                  <span>Prescriptions</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                  {(hasRole('admin') || hasRole('doctor') || hasPermission('create prescription')) && (
-                <li>
-                  <NavLink
-                        to='/prescriptions/create'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                        Nouvelle prescription
-                  </NavLink>
-                </li>
-                  )}
-                  {(hasRole('admin') || hasRole('doctor') || hasRole('patient') || hasPermission('view prescription')) && (
-                <li>
-                  <NavLink
-                        to='/prescriptions'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                        Liste des prescriptions
-                  </NavLink>
-                </li>
-                  )}
-              </ul>
-            </li>
-            )}
-
-            {/* Factures et paiements - accessible aux admins, accountants et patients */}
-            {(hasRole('admin') || hasRole('accountant') || hasRole('patient') || hasPermission('view payments')) && (
-            <li className='dropdown'>
-              <Link to='#'>
-                <AiOutlineDollar
-                  className='menu-icon'
-                />
-                  <span>Factures & Paiements</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                  {(hasRole('admin') || hasRole('accountant') || hasPermission('create invoice')) && (
-                <li>
-                  <NavLink
-                        to='/invoices/create'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                        Nouvelle facture
-                  </NavLink>
-                </li>
-                  )}
-                  {(hasRole('admin') || hasRole('accountant') || hasPermission('view payments')) && (
-                <li>
-                  <NavLink
-                        to='/invoices'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                        Liste des factures
-                  </NavLink>
-                </li>
-                  )}
-                  {(hasRole('admin') || hasRole('accountant') || hasPermission('view payments')) && (
-                <li>
-                  <NavLink
-                        to='/payments'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-success-main w-auto' />
-                        Paiements
-                  </NavLink>
-                </li>
-                  )}
-                  {(hasRole('admin') || hasRole('accountant') || hasPermission('manage refunds')) && (
-                <li>
-                  <NavLink
-                        to='/refunds'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-danger-main w-auto' />
-                        Remboursements
-                  </NavLink>
-                </li>
-                  )}
-              </ul>
-            </li>
-            )}
-
-            {/* Rapports - accessible aux admins, doctors et accountants */}
-            {(hasRole('admin') || hasRole('doctor') || hasRole('accountant') || hasPermission('generate medical reports') || hasPermission('generate financial reports')) && (
-            <li className='dropdown'>
-              <Link to='#'>
-                <AiOutlineBarChart
-                  className='menu-icon'
-                />
-                  <span>Rapports</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                  {(hasRole('admin') || hasRole('doctor') || hasPermission('generate medical reports')) && (
-                <li>
-                  <NavLink
-                        to='/reports/medical'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                        Rapports médicaux
-                  </NavLink>
-                </li>
-                  )}
-                  {(hasRole('admin') || hasRole('accountant') || hasPermission('generate financial reports')) && (
-                <li>
-                  <NavLink
-                        to='/reports/financial'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                        Rapports financiers
-                  </NavLink>
-                </li>
-                  )}
-                  {(hasRole('admin') || hasPermission('view statistics')) && (
-                <li>
-                  <NavLink
-                        to='/reports/statistics'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                        <i className='ri-circle-fill circle-icon text-info-main w-auto' />
-                        Statistiques
-                  </NavLink>
-                </li>
-                  )}
-              </ul>
-            </li>
-            )}
-
-            {/* Administration - accessible uniquement aux admins */}
-            {hasRole('admin') && (
-            <li className='dropdown'>
-              <Link to='#'>
-                <AiOutlineSetting
-                  className='menu-icon'
-                />
-                  <span>Administration</span>
-              </Link>
-              <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                      to='/admin/users'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                      <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                      Utilisateurs
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                      to='/admin/roles'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                      <i className='ri-circle-fill circle-icon text-warning-main w-auto' />
-                      Rôles & Permissions
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                      to='/admin/settings'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                      <i className='ri-circle-fill circle-icon text-info-main w-auto' />
-                      Paramètres
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
+              )
             )}
           </ul>
         </div>
+
+        <style jsx>{`
+          .menu-group {
+            margin-bottom: 16px;
+          }
+          
+          .menu-group-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6c757d;
+            padding: 8px 16px;
+            margin-top: 8px;
+          }
+          
+          .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            color: #333;
+            transition: all 0.3s;
+            border-radius: 6px;
+            margin: 4px 10px;
+          }
+          
+          .menu-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+          }
+          
+          .menu-icon {
+            font-size: 20px;
+            margin-right: 10px;
+          }
+          
+          .menu-title {
+            white-space: nowrap;
+          }
+        `}</style>
       </aside>
 
       {/* Main Content */}
-      <main className='main-content'>
+      <main className={`dashboard-main ${sidebarActive ? 'active' : ''}`}>
         {/* Header */}
-        <header className='header'>
-          <div className='header-left'>
-                <button
-                  onClick={sidebarControl}
-                  type='button'
-              className='sidebar-toggle-btn'
-                >
-              <AiOutlineMenu />
-                </button>
-              </div>
-          <div className='header-right'>
-           
-            <div className='header-right-right'>
-                <div className='dropdown'>
-                  <button
-                    type='button'
-                  className='dropdown-toggle-btn'
-                    data-bs-toggle='dropdown'
-                  aria-expanded='false'
-                >
-                  <img
-                    src='assets/images/avatar.png'
-                    alt='avatar'
-                    className='avatar-img'
-                  />
-                  <span className='user-name'>{user?.name || 'Utilisateur'}</span>
-                  </button>
-                <ul className='dropdown-menu'>
-                  <li>
-                    <Link to='/profile' className='dropdown-item'>
-                      <AiOutlineUser className='dropdown-icon' />
-                      Mon profil
-                        </Link>
-                      </li>
-                      <li>
-                    <Link to='/settings' className='dropdown-item'>
-                      <AiOutlineSetting className='dropdown-icon' />
-                      Paramètres
-                        </Link>
-                      </li>
-                      <li>
-                    <hr className='dropdown-divider' />
-                      </li>
-                      <li>
-                    <Link to='/logout' className='dropdown-item'>
-                      <AiOutlineLogout className='dropdown-icon' />
-                      Déconnexion
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-        </header>
+        <div className='navbar-header flex justify-between items-center p-4 bg-white shadow'>
+          <div className='flex items-center gap-4'>
+            <button onClick={toggleSidebar}>
+              <Icon icon={sidebarActive ? 'iconoir:arrow-right' : 'heroicons:bars-3-solid'} className='text-2xl' />
+            </button>
+            <button onClick={() => setMobileMenu(!mobileMenu)} className='md:hidden'>
+              <Icon icon='heroicons:bars-3-solid' />
+            </button>
+            <form className='navbar-search hidden md:block'>
+              <input type='text' placeholder='Search' />
+              <Icon icon='ion:search-outline' />
+            </form>
+          </div>
+          <div className='flex items-center gap-3'>
+            <div className='dropdown'>
+              <button className='rounded-full bg-gray-200 w-10 h-10 flex items-center justify-center'>
+                <Icon icon='iconoir:bell' />
+              </button>
+              {/* Exemple simple de dropdown */}
+            </div>
+            
+          </div>
+        </div>
 
         {/* Page Content */}
-        <div className='page-content'>
-          <Outlet />
-            </div>
+        <div className='dashboard-main-body p-6'>
+          {children}
+        </div>
+
+        {/* Footer */}
+        <footer className='p-4 text-center text-gray-500'>
+          © 2024 Messhati. All Rights Reserved.
+        </footer>
       </main>
     </section>
   );

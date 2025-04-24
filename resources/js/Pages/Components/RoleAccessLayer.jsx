@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react/dist/iconify.js';
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@inertiajs/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
     fetchAllRoles as fetchRoles, 

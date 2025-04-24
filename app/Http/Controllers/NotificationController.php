@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Notification;
+use App\Models\NotificationUser;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class NotificationController extends Controller
 {
@@ -87,5 +91,74 @@ class NotificationController extends Controller
         $notification->delete();
 
         return redirect()->route('notifications.index')->with('success', 'Notification supprimée avec succès.');
+    }
+
+    public function getUserNotifications($userId)
+    {
+        // Vérifier que l'utilisateur connecté est bien celui qui fait la requête
+      
+
+        // Récupérer les notifications de l'utilisateur avec leurs messages
+        $notifications = NotificationUser::with(['notification', 'user'])
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($notificationUser) {
+                return [
+                    'id' => $notificationUser->notification->id,
+                    'message' => $notificationUser->message,
+                    'type' => $notificationUser->notification->type,
+                    'statut' => $notificationUser->statut,
+                    'created_at' => $notificationUser->created_at,
+                    'user' => [
+                        'id' => $notificationUser->user->id,
+                        'name' => $notificationUser->user->name,
+                        'email' => $notificationUser->user->email
+                    ]
+                ];
+            });
+
+        return response()->json($notifications);
+    }
+
+    public function markAsRead($notificationId)
+    {
+        
+        
+        $notificationUser = NotificationUser::where('notification_id', $notificationId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$notificationUser) {
+            return response()->json(['message' => 'Notification not found'], 404);
+        }
+
+        $notificationUser->statut = true;
+        $notificationUser->save();
+
+        return response()->json([
+            'id' => $notificationId,
+            'statut' => true
+        ]);
+    }
+
+    public function delete($notificationId)
+    {
+        $userId = Auth::id();
+        
+        $notificationUser = NotificationUser::where('notification_id', $notificationId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$notificationUser) {
+            return response()->json(['message' => 'Notification not found'], 404);
+        }
+
+        $notificationUser->delete();
+
+        return response()->json([
+            'id' => $notificationId,
+            'message' => 'Notification deleted successfully'
+        ]);
     }
 }

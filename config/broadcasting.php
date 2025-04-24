@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('BROADCAST_CONNECTION', 'null'),
+    'default' => env('BROADCAST_DRIVER', 'pusher'),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,6 +54,7 @@ return [
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
                 'host' => '127.0.0.1',
+                'auth_endpoint' => '/custom/endpoint/auth',
         'port' => 6001,
         'scheme' => 'http',
                 'encrypted' => true,
@@ -82,5 +83,4 @@ return [
         ],
 
     ],
-
 ];

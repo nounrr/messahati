@@ -8,7 +8,6 @@ export const fetchRendezVous = createAsyncThunk(
         return response.data;
     }
 );
-
 export const createRendezVous = createAsyncThunk(
     'rendezvous/createRendezVous',
     async (rdvData, { rejectWithValue }) => {
@@ -106,7 +105,6 @@ export const createRendezVous = createAsyncThunk(
         }
     }
 );
-
 export const updateRendezVous = createAsyncThunk(
     'rendezvous/updateRendezVous',
     async (updates, { rejectWithValue }) => {
@@ -118,7 +116,6 @@ export const updateRendezVous = createAsyncThunk(
         }
     }
 );
-
 export const deleteRendezVous = createAsyncThunk(
     'rendezvous/deleteRendezVous',
     async (ids, { rejectWithValue }) => {
@@ -130,11 +127,27 @@ export const deleteRendezVous = createAsyncThunk(
         }
     }
 );
+export const getListeAttends = createAsyncThunk(
+    'rendezvous/getListeAttends',
+    async () => {
+        const response = await axiosInstance.get('/rendez-vous/attends');
+        return response.data;
+    }
+);
+export const getListRendezVous = createAsyncThunk(
+    'rendezvous/getListRendezVous',
+    async () => {
+        const response = await axiosInstance.get('/rendez-vous/list');
+        return response.data;
+    }
+);
 
 const rendezvousSlice = createSlice({
     name: 'rendezvous',
     initialState: {
         items: [],
+        listeAttends: [],
+        listRendezVous: [],
         status: 'idle',
         error: null,
     },
@@ -165,6 +178,28 @@ const rendezvousSlice = createSlice({
             })
             .addCase(deleteRendezVous.fulfilled, (state, action) => {
                 state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
+            })
+            .addCase(getListeAttends.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(getListeAttends.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.listeAttends = action.payload;
+            })
+            .addCase(getListeAttends.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(getListRendezVous.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(getListRendezVous.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.listRendezVous = action.payload;
+            })
+            .addCase(getListRendezVous.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
             });
     },
 });
