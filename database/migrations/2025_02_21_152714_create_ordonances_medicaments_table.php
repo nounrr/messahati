@@ -15,8 +15,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('ordonance_id');
             $table->unsignedBigInteger('medicament_id');
+
             $table->foreign('ordonance_id')->references('id')->on('ordonances')->onDelete('cascade');
             $table->foreign('medicament_id')->references('id')->on('medicaments')->onDelete('cascade');
+            $table->string('dosage');
+            $table->string('frequence');
+            $table->string('duree');
             $table->timestamps();
         });
     }

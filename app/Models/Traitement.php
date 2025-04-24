@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Traitement extends Model
 {
+    use HasFactory;
+
+    // Existing code remains unchanged
     protected $fillable=['description','date_debut','date_fin'];
     public function rendezvous(){
         return $this->hasMany(Rendezvous::class);

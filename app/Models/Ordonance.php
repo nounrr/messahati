@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Ordonance extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['date_emission','description'];
     
     public function traitement(){

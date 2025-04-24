@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('type_partenaires', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Partenaire extends Model
 {
-ected $fillable = ['nom', 'adress', 'telephone', 'typepartenaires_id'];
-=======
+    use HasFactory;
+
     protected $fillable = [
         'nom',
         'adress',

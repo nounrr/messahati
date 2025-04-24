@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Rendezvous extends Model
+class RendezVous extends Model
+{
+    use HasFactory;
 
-{   protected $table = 'rendez_vous';
+    protected $table = 'rendez_vous';
 
     protected $fillable = ['date_heure','statut'];
     public function patient(){
