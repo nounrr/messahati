@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('description')->nullable();
-            $table->boolean('status');
+            $table->enum('status', ['en_cours', 'terminé'])->default('en_cours');
             $table->string('priority');
             $table->date('date_debut');
             $table->date('date_fin')->nullable();

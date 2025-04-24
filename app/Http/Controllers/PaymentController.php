@@ -10,7 +10,6 @@ use App\Traits\ExcelExportImport;
 
 use App\Models\User;
 use App\Models\Notification;
-use App\Models\RendezVous;
 
 class PaymentController extends Controller
 {

@@ -19,7 +19,7 @@ class Rendezvous extends Model
         return $this->belongsTo(Departement::class);
     }
     public function payment(){
-        return $this->hasOne(Payment::class);
+        return $this->hasOne(Payment::class, 'rendez_vous_id');
     }
     public function traitement(){
         return $this->belongsTo(Traitement::class);

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('type_medicaments', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
+            $table->text('description');
             $table->timestamps();
         });
     }

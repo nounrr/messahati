@@ -4,44 +4,141 @@ import axiosInstance from '../../utils/axiosInstance';
 export const fetchRendezVous = createAsyncThunk(
     'rendezvous/fetchRendezVous',
     async () => {
-        const response = await axiosInstance.get('/rendezvous');
+        const response = await axiosInstance.get('/rendez-vous');
         return response.data;
     }
 );
-
 export const createRendezVous = createAsyncThunk(
     'rendezvous/createRendezVous',
-    async (rendezvous, { rejectWithValue }) => {
+    async (rdvData, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/rendezvous', { rendezvous });
+            // Vérifications minimales
+            if (!rdvData.patient_id && !rdvData.newPatient) {
+                throw new Error('Un patient doit être spécifié (existant ou nouveau)');
+            }
+            
+            // Liste des champs obligatoires
+            const requiredFields = ['date_heure', 'departement_id', 'docteur_id'];
+            for (const field of requiredFields) {
+                if (rdvData[field] === undefined || rdvData[field] === null || rdvData[field] === '') {
+                    throw new Error(`Le champ ${field} est obligatoire`);
+                }
+            }
+            
+            // 1. Créer le traitement d'abord si nécessaire
+            if (rdvData.nouveau_traitement) {
+                console.log('Création d\'un nouveau traitement...');
+                
+                // S'assurer que les dates sont bien définies
+                if (!rdvData.nouveau_traitement.date_debut || !rdvData.nouveau_traitement.date_fin) {
+                    // Si les dates ne sont pas définies, utiliser la date du rendez-vous
+                    const rendezVousDate = rdvData.date_heure.split('T')[0];
+                    rdvData.nouveau_traitement.date_debut = rendezVousDate;
+                    rdvData.nouveau_traitement.date_fin = rendezVousDate;
+                }
+                
+                // Vérification des champs requis pour le traitement
+                const traitementData = {
+                    typetraitement_id: rdvData.nouveau_traitement.typetraitement_id,
+                    description: rdvData.nouveau_traitement.description || 'Rendez-vous médical',
+                    date_debut: rdvData.nouveau_traitement.date_debut,
+                    date_fin: rdvData.nouveau_traitement.date_fin
+                };
+                
+                console.log('Données du traitement à créer:', traitementData);
+                
+                try {
+                    const traitementResponse = await axiosInstance.post('/traitements', {
+                        traitements: [traitementData]
+                    });
+                    
+                    console.log('Traitement créé avec succès:', traitementResponse.data);
+                    
+                    // Associer le nouveau traitement au rendez-vous
+                    if (traitementResponse.data && traitementResponse.data.length > 0) {
+                        rdvData.traitement_id = traitementResponse.data[0].id;
+                    }
+                    
+                    // Supprimer l'objet nouveau_traitement pour ne pas l'envoyer au backend
+                    delete rdvData.nouveau_traitement;
+                } catch (traitementError) {
+                    console.error('Erreur lors de la création du traitement:', traitementError);
+                    
+                    let errorMessage = 'Erreur lors de la création du traitement';
+                    if (traitementError.response?.data?.message) {
+                        errorMessage = traitementError.response.data.message;
+                    }
+                    
+                    return rejectWithValue({
+                        message: errorMessage,
+                        error: traitementError.response?.data || traitementError.message
+                    });
+                }
+            }
+            
+            // Préparation des données pour le rendez-vous
+            // Copier les données pour ne pas modifier l'objet original
+            const rdvToSend = { ...rdvData };
+            
+            // 2. Créer le rendez-vous après avoir créé le traitement
+            const formattedData = {
+                rendez_vous: [rdvToSend]
+            };
+            
+            console.log('Données à envoyer au backend pour le rendez-vous:', formattedData);
+            
+            const response = await axiosInstance.post('/rendez-vous', formattedData);
+            console.log('Réponse du backend:', response.data);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            console.error('Erreur détaillée:', error);
+            if (error.response) {
+                console.error('Données d\'erreur du serveur:', error.response.data);
+                console.error('Statut HTTP:', error.response.status);
+                console.error('Headers:', error.response.headers);
+            } else if (error.request) {
+                console.error('Requête sans réponse:', error.request);
+            } else {
+                console.error('Message d\'erreur:', error.message);
+            }
+            return rejectWithValue(error.response?.data || { message: error.message });
         }
     }
 );
-
 export const updateRendezVous = createAsyncThunk(
     'rendezvous/updateRendezVous',
-    async (rendezvous, { rejectWithValue }) => {
+    async (updates, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/rendezvous', { rendezvous });
+            const response = await axiosInstance.put('/rendez-vous', { updates });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
     }
 );
-
 export const deleteRendezVous = createAsyncThunk(
     'rendezvous/deleteRendezVous',
     async (ids, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.delete('/rendezvous', { data: { ids } });
+            const response = await axiosInstance.delete('/rendez-vous', { data: { ids } });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
         }
+    }
+);
+export const getListeAttends = createAsyncThunk(
+    'rendezvous/getListeAttends',
+    async () => {
+        const response = await axiosInstance.get('/rendez-vous/attends');
+        return response.data;
+    }
+);
+export const getListRendezVous = createAsyncThunk(
+    'rendezvous/getListRendezVous',
+    async () => {
+        const response = await axiosInstance.get('/rendez-vous/list');
+        return response.data;
     }
 );
 
@@ -49,6 +146,8 @@ const rendezvousSlice = createSlice({
     name: 'rendezvous',
     initialState: {
         items: [],
+        listeAttends: [],
+        listRendezVous: [],
         status: 'idle',
         error: null,
     },
@@ -79,6 +178,28 @@ const rendezvousSlice = createSlice({
             })
             .addCase(deleteRendezVous.fulfilled, (state, action) => {
                 state.items = state.items.filter((item) => !action.payload.ids.includes(item.id));
+            })
+            .addCase(getListeAttends.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(getListeAttends.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.listeAttends = action.payload;
+            })
+            .addCase(getListeAttends.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(getListRendezVous.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(getListRendezVous.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.listRendezVous = action.payload;
+            })
+            .addCase(getListRendezVous.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
             });
     },
 });

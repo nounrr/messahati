@@ -7,19 +7,17 @@ use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FactureController;
-
 use App\Http\Controllers\Api\ChatController;
-
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\TypeTraitementController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\MutuelController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Statestiques\StatestiquesDashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +40,7 @@ Route::get('/charges/export', [ChargeController::class, 'export'])->name('charge
 Route::get('/payments/export', [PaymentController::class, 'export'])->name('payments.export');
 Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
 Route::get('/audit-logs/export', [AuditLogCliniqueController::class, 'export'])->name('audit_logs.export');
+Route::get('/type-traitements/export', [TypeTraitementController::class, 'export'])->name('typetraitement.export');
 
 
 
@@ -128,11 +127,19 @@ Route::post('/send-message', [ChatController::class, 'send']);
 // Route::get('/messages/{user_id}', [ChatController::class, 'getMessages']);
 Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages']);
 Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
+Route::get('/medecin-planing', function () {
+    return Inertia::render('Components/PlanningMeds/PlanningMeds');
+})->name('medecin-planing.view');
+
+Route::get('/rdv', function () {
+    return Inertia::render('Components/RDV/CalendarMainLayer');
+})->name('rdv.view');
 
 // Route pour accéder à la vue du chat
 Route::get('/chat', function () {
     return Inertia::render('Components/Chat/ChatMessageLayer');
 })->name('chat.view');
+
 
 // Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);
 
@@ -140,6 +147,15 @@ Route::get('/chat', function () {
 Route::get('/type-partenaires', function () {
     return Inertia::render('ListTable/ListeTypePartenaires');
 })->name('type-partenaires.view'); //done
+
+Route::get('/rendez-vous-list', function () {
+    return Inertia::render('ListTable/ListeRendezVous');
+})->name('rendez-vous-list.view'); //done
+
+// Route pour gérer les permissions directes des utilisateurs
+Route::get('/model-permissions', function () {
+    return Inertia::render('Components/ModelPermissionManager');
+})->name('model-permissions.view');
 
 Route::get('/type-medicaments', function () {
     return Inertia::render('ListTable/ListeTypeMedicaments');
@@ -198,8 +214,18 @@ Route::get('/charges', function () {
     return Inertia::render('ListTable/ListeCharges');
 })->name('charges.view'); //Done
 
-
+Route::get('/users', function () {
+    return Inertia::render('ListTable/ListeUsers');
+})->name('users.view'); //Added users list
 
 Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
+Route::get('/statistiques', function () {
+    return Inertia::render('Statestiques/Statestiques');
+})->name('statistiques');
 
+// Route pour les statistiques de revenus
+Route::get('/statistiques/revenus', [App\Http\Controllers\Statestiques\StatestiqueDiagramme\StatistiqueRevenue::class, 'getRevenus'])->name('statistiques.revenus');
+Route::get('/user-profile', function () {
+    return Inertia::render('Components/ProfileUser/ViewProfilePage');
+})->name('user.profile');
 require __DIR__.'/auth.php';

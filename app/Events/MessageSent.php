@@ -34,7 +34,8 @@ class MessageSent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('chat-channel');
+        // Diffusion sur le canal privé du destinataire
+        return new Channel('chat.' . $this->message->destinataire_id);
     }
 
     public function broadcastAs()

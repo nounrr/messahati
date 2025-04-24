@@ -7,10 +7,10 @@ export const sendMessage = createAsyncThunk(
     'chat/sendMessage',
     async ({ receiver_id, message }, { getState }) => {
         const { auth } = getState();
-        const response = await axios.post('/api/messages', {
+        const response = await axios.post('/api/send-message', {
             message,
             destinataire_id: receiver_id,
-            emetteure_id: auth.user.id
+            sender_id: auth.user.id
         });
         return response.data;
     }
@@ -49,7 +49,9 @@ const initialState = {
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
     isConnected: false,
-    users: []
+    users: [],
+    unreadMessages: 0,
+    isOpen: false
 };
 
 // Slice
@@ -77,6 +79,18 @@ const chatSlice = createSlice({
         },
         setConnectionStatus: (state, action) => {
             state.isConnected = action.payload;
+        },
+        incrementUnreadMessages: (state) => {
+            state.unreadMessages += 1;
+        },
+        resetUnreadMessages: (state) => {
+            state.unreadMessages = 0;
+        },
+        setChatOpen: (state, action) => {
+            state.isOpen = action.payload;
+            if (action.payload) {
+                state.unreadMessages = 0;
+            }
         }
     },
     extraReducers: (builder) => {
@@ -132,36 +146,62 @@ const chatSlice = createSlice({
 });
 
 // Middleware pour la connexion WebSocket
-export const initializeWebSocket = () => (dispatch) => {
+export const initializeWebSocket = () => (dispatch, getState) => {
     const token = localStorage.getItem('token');
     
-    const echo = new Echo({
-        broadcaster: 'pusher',
-        key: import.meta.env.VITE_PUSHER_APP_KEY,
-        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-        forceTLS: true,
-        authEndpoint: '/broadcasting/auth',
-        auth: {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+    try {
+        console.log('Initialisation WebSocket avec token:', token ? 'Token présent' : 'Token absent');
+        
+        const echo = new Echo({
+            broadcaster: 'pusher',
+            key: import.meta.env.VITE_PUSHER_APP_KEY,
+            cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+            forceTLS: true,
+            authEndpoint: '/broadcasting/auth',
+            auth: {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
             }
-        }
-    });
-
-    // Écouter les messages privés
-    echo.private(`chat.${localStorage.getItem('user_id')}`)
-        .listen('MessageSent', (e) => {
-            dispatch(addMessage(e.message));
         });
 
-    dispatch(setConnectionStatus(true));
+        const userId = localStorage.getItem('user_id');
+        console.log('Écoute du canal pour l\'utilisateur ID:', userId);
 
-    return () => {
-        echo.leave(`chat.${localStorage.getItem('user_id')}`);
+        // Écouter les messages privés
+        echo.private(`chat.${userId}`)
+            .listen('MessageSent', (e) => {
+                console.log('Message reçu via WebSocket:', e);
+                dispatch(addMessage(e.message));
+                
+                // Vérifier si le chat est ouvert et si le message provient de l'utilisateur sélectionné
+                const state = getState();
+                const { selectedUser, isOpen } = state.chat;
+                
+                if (!isOpen || selectedUser?.id !== e.message.emetteure_id) {
+                    dispatch(incrementUnreadMessages());
+                }
+            })
+            .error((error) => {
+                console.error('Erreur WebSocket:', error);
+            });
+
+        dispatch(setConnectionStatus(true));
+        console.log('WebSocket initialisé avec succès');
+
+        return () => {
+            console.log('Nettoyage de la connexion WebSocket');
+            echo.leave(`chat.${userId}`);
+            dispatch(setConnectionStatus(false));
+        };
+    } catch (error) {
+        console.error('Erreur lors de l\'initialisation WebSocket:', error);
         dispatch(setConnectionStatus(false));
-    };
+        
+        return () => {}; // Fonction de nettoyage vide
+    }
 };
 
 export const { 
@@ -169,7 +209,10 @@ export const {
     toggleProfile, 
     clearMessages, 
     addMessage, 
-    setConnectionStatus 
+    setConnectionStatus,
+    incrementUnreadMessages,
+    resetUnreadMessages,
+    setChatOpen
 } = chatSlice.actions;
 
 export default chatSlice.reducer; 

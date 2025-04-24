@@ -1,18 +1,24 @@
 import { Icon } from '@iconify/react/dist/iconify.js';
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@inertiajs/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
-    fetchRoles, 
+    fetchAllRoles as fetchRoles, 
     createRole, 
     updateRole, 
     deleteRole 
-} from '../../Redux/rolePermissions/rolePermissionSlice';
+} from '../../Redux/roles/roleSlice';
+import { fetchAllPermissions, updateRolePermissions } from '../../Redux/permissions/permissionSlice';
+import { fetchUsersByRole } from '../../Redux/users/userSlice';
 import Swal from 'sweetalert2';
+import { Modal, Button, Form, Spinner, Table, Pagination, Accordion, Card } from 'react-bootstrap';
+import '../../assets/css/components/role-access-layer.css';
 
 const RoleAccessLayer = () => {
     const dispatch = useDispatch();
-    const { roles, status, error } = useSelector((state) => state.rolePermissions);
+    const { items: roles, status, error } = useSelector((state) => state.roles);
+    const { items: permissions, status: permissionsStatus } = useSelector((state) => state.permissions);
+    const { items: allUsers } = useSelector((state) => state.users);
     
     // Form state
     const [formData, setFormData] = useState({
@@ -26,9 +32,29 @@ const RoleAccessLayer = () => {
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
     
-    // Fetch roles on component mount
+    // Permissions modal state
+    const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
+    const [selectedRole, setSelectedRole] = useState(null);
+    const [selectedPermissions, setSelectedPermissions] = useState([]);
+    
+    // Doctors modal state
+    const [isDoctorsModalOpen, setIsDoctorsModalOpen] = useState(false);
+    const [doctors, setDoctors] = useState([]);
+    const [loadingDoctors, setLoadingDoctors] = useState(false);
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    
+    // État pour les médecins
+    const [doctorsAccordionOpen, setDoctorsAccordionOpen] = useState(false);
+    
+    // Fetch roles and permissions on component mount
     useEffect(() => {
         dispatch(fetchRoles());
+        dispatch(fetchAllPermissions());
     }, [dispatch]);
     
     // Handle form input changes
@@ -48,6 +74,72 @@ const RoleAccessLayer = () => {
     // Close modal
     const closeModal = () => {
         setIsModalOpen(false);
+    };
+    
+    // Open permissions modal
+    const openPermissionModal = (role) => {
+        setSelectedRole(role);
+        
+        console.log("Role permissions:", role.permissions);
+        
+        // Récupérer les permissions déjà associées au rôle
+        if (role.permissions && role.permissions.length > 0) {
+            // Si le rôle a déjà des permissions, les utiliser
+            const permissionIds = role.permissions.map(p => p.id);
+            console.log("Setting permission IDs:", permissionIds);
+            setSelectedPermissions(permissionIds);
+        } else {
+            // Sinon, initialiser avec un tableau vide
+            setSelectedPermissions([]);
+        }
+        
+        setIsPermissionModalOpen(true);
+    };
+    
+    // Close permissions modal
+    const closePermissionModal = () => {
+        setIsPermissionModalOpen(false);
+        setSelectedRole(null);
+        setSelectedPermissions([]);
+    };
+    
+    // Save role permissions
+    const handleSavePermissions = async () => {
+        try {
+            // Show loading state
+            Swal.fire({
+                title: 'Saving...',
+                text: 'Please wait while we update the permissions',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Call the API to update permissions
+            await dispatch(updateRolePermissions({
+                roleId: selectedRole.id,
+                permissions: selectedPermissions
+            })).unwrap();
+            
+            // Show success message
+            Swal.fire(
+                'Success!',
+                'Permissions have been updated successfully.',
+                'success'
+            );
+            
+            // Refresh the roles list to ensure UI is updated
+            dispatch(fetchRoles());
+            closePermissionModal();
+        } catch (error) {
+            // Show error message
+            Swal.fire(
+                'Error!',
+                error.message || 'Failed to update permissions.',
+                'error'
+            );
+        }
     };
     
     // Handle form submission
@@ -141,50 +233,124 @@ const RoleAccessLayer = () => {
         return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
     };
     
+    // Handle items per page change
+    const handleItemsPerPageChange = (e) => {
+        setItemsPerPage(parseInt(e.target.value));
+        setCurrentPage(1); // Reset to first page when changing items per page
+    };
+    
+    // Handle search input change
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1); // Reset to first page when searching
+    };
+    
+    // Handle status filter change
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+        setCurrentPage(1); // Reset to first page when filtering
+    };
+    
+    // Handle page change
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+    
+    // Filter roles based on search and status
+    const filteredRoles = roles.filter(role => {
+        const matchesSearch = role.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === '' || role.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+    
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredRoles.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredRoles.length);
+    const paginatedRoles = filteredRoles.slice(startIndex, endIndex);
+    
+    // Fetch doctors
+    const fetchDoctors = async () => {
+        setLoadingDoctors(true);
+        try {
+            // Use Redux to fetch users with 'doctor' role
+            await dispatch(fetchUsersByRole('docteur')).unwrap();
+            // Doctors will be updated via the useEffect below
+            setLoadingDoctors(false);
+        } catch (error) {
+            console.error('Error fetching doctors:', error);
+            Swal.fire({
+                title: 'Erreur',
+                text: 'Impossible de charger la liste des médecins',
+                icon: 'error'
+            });
+            setLoadingDoctors(false);
+        }
+    };
+    
+    // Update doctors list when allUsers changes
+    useEffect(() => {
+        if (isDoctorsModalOpen && allUsers && allUsers.length > 0) {
+            // Filter users with "doctor" role
+            const doctorUsers = allUsers.filter(user => 
+                user.roles && user.roles.some(role => 
+                    role.name.toLowerCase() === 'docteur' || 
+                    role.name.toLowerCase() === 'doctor' || 
+                    role.name.toLowerCase() === 'médecin'
+                )
+            );
+            
+            setDoctors(doctorUsers);
+        }
+    }, [allUsers, isDoctorsModalOpen]);
+    
+    // Open doctors modal
+    const openDoctorsModal = () => {
+        setIsDoctorsModalOpen(true);
+        // Fetch doctors if not already loaded
+        if (doctors.length === 0 && !loadingDoctors) {
+            fetchDoctors();
+        }
+    };
+    
+    // Close doctors modal
+    const closeDoctorsModal = () => {
+        setIsDoctorsModalOpen(false);
+    };
+    
+    // Gérer l'ouverture/fermeture de l'accordéon des médecins
+    const handleDoctorsAccordionToggle = (isOpen) => {
+        setDoctorsAccordionOpen(isOpen);
+        
+        // Si on ouvre l'accordéon et qu'on n'a pas encore chargé les médecins
+        if (isOpen && doctors.length === 0 && !loadingDoctors) {
+            fetchDoctors();
+        }
+    };
+    
     return (
-        <>
-            <div className="card h-100 p-0 radius-12">
-                <div className="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
-                    <div className="d-flex align-items-center flex-wrap gap-3">
-                        <span className="text-md fw-medium text-secondary-light mb-0">
-                            Show
-                        </span>
-                        <select className="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" defaultValue="Select Number">
-                            <option value="Select Number" disabled>
-                                Select Number
-                            </option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                        </select>
-                        <form className="navbar-search">
-                            <input
-                                type="text"
-                                className="bg-base h-40-px w-auto"
-                                name="search"
-                                placeholder="Search"
-                            />
-                            <Icon icon="ion:search-outline" className="icon" />
-                        </form>
-                        <select className="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" defaultValue="Select Status">
-                            <option value="Select Status" disabled>
-                                Select Status
-                            </option>
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                        </select>
+        <div className="role-access-container">
+            <div className="header-section">
+                <h2>Role Management</h2>
+                <div className="actions">
+                    <div className="search-container">
+                        <input
+                            type="text"
+                            placeholder="Search roles..."
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            className="search-input"
+                        />
                     </div>
-                    <button
-                        type="button"
-                        className="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
-                        onClick={() => {
+                    <div className="button-group">
+                        <Button 
+                            variant="info" 
+                            onClick={openDoctorsModal}
+                            className="me-2"
+                        >
+                            <i className="fa fa-user-md me-1"></i> Liste des Médecins
+                        </Button>
+                        <Button variant="primary" onClick={() => {
                             setIsEditing(false);
                             setFormData({
                                 name: '',
@@ -192,322 +358,638 @@ const RoleAccessLayer = () => {
                                 status: 'active'
                             });
                             openModal();
-                        }}
-                    >
-                        <Icon
-                            icon="ic:baseline-plus"
-                            className="icon text-xl line-height-1"
-                        />
-                        Add New Role
-                    </button>
-                </div>
-                <div className="card-body p-24">
-                    {status === 'loading' ? (
-                        <div className="text-center py-5">
-                            <div className="spinner-border text-primary" role="status">
-                                <span className="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    ) : status === 'failed' ? (
-                        <div className="alert alert-danger" role="alert">
-                            {error || 'Failed to load roles'}
-                        </div>
-                    ) : (
-                        <>
-                    <div className="table-responsive scroll-sm">
-                        <table className="table bordered-table sm-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">
-                                        <div className="d-flex align-items-center gap-10">
-                                            <div className="form-check style-check d-flex align-items-center">
-                                                <input
-                                                    className="form-check-input radius-4 border input-form-dark"
-                                                    type="checkbox"
-                                                    name="checkbox"
-                                                    id="selectAll"
-                                                />
-                                            </div>
-                                            S.L
-                                        </div>
-                                    </th>
-                                    <th scope="col">Create Date</th>
-                                    <th scope="col">Role </th>
-                                    <th scope="col">Description</th>
-                                    <th scope="col" className="text-center">
-                                        Status
-                                    </th>
-                                    <th scope="col" className="text-center">
-                                        Action
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                        {roles.length > 0 ? (
-                                            roles.map((role, index) => (
-                                                <tr key={role.id}>
-                                    <td>
-                                        <div className="d-flex align-items-center gap-10">
-                                            <div className="form-check style-check d-flex align-items-center">
-                                                <input
-                                                    className="form-check-input radius-4 border border-neutral-400"
-                                                    type="checkbox"
-                                                    name="checkbox"
-                                                />
-                                            </div>
-                                                            {String(index + 1).padStart(2, '0')}
-                                        </div>
-                                    </td>
-                                                    <td>{formatDate(role.created_at)}</td>
-                                                    <td>{role.name}</td>
-                                    <td>
-                                        <p className="max-w-500-px">
-                                                            {role.description || 'No description provided'}
-                                        </p>
-                                    </td>
-                                    <td className="text-center">
-                                                        <span className={`${role.status === 'active' ? 'bg-success-focus text-success-600 border border-success-main' : 'bg-danger-focus text-danger-600 border border-danger-main'} px-24 py-4 radius-4 fw-medium text-sm`}>
-                                                            {role.status === 'active' ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td className="text-center">
-                                        <div className="d-flex align-items-center gap-10 justify-content-center">
-                                            <button
-                                                type="button"
-                                                className="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                                                                onClick={() => handleEdit(role)}
-                                            >
-                                                <Icon icon="lucide:edit" className="menu-icon" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                                                                onClick={() => handleDelete(role.id)}
-                                            >
-                                                <Icon
-                                                    icon="fluent:delete-24-regular"
-                                                    className="menu-icon"
-                                                />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="6" className="text-center py-4">
-                                                    No roles found
-                                    </td>
-                                </tr>
-                                        )}
-                            </tbody>
-                        </table>
+                        }}>
+                            Add New Role
+                        </Button>
                     </div>
-                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
-                                <span>Showing 1 to {roles.length} of {roles.length} entries</span>
-                        <ul className="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
-                            <li className="page-item">
-                                <Link
-                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                    to="#"
-                                >
-                                    <Icon icon="ep:d-arrow-left" className="" />
-                                </Link>
-                            </li>
-                            <li className="page-item">
-                                <Link
-                                    className="page-link text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md bg-primary-600 text-white"
-                                    to="#"
-                                >
-                                    1
-                                </Link>
-                            </li>
-                            <li className="page-item">
-                                <Link
-                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px"
-                                    to="#"
-                                >
-                                    2
-                                </Link>
-                            </li>
-                            <li className="page-item">
-                                <Link
-                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                    to="#"
-                                >
-                                    3
-                                </Link>
-                            </li>
-                            <li className="page-item">
-                                <Link
-                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                    to="#"
-                                >
-                                    4
-                                </Link>
-                            </li>
-                            <li className="page-item">
-                                <Link
-                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                    to="#"
-                                >
-                                    5
-                                </Link>
-                            </li>
-                            <li className="page-item">
-                                <Link
-                                    className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md"
-                                    to="#"
-                                >
-                                    {" "}
-                                    <Icon icon="ep:d-arrow-right" className="" />{" "}
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                        </>
-                    )}
                 </div>
             </div>
-            {/* Custom Modal */}
-            {isModalOpen && (
-                <div className="modal-custom-overlay" style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1050
-                }}>
-                    <div className="modal-custom" style={{
-                        backgroundColor: 'white',
-                        borderRadius: '16px',
-                        width: '100%',
-                        maxWidth: '800px',
-                        maxHeight: '90vh',
-                        overflow: 'auto',
-                        position: 'relative'
-                    }}>
-                        <div className="modal-header py-16 px-24 border border-top-0 border-start-0 border-end-0" style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                        }}>
-                            <h1 className="modal-title fs-5">
-                                {isEditing ? 'Edit Role' : 'Add New Role'}
-                            </h1>
-                            <button
-                                type="button"
-                                className="btn-close"
-                                onClick={closeModal}
-                                aria-label="Close"
-                            />
+            
+            {status === 'loading' ? (
+                <div className="text-center my-5">
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </Spinner>
+                </div>
+            ) : status === 'failed' ? (
+                <div className="alert alert-danger" role="alert">
+                    {error || 'Failed to load roles'}
+                </div>
+            ) : (
+                <>
+                    <Table striped bordered hover responsive>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Permissions</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {paginatedRoles.map((role) => (
+                                <tr key={role.id}>
+                                    <td>{role.name}</td>
+                                    <td>{role.description || '-'}</td>
+                                    <td>
+                                        <span className={`status-badge ${role.status}`}>
+                                            {role.status}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div className="permissions-count">
+                                            {role.permissions.length} permissions
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="action-buttons">
+                                            <Button 
+                                                variant="info" 
+                                                size="sm"
+                                                onClick={() => openPermissionModal(role)}
+                                            >
+                                                Permissions
+                                            </Button>
+                                            <Button 
+                                                variant="primary" 
+                                                size="sm"
+                                                onClick={() => handleEdit(role)}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button 
+                                                variant="danger" 
+                                                size="sm"
+                                                onClick={() => handleDelete(role.id)}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                    
+                    {totalPages > 1 && (
+                        <div className="pagination-container">
+                            <Pagination>
+                                <Pagination.First onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
+                                <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                                
+                                {[...Array(totalPages).keys()].map((number) => (
+                                    <Pagination.Item
+                                        key={number + 1}
+                                        active={number + 1 === currentPage}
+                                        onClick={() => handlePageChange(number + 1)}
+                                    >
+                                        {number + 1}
+                                    </Pagination.Item>
+                                ))}
+                                
+                                <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+                                <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
+                            </Pagination>
                         </div>
-                        <div className="modal-body p-24">
-                            <form onSubmit={handleSubmit}>
-                                <div className="row">
-                                    <div className="col-12 mb-20">
-                                        <label className="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Role Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control radius-8"
-                                            placeholder="Enter Role Name"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
+                    )}
+                </>
+            )}
+            
+            {/* Liste des médecins en accordéon */}
+            <div className="doctors-section mt-5">
+                <h3 className="mb-4">Liste des Médecins</h3>
+                
+                <Accordion 
+                    onSelect={(eventKey) => handleDoctorsAccordionToggle(eventKey === "0")}
+                >
+                    <Card>
+                        <Accordion.Item eventKey="0">
+                            <Accordion.Header>
+                                Voir la liste des médecins
+                            </Accordion.Header>
+                            <Accordion.Body>
+                                {loadingDoctors ? (
+                                    <div className="text-center my-5">
+                                        <Spinner animation="border" role="status">
+                                            <span className="visually-hidden">Chargement...</span>
+                                        </Spinner>
                                     </div>
-                                    <div className="col-12 mb-20">
-                                        <label
-                                            htmlFor="desc"
-                                            className="form-label fw-semibold text-primary-light text-sm mb-8"
-                                        >
-                                            Description
-                                        </label>
-                                        <textarea
-                                            className="form-control"
-                                            id="desc"
-                                            rows={4}
-                                            cols={50}
-                                            placeholder="Write some text"
-                                            name="description"
-                                            value={formData.description}
-                                            onChange={handleInputChange}
-                                        />
+                                ) : doctors.length === 0 ? (
+                                    <div className="alert alert-info">
+                                        Aucun médecin trouvé. Vérifiez que des utilisateurs avec le rôle "docteur" existent dans le système.
                                     </div>
-                                    <div className="col-12 mb-20">
-                                        <label className="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            Status{" "}
-                                        </label>
-                                        <div className="d-flex align-items-center flex-wrap gap-28">
-                                            <div className="form-check checked-success d-flex align-items-center gap-2">
-                                                <input
-                                                    className="form-check-input"
-                                                    type="radio"
-                                                    name="status"
-                                                    id="active"
-                                                    value="active"
-                                                    checked={formData.status === 'active'}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <label
-                                                    className="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1"
-                                                    htmlFor="active"
-                                                >
-                                                    <span className="w-8-px h-8-px bg-success-600 rounded-circle" />
-                                                    Active
-                                                </label>
+                                ) : (
+                                    <Accordion className="doctors-accordion">
+                                        {doctors.map((doctor, index) => (
+                                            <Accordion.Item key={doctor.id} eventKey={`doctor-${doctor.id}`}>
+                                                <Accordion.Header>
+                                                    <div className="d-flex align-items-center justify-content-between w-100 pe-3">
+                                                        <div>
+                                                            <strong>{doctor.name} {doctor.prenom || ''}</strong>
+                                                        </div>
+                                                        <span className={`status-badge ${doctor.status || 'active'}`}>
+                                                            {doctor.status || 'active'}
+                                                        </span>
+                                                    </div>
+                                                </Accordion.Header>
+                                                <Accordion.Body>
+                                                    <div className="doctor-details">
+                                                        <div className="row mb-3">
+                                                            <div className="col-md-4">
+                                                                <strong>Email:</strong>
+                                                            </div>
+                                                            <div className="col-md-8">
+                                                                {doctor.email}
+                                                            </div>
+                                                        </div>
+                                                        <div className="row mb-3">
+                                                            <div className="col-md-4">
+                                                                <strong>Département:</strong>
+                                                            </div>
+                                                            <div className="col-md-8">
+                                                                {doctor.departement ? doctor.departement.nom : 'Non assigné'}
+                                                            </div>
+                                                        </div>
+                                                        <div className="row mb-3">
+                                                            <div className="col-md-4">
+                                                                <strong>Téléphone:</strong>
+                                                            </div>
+                                                            <div className="col-md-8">
+                                                                {doctor.telephone || 'Non spécifié'}
+                                                            </div>
+                                                        </div>
+                                                        {doctor.cin && (
+                                                            <div className="row mb-3">
+                                                                <div className="col-md-4">
+                                                                    <strong>CIN:</strong>
+                                                                </div>
+                                                                <div className="col-md-8">
+                                                                    {doctor.cin}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        <div className="row mb-3">
+                                                            <div className="col-md-4">
+                                                                <strong>Statut:</strong>
+                                                            </div>
+                                                            <div className="col-md-8">
+                                                                <span className={`status-badge ${doctor.status || 'active'}`}>
+                                                                    {doctor.status || 'active'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-end mt-3">
+                                                            <Button 
+                                                                variant="primary" 
+                                                                size="sm"
+                                                                onClick={() => alert(`Voir le profil complet de ${doctor.name}`)}
+                                                            >
+                                                                Voir profil complet
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </Accordion.Body>
+                                            </Accordion.Item>
+                                        ))}
+                                    </Accordion>
+                                )}
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    </Card>
+                </Accordion>
+                
+                <style jsx>{`
+                    .doctors-accordion .accordion-item {
+                        margin-bottom: 8px;
+                        border-radius: 8px;
+                        overflow: hidden;
+                    }
+                    
+                    .doctors-accordion .accordion-button {
+                        padding: 12px 20px;
+                    }
+                    
+                    .status-badge {
+                        padding: 4px 10px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        text-transform: capitalize;
+                    }
+                    
+                    .status-badge.active {
+                        background-color: #198754;
+                        color: white;
+                    }
+                    
+                    .status-badge.inactive {
+                        background-color: #dc3545;
+                        color: white;
+                    }
+                    
+                    .doctor-details {
+                        background-color: #f8f9fa;
+                        border-radius: 8px;
+                        padding: 15px;
+                    }
+                `}</style>
+            </div>
+            
+            {/* Modal for adding/editing roles */}
+            <Modal show={isModalOpen} onHide={closeModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>{isEditing ? 'Edit Role' : 'Add New Role'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Role Name</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                placeholder="Enter role name"
+                                required
+                            />
+                        </Form.Group>
+                        
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                placeholder="Enter description (optional)"
+                                rows={3}
+                            />
+                        </Form.Group>
+                        
+                        <Form.Group className="mb-3">
+                            <Form.Label>Status</Form.Label>
+                            <Form.Select
+                                name="status"
+                                value={formData.status}
+                                onChange={handleInputChange}
+                            >
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </Form.Select>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={closeModal}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleSubmit} disabled={status === 'loading'}>
+                        {status === 'loading' ? (
+                            <>
+                                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                                Saving...
+                            </>
+                        ) : (
+                            'Save'
+                        )}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            
+            {/* Modal for managing permissions */}
+            {isPermissionModalOpen && selectedRole && (
+                <Modal show={isPermissionModalOpen} onHide={closePermissionModal} centered size="lg">
+                    <Modal.Header closeButton>
+                        <Modal.Title>
+                            Manage Permissions for {selectedRole.name}
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {permissionsStatus === 'loading' ? (
+                            <div className="text-center my-5">
+                                <Spinner animation="border" role="status">
+                                    <span className="visually-hidden">Loading permissions...</span>
+                                </Spinner>
+                            </div>
+                        ) : (
+                            <div className="role-permissions-container">
+                                <h5 className="mb-3">Sélectionner les permissions</h5>
+                                
+                                <Form.Group className="mb-4">
+                                    <Accordion className="permissions-accordion mb-4">
+                                        {/* Groupe par catégorie pour une meilleure organisation */}
+                                        <Accordion.Item eventKey="doctors">
+                                            <Accordion.Header>
+                                                <strong>Permissions médecin</strong>
+                                            </Accordion.Header>
+                                            <Accordion.Body>
+                                                <div className="permissions-list">
+                                                    {permissions
+                                                        .filter(p => p.name.toLowerCase().includes('doctor') || p.name.toLowerCase().includes('médecin') || p.name.toLowerCase().includes('med'))
+                                                        .map(permission => (
+                                                            <Form.Check
+                                                                key={permission.id}
+                                                                type="checkbox"
+                                                                id={`permission-${permission.id}`}
+                                                                label={permission.name}
+                                                                checked={selectedPermissions.includes(permission.id)}
+                                                                onChange={() => {
+                                                                    const updatedPermissions = selectedPermissions.includes(permission.id)
+                                                                        ? selectedPermissions.filter(id => id !== permission.id)
+                                                                        : [...selectedPermissions, permission.id];
+                                                                    setSelectedPermissions(updatedPermissions);
+                                                                }}
+                                                                className="mb-2"
+                                                            />
+                                                        ))}
+                                                </div>
+                                            </Accordion.Body>
+                                        </Accordion.Item>
+                                        
+                                        <Accordion.Item eventKey="patients">
+                                            <Accordion.Header>
+                                                <strong>Permissions patient</strong>
+                                            </Accordion.Header>
+                                            <Accordion.Body>
+                                                <div className="permissions-list">
+                                                    {permissions
+                                                        .filter(p => p.name.toLowerCase().includes('patient'))
+                                                        .map(permission => (
+                                                            <Form.Check
+                                                                key={permission.id}
+                                                                type="checkbox"
+                                                                id={`permission-${permission.id}`}
+                                                                label={permission.name}
+                                                                checked={selectedPermissions.includes(permission.id)}
+                                                                onChange={() => {
+                                                                    const updatedPermissions = selectedPermissions.includes(permission.id)
+                                                                        ? selectedPermissions.filter(id => id !== permission.id)
+                                                                        : [...selectedPermissions, permission.id];
+                                                                    setSelectedPermissions(updatedPermissions);
+                                                                }}
+                                                                className="mb-2"
+                                                            />
+                                                        ))}
+                                                </div>
+                                            </Accordion.Body>
+                                        </Accordion.Item>
+                                        
+                                        <Accordion.Item eventKey="appointments">
+                                            <Accordion.Header>
+                                                <strong>Permissions rendez-vous</strong>
+                                            </Accordion.Header>
+                                            <Accordion.Body>
+                                                <div className="permissions-list">
+                                                    {permissions
+                                                        .filter(p => p.name.toLowerCase().includes('appointment') || p.name.toLowerCase().includes('rendez') || p.name.toLowerCase().includes('rdv'))
+                                                        .map(permission => (
+                                                            <Form.Check
+                                                                key={permission.id}
+                                                                type="checkbox"
+                                                                id={`permission-${permission.id}`}
+                                                                label={permission.name}
+                                                                checked={selectedPermissions.includes(permission.id)}
+                                                                onChange={() => {
+                                                                    const updatedPermissions = selectedPermissions.includes(permission.id)
+                                                                        ? selectedPermissions.filter(id => id !== permission.id)
+                                                                        : [...selectedPermissions, permission.id];
+                                                                    setSelectedPermissions(updatedPermissions);
+                                                                }}
+                                                                className="mb-2"
+                                                            />
+                                                        ))}
+                                                </div>
+                                            </Accordion.Body>
+                                        </Accordion.Item>
+                                        
+                                        <Accordion.Item eventKey="other">
+                                            <Accordion.Header>
+                                                <strong>Autres permissions</strong>
+                                            </Accordion.Header>
+                                            <Accordion.Body>
+                                                <div className="permissions-list">
+                                                    {permissions
+                                                        .filter(p => 
+                                                            !p.name.toLowerCase().includes('doctor') && 
+                                                            !p.name.toLowerCase().includes('médecin') && 
+                                                            !p.name.toLowerCase().includes('med') &&
+                                                            !p.name.toLowerCase().includes('patient') &&
+                                                            !p.name.toLowerCase().includes('appointment') && 
+                                                            !p.name.toLowerCase().includes('rendez') && 
+                                                            !p.name.toLowerCase().includes('rdv')
+                                                        )
+                                                        .map(permission => (
+                                                            <Form.Check
+                                                                key={permission.id}
+                                                                type="checkbox"
+                                                                id={`permission-${permission.id}`}
+                                                                label={permission.name}
+                                                                checked={selectedPermissions.includes(permission.id)}
+                                                                onChange={() => {
+                                                                    const updatedPermissions = selectedPermissions.includes(permission.id)
+                                                                        ? selectedPermissions.filter(id => id !== permission.id)
+                                                                        : [...selectedPermissions, permission.id];
+                                                                    setSelectedPermissions(updatedPermissions);
+                                                                }}
+                                                                className="mb-2"
+                                                            />
+                                                        ))}
+                                                </div>
+                                            </Accordion.Body>
+                                        </Accordion.Item>
+                                    </Accordion>
+                                    
+                                    <div className="selected-count mt-3">
+                                        <span className="badge bg-primary">
+                                            {selectedPermissions.length} permission(s) sélectionnée(s)
+                                        </span>
+                                    </div>
+                                </Form.Group>
+                            </div>
+                        )}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={closePermissionModal}>
+                            Cancel
+                        </Button>
+                        <Button variant="primary" onClick={handleSavePermissions} disabled={permissionsStatus === 'loading'}>
+                            {permissionsStatus === 'loading' ? (
+                                <>
+                                    <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                                    Saving...
+                                </>
+                            ) : (
+                                'Save Permissions'
+                            )}
+                        </Button>
+                    </Modal.Footer>
+                    
+                    <style jsx>{`
+                        .permissions-accordion .accordion-item {
+                            margin-bottom: 8px;
+                            border-radius: 8px;
+                            overflow: hidden;
+                        }
+                        
+                        .permissions-list {
+                            max-height: 300px;
+                            overflow-y: auto;
+                        }
+                        
+                        .selected-count {
+                            text-align: center;
+                        }
+                    `}</style>
+                </Modal>
+            )}
+            
+            {/* Modal for doctors list */}
+            <Modal 
+                show={isDoctorsModalOpen} 
+                onHide={closeDoctorsModal} 
+                centered 
+                size="lg"
+                className="doctors-modal"
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        Liste des Médecins
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {loadingDoctors ? (
+                        <div className="text-center my-5">
+                            <Spinner animation="border" role="status">
+                                <span className="visually-hidden">Chargement...</span>
+                            </Spinner>
+                        </div>
+                    ) : doctors.length === 0 ? (
+                        <div className="alert alert-info">
+                            Aucun médecin trouvé. Vérifiez que des utilisateurs avec le rôle "docteur" existent dans le système.
+                        </div>
+                    ) : (
+                        <Accordion className="doctors-accordion">
+                            {doctors.map(doctor => (
+                                <Accordion.Item key={doctor.id} eventKey={`doctor-${doctor.id}`}>
+                                    <Accordion.Header>
+                                        <div className="d-flex align-items-center justify-content-between w-100 pe-3">
+                                            <div>
+                                                <strong>{doctor.name} {doctor.prenom || ''}</strong>
                                             </div>
-                                            <div className="form-check checked-danger d-flex align-items-center gap-2">
-                                                <input
-                                                    className="form-check-input"
-                                                    type="radio"
-                                                    name="status"
-                                                    id="inactive"
-                                                    value="inactive"
-                                                    checked={formData.status === 'inactive'}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <label
-                                                    className="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1"
-                                                    htmlFor="inactive"
+                                            <span className={`status-badge ${doctor.status || 'active'}`}>
+                                                {doctor.status || 'active'}
+                                            </span>
+                                        </div>
+                                    </Accordion.Header>
+                                    <Accordion.Body>
+                                        <div className="doctor-details">
+                                            <div className="row mb-3">
+                                                <div className="col-md-4">
+                                                    <strong>Email:</strong>
+                                                </div>
+                                                <div className="col-md-8">
+                                                    {doctor.email}
+                                                </div>
+                                            </div>
+                                            <div className="row mb-3">
+                                                <div className="col-md-4">
+                                                    <strong>Département:</strong>
+                                                </div>
+                                                <div className="col-md-8">
+                                                    {doctor.departement ? doctor.departement.nom : 'Non assigné'}
+                                                </div>
+                                            </div>
+                                            <div className="row mb-3">
+                                                <div className="col-md-4">
+                                                    <strong>Téléphone:</strong>
+                                                </div>
+                                                <div className="col-md-8">
+                                                    {doctor.telephone || 'Non spécifié'}
+                                                </div>
+                                            </div>
+                                            {doctor.cin && (
+                                                <div className="row mb-3">
+                                                    <div className="col-md-4">
+                                                        <strong>CIN:</strong>
+                                                    </div>
+                                                    <div className="col-md-8">
+                                                        {doctor.cin}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <div className="row mb-3">
+                                                <div className="col-md-4">
+                                                    <strong>Statut:</strong>
+                                                </div>
+                                                <div className="col-md-8">
+                                                    <span className={`status-badge ${doctor.status || 'active'}`}>
+                                                        {doctor.status || 'active'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="text-end mt-3">
+                                                <Button 
+                                                    variant="primary" 
+                                                    size="sm"
+                                                    onClick={() => alert(`Voir le profil complet de ${doctor.name}`)}
                                                 >
-                                                    <span className="w-8-px h-8-px bg-danger-600 rounded-circle" />
-                                                    Inactive
-                                                </label>
+                                                    Voir profil complet
+                                                </Button>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="d-flex align-items-center justify-content-center gap-3 mt-24">
-                                        <button
-                                            type="button"
-                                            className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8"
-                                            onClick={closeModal}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="btn btn-primary border border-primary-600 text-md px-48 py-12 radius-8"
-                                            disabled={status === 'loading'}
-                                        >
-                                            {status === 'loading' ? 'Saving...' : 'Save'}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
+                                    </Accordion.Body>
+                                </Accordion.Item>
+                            ))}
+                        </Accordion>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={closeDoctorsModal}>
+                        Fermer
+                    </Button>
+                </Modal.Footer>
+                
+                <style jsx>{`
+                    .doctors-accordion .accordion-item {
+                        margin-bottom: 8px;
+                        border-radius: 8px;
+                        overflow: hidden;
+                    }
+                    
+                    .doctors-accordion .accordion-button {
+                        padding: 12px 20px;
+                    }
+                    
+                    .status-badge {
+                        padding: 4px 10px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        text-transform: capitalize;
+                    }
+                    
+                    .status-badge.active {
+                        background-color: #198754;
+                        color: white;
+                    }
+                    
+                    .status-badge.inactive {
+                        background-color: #dc3545;
+                        color: white;
+                    }
+                    
+                    .doctor-details {
+                        background-color: #f8f9fa;
+                        border-radius: 8px;
+                        padding: 15px;
+                    }
+                    
+                    .button-group {
+                        display: flex;
+                        align-items: center;
+                    }
+                `}</style>
+            </Modal>
+        </div>
     );
 };
 

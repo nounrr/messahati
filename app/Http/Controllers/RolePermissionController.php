@@ -11,7 +11,8 @@ class RolePermissionController extends Controller
 {
     public function roles()
     {
-        return response()->json(Role::all());
+        $roles = Role::with('permissions')->get();
+        return response()->json($roles);
     }
 
     public function permissions()
@@ -61,6 +62,31 @@ class RolePermissionController extends Controller
         $role->delete();
 
         return response()->json(['message' => 'Role deleted successfully.']);
+    }
+
+    public function updateRolePermissions($id, Request $request)
+    {
+        $role = Role::findOrFail($id);
+        
+        // Valider les permissions
+        $request->validate([
+            'permissions' => 'required|array',
+            'permissions.*' => 'exists:permissions,id',
+        ]);
+        
+        // Récupérer les ID des permissions
+        $permissionIds = $request->permissions;
+        
+        // Récupérer les objets Permission depuis les IDs
+        $permissions = Permission::whereIn('id', $permissionIds)->get();
+        
+        // Attribuer les permissions au rôle (cela remplace toutes les permissions existantes)
+        $role->syncPermissions($permissions);
+        
+        return response()->json([
+            'message' => 'Role permissions updated successfully.',
+            'role' => $role->load('permissions')
+        ]);
     }
 
     public function assignRoleToUser(Request $request)

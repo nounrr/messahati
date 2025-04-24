@@ -1,15 +1,12 @@
-
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { usePage } from '@inertiajs/react';
+
 const RouteScrollToTop = () => {
-  const pathname = useLocation()
+  const { url } = usePage();
 
   useEffect(() => {
-
     window.scrollTo(0, 0);
-
-
-  }, [pathname]);
+  }, [url]);
 
   return null;
 };

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Ordonnance;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 class OrdonanceController extends Controller
 {
@@ -102,5 +104,43 @@ class OrdonanceController extends Controller
         }
 
         return response()->json(['message' => 'Ordonnances supprimées avec succès.']);
+    }
+    public function generatePDF($id)
+    {
+        try {
+            Log::info('Tentative de génération de l\'ordonnance ID: ' . $id);
+
+            // Récupérer l'ordonnance avec ses relations
+            $ordonance = Ordonance::with(['traitement', 'patient', 'docteur', 'medicaments'])->findOrFail($id);
+
+            Log::info('Ordonnance trouvée:', [
+                'id' => $ordonance->id,
+                'patient' => $ordonance->patient->name ?? 'Inconnu',
+                'docteur' => $ordonance->docteur->name ?? 'Inconnu',
+            ]);
+
+            // Préparer les données pour la vue
+            $data = [
+                'ordonance' => $ordonance,
+            ];
+
+            // Charger la vue et générer le PDF
+            $pdf = Pdf::loadView('Ordonnance', $data);
+
+            Log::info('PDF généré avec succès');
+
+            // Télécharger le fichier PDF
+            return $pdf->download('ordonance.pdf');
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la génération de l\'ordonnance:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Erreur lors de la génération de l\'ordonnance',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

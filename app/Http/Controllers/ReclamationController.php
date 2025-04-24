@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reclamation;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ReclamationController extends Controller
 {
@@ -14,13 +15,11 @@ class ReclamationController extends Controller
         // Vérifier si un ID utilisateur est fourni
         if ($request->has('user_id')) {
             $userId = $request->input('user_id');
-            \Log::info('ReclamationController - Liste des réclamations filtrées par user_id: ' . $userId);
             
             // Récupérer les réclamations pour cet utilisateur
             $reclamations = Reclamation::with('user')
                 ->where('user_id', $userId)
                 ->get();
-                
             return response()->json($reclamations);
         }
         
@@ -41,9 +40,8 @@ class ReclamationController extends Controller
         // Vérifier simplement si l'utilisateur est authentifié mais ne pas bloquer
         $isAuthenticated = Auth::check();
         
-        // Log si l'utilisateur n'est pas authentifié
+        //  si l'utilisateur n'est pas authentifié
         if (!$isAuthenticated) {
-            \Log::warning('ReclamationController - Création de réclamation sans authentification');
         }
         
         // Récupérer l'ID utilisateur envoyé par le frontend
@@ -64,7 +62,6 @@ class ReclamationController extends Controller
                 
                 // Utiliser l'ID utilisateur du frontend
                 $userId = $validated['user_id'];
-                \Log::info('ReclamationController - Création de réclamation avec user_id fourni: ' . $userId);
                 
                 $reclamation = new Reclamation();
                 $reclamation->titre = $validated['titre'];
@@ -88,7 +85,6 @@ class ReclamationController extends Controller
 
             // Utiliser l'ID utilisateur du frontend
             $userId = $validated['user_id'];
-            \Log::info('ReclamationController - Création de réclamation avec user_id fourni: ' . $userId);
             
             $reclamation = new Reclamation();
             $reclamation->titre = $validated['titre'];
@@ -132,7 +128,6 @@ class ReclamationController extends Controller
         
         // Mettre à jour l'user_id si fourni
         if (isset($validated['user_id'])) {
-            \Log::info('ReclamationController - Mise à jour de réclamation avec user_id fourni: ' . $validated['user_id']);
             $reclamation->user_id = $validated['user_id'];
         }
         

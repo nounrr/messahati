@@ -91,12 +91,22 @@ export const fetchUserRoles = createAsyncThunk(
     }
 );
 
+// Fetch user permissions
+export const fetchUserPermissions = createAsyncThunk(
+    'rolePermissions/fetchUserPermissions',
+    async (userId) => {
+        const response = await axiosInstance.get(`/user-permissions/${userId}`);
+        return { userId, permissions: response.data };
+    }
+);
+
 const rolePermissionSlice = createSlice({
     name: 'rolePermissions',
     initialState: {
         roles: [],
         permissions: [],
         userRoles: {}, // Nouveau state pour stocker les rôles par utilisateur
+        userPermissions: {}, // Nouveau state pour stocker les permissions par utilisateur
         users: [], // Add users to the state
         status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
         error: null,
@@ -236,6 +246,18 @@ const rolePermissionSlice = createSlice({
                 state.userRoles[action.payload.user_id] = action.payload.roles;
             })
             .addCase(fetchUserRoles.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            // Fetch user permissions
+            .addCase(fetchUserPermissions.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchUserPermissions.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.userPermissions[action.payload.userId] = action.payload.permissions;
+            })
+            .addCase(fetchUserPermissions.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             });

@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Swal from 'sweetalert2';
 
-const ChatMessageLayer = () => {
+const ChatMessageLayer = ({ isMinimized = false }) => {
     const dispatch = useDispatch();
     const messagesEndRef = useRef(null);
     const messageInputRef = useRef(null);
@@ -74,6 +74,7 @@ const ChatMessageLayer = () => {
                 })).unwrap();
                 messageInputRef.current.value = '';
             } catch (error) {
+                console.error('Erreur d\'envoi du message:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Erreur',
@@ -92,65 +93,86 @@ const ChatMessageLayer = () => {
         dispatch(toggleProfile());
     };
 
+    // Ajustement du style pour le mode minimisé
+    const containerClass = isMinimized 
+        ? "flex flex-col h-full" 
+        : "flex h-full";
+    
+    const userListClass = isMinimized 
+        ? "h-24 overflow-y-auto border-b border-gray-200 p-2" 
+        : "w-1/4 border-r border-gray-200 p-4";
+    
+    const chatAreaClass = isMinimized 
+        ? "flex-1 flex flex-col" 
+        : "flex-1 flex flex-col";
+    
+    const profileAreaClass = isMinimized 
+        ? "border-t border-gray-200 p-2 h-32 overflow-y-auto" 
+        : "w-1/4 border-l border-gray-200 p-4";
+
     return (
-        <div className="flex h-full">
+        <div className={containerClass}>
             {/* Liste des utilisateurs */}
-            <div className="w-1/4 border-r border-gray-200 p-4">
-                <h2 className="text-lg font-semibold mb-4">Conversations</h2>
-                <div className="space-y-2">
+            <div className={userListClass}>
+                <h2 className={`${isMinimized ? "text-sm" : "text-lg"} font-semibold mb-2`}>Conversations</h2>
+                <div className={`${isMinimized ? "flex overflow-x-auto" : "space-y-2"}`}>
                     {users.map(user => (
                         <div 
                             key={user.id}
-                            className={`p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${selectedUser?.id === user.id ? 'bg-blue-50' : ''}`}
+                            className={`${isMinimized ? "p-1 mr-2" : "p-3"} rounded-lg cursor-pointer hover:bg-gray-100 ${selectedUser?.id === user.id ? 'bg-blue-50' : ''}`}
                             onClick={() => handleUserSelect(user)}
                         >
-                            <div className="flex items-center space-x-3">
+                            <div className={`${isMinimized ? "" : "space-x-3"} flex items-center`}>
                                 <img 
                                     src={user.avatar || '/default-avatar.png'} 
                                     alt={user.name}
-                                    className="w-10 h-10 rounded-full"
+                                    className={`${isMinimized ? "w-6 h-6" : "w-10 h-10"} rounded-full`}
                                 />
-                                <div>
-                                    <h3 className="font-medium">{user.name}</h3>
-                                    <p className="text-sm text-gray-500">
-                                        {user.status || 'En ligne'}
-                                    </p>
-                    </div>
-                </div>
+                                {!isMinimized && (
+                                    <div>
+                                        <h3 className="font-medium">{user.name}</h3>
+                                        <p className="text-sm text-gray-500">
+                                            {user.status || 'En ligne'}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
             </div>
 
             {/* Zone de chat */}
-            <div className="flex-1 flex flex-col">
+            <div className={chatAreaClass}>
                 {selectedUser ? (
                     <>
                         {/* En-tête du chat */}
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                            <div className="flex items-center space-x-3">
+                        <div className="p-2 border-b border-gray-200 flex justify-between items-center">
+                            <div className="flex items-center space-x-2">
                                 <img 
                                     src={selectedUser.avatar || '/default-avatar.png'} 
                                     alt={selectedUser.name}
-                                    className="w-10 h-10 rounded-full"
+                                    className={`${isMinimized ? "w-6 h-6" : "w-10 h-10"} rounded-full`}
                                 />
                                 <div>
-                                    <h3 className="font-semibold">{selectedUser.name}</h3>
-                                    <p className="text-sm text-gray-500">
-                                        {selectedUser.status || 'En ligne'}
-                                    </p>
-                    </div>
-                    </div>
+                                    <h3 className={`${isMinimized ? "text-sm" : "text-base"} font-semibold`}>{selectedUser.name}</h3>
+                                    {!isMinimized && (
+                                        <p className="text-sm text-gray-500">
+                                            {selectedUser.status || 'En ligne'}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                             <button
                                 onClick={handleToggleProfile}
                                 className="text-gray-500 hover:text-gray-700"
                             >
-                                <i className="fas fa-user-circle text-xl"></i>
+                                <i className={`fas fa-user-circle ${isMinimized ? "text-base" : "text-xl"}`}></i>
                             </button>
                         </div>
 
                         {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        <div className={`flex-1 overflow-y-auto ${isMinimized ? "p-2" : "p-4"} space-y-3`}>
                             {[...sentMessages, ...receivedMessages]
                                 .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
                                 .map((message) => (
@@ -158,9 +180,9 @@ const ChatMessageLayer = () => {
                                         key={message.id}
                                         className={`flex ${message.emetteure_id === currentUser.id ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        <div className={`max-w-[70%] ${message.emetteure_id === currentUser.id ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
-                                            <div className="p-3 rounded-lg">
-                                                <p>{message.contenu}</p>
+                                        <div className={`${isMinimized ? "max-w-[80%]" : "max-w-[70%]"} ${message.emetteure_id === currentUser.id ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
+                                            <div className={`${isMinimized ? "p-2" : "p-3"} rounded-lg`}>
+                                                <p className={isMinimized ? "text-sm" : ""}>{message.contenu}</p>
                                                 <span className="text-xs opacity-75">
                                                     {format(new Date(message.created_at), 'HH:mm', { locale: fr })}
                                                 </span>
@@ -172,19 +194,19 @@ const ChatMessageLayer = () => {
                         </div>
 
                         {/* Formulaire d'envoi de message */}
-                        <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200">
+                        <form onSubmit={handleSendMessage} className={`${isMinimized ? "p-2" : "p-4"} border-t border-gray-200`}>
                             <div className="flex space-x-2">
                                 <input
                                     ref={messageInputRef}
                                     type="text"
                                     placeholder="Écrivez votre message..."
-                                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
+                                    className={`flex-1 border border-gray-300 rounded-lg ${isMinimized ? "px-2 py-1 text-sm" : "px-4 py-2"} focus:outline-none focus:border-blue-500`}
                                     disabled={!isConnected}
                                 />
                                 <button
                                     type="submit"
                                     disabled={status === 'loading' || !isConnected}
-                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none disabled:opacity-50"
+                                    className={`bg-blue-500 text-white ${isMinimized ? "px-2 py-1" : "px-4 py-2"} rounded-lg hover:bg-blue-600 focus:outline-none disabled:opacity-50`}
                                 >
                                     <i className="fas fa-paper-plane"></i>
                                 </button>
@@ -193,14 +215,14 @@ const ChatMessageLayer = () => {
                     </>
                 ) : (
                     <div className="flex-1 flex items-center justify-center text-gray-500">
-                        <p>Sélectionnez une conversation pour commencer</p>
+                        <p className={isMinimized ? "text-sm" : ""}>Sélectionnez une conversation pour commencer</p>
                     </div>
                 )}
                 </div>
 
             {/* Profil utilisateur */}
-            {showProfile && selectedUser && (
-                <div className="w-1/4 border-l border-gray-200 p-4">
+            {showProfile && selectedUser && !isMinimized && (
+                <div className={profileAreaClass}>
                     <div className="text-center">
                         <img 
                             src={selectedUser.avatar || '/default-avatar.png'} 

@@ -222,7 +222,7 @@ const ListeReclamations = () => {
     return (
 
         <div className="container mx-auto px-4 py-6">
-                    <AuthenticatedLayout
+                    <div
             auth={auth}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Réclamations</h2>}
         >
@@ -305,7 +305,7 @@ const ListeReclamations = () => {
                     />
                 </div>
             )}
-                    </AuthenticatedLayout>
+                    </div>
 
         </div>
     );

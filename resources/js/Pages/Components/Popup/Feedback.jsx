@@ -1,26 +1,24 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
 import { createFeedback, updateFeedback } from '../../../Redux/feedbacks/feedbackSlice';
-import { X } from 'lucide-react';
+import { X, Star } from 'lucide-react';
+import { Icon } from '@iconify/react';
 
 function Feedback({ onClose, feedback = null }) {
     const dispatch = useDispatch();
+    const user = useSelector(state => state.auth.user);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [feedbacks, setFeedbacks] = useState([{
-        titre: feedback?.titre || '',
         contenu: feedback?.contenu || '',
-        note: feedback?.note || 5,
-        statut: feedback?.statut || 'en_attente'
+        rating: feedback?.rating || 5
     }]);
 
     const handleAddField = () => {
         if (feedback) return; // Désactiver l'ajout en mode édition
         setFeedbacks([...feedbacks, {
-            titre: '',
             contenu: '',
-            note: 5,
-            statut: 'en_attente'
+            rating: 5
         }]);
     };
 
@@ -28,6 +26,11 @@ function Feedback({ onClose, feedback = null }) {
         const updated = [...feedbacks];
         updated[index][field] = value;
         setFeedbacks(updated);
+    };
+
+    // Fonction pour définir la note directement
+    const handleSetRating = (index, rating) => {
+        handleChange(index, 'rating', rating);
     };
 
     const handleRemoveField = (index) => {
@@ -40,9 +43,15 @@ function Feedback({ onClose, feedback = null }) {
     const handleSubmit = async () => {
         if (isSubmitting) return;
 
+        if (!user || !user.id) {
+            Swal.fire('Erreur', 'Vous devez être connecté pour ajouter un feedback.', 'error');
+            return;
+        }
+
         const isValid = feedbacks.every(item => 
-            item.titre && 
-            item.contenu
+            item.contenu && 
+            item.contenu.trim() !== '' &&
+            item.rating
         );
 
         if (!isValid) {
@@ -64,7 +73,14 @@ function Feedback({ onClose, feedback = null }) {
                     text: 'Le feedback a été modifié avec succès.'
                 });
             } else {
-                await dispatch(createFeedback(feedbacks)).unwrap();
+                // Ensure all entries have the required fields
+                const validatedFeedbacks = feedbacks.map(item => ({
+                    contenu: item.contenu.trim(),
+                    rating: item.rating || 5,
+                    user_id: user.id  // Include the user ID from Redux
+                }));
+                
+                await dispatch(createFeedback(validatedFeedbacks)).unwrap();
                 Swal.fire({
                     icon: 'success',
                     title: 'Succès !',
@@ -74,10 +90,19 @@ function Feedback({ onClose, feedback = null }) {
             onClose();
         } catch (error) {
             console.error('Erreur:', error);
+            let errorMessage = 'Une erreur est survenue lors de l\'opération.';
+            
+            // Check if there are validation errors
+            if (error.errors && Object.keys(error.errors).length > 0) {
+                errorMessage = Object.values(error.errors).flat().join('\n');
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
             Swal.fire({
                 icon: 'error',
                 title: 'Erreur !',
-                text: error.message || 'Une erreur est survenue lors de l\'opération.'
+                text: errorMessage
             });
         } finally {
             setIsSubmitting(false);
@@ -85,7 +110,7 @@ function Feedback({ onClose, feedback = null }) {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="relative bg-white rounded-xl shadow-lg p-6">
             <button 
                 onClick={onClose} 
                 className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
@@ -113,18 +138,6 @@ function Feedback({ onClose, feedback = null }) {
                         </button>
                     )}
                     <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Titre</label>
-                        <input
-                            type="text"
-                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={item.titre}
-                            onChange={(e) => handleChange(index, 'titre', e.target.value)}
-                            placeholder='Entrez le titre du feedback'
-                            disabled={isSubmitting}
-                            required
-                        />
-                    </div>
-                    <div className="mb-4 text-left">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Contenu</label>
                         <textarea
                             className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
@@ -136,37 +149,28 @@ function Feedback({ onClose, feedback = null }) {
                             required
                         />
                     </div>
-                    <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
-                        <input
-                            type="range"
-                            min="1"
-                            max="5"
-                            className='w-full'
-                            value={item.note}
-                            onChange={(e) => handleChange(index, 'note', parseInt(e.target.value))}
-                            disabled={isSubmitting}
-                        />
-                        <div className="flex justify-between text-sm text-gray-600">
-                            <span>1</span>
-                            <span>2</span>
-                            <span>3</span>
-                            <span>4</span>
-                            <span>5</span>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Note</label>
+                        <div className="flex justify-center items-center space-x-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    type="button"
+                                    onClick={() => handleSetRating(index, star)}
+                                    className="focus:outline-none transition-colors duration-200"
+                                    disabled={isSubmitting}
+                                    title={`${star} étoile${star > 1 ? 's' : ''}`}
+                                >
+                                    <Icon 
+                                        icon={star <= item.rating ? "material-symbols:star" : "material-symbols:star-outline"}
+                                        className={`text-3xl ${star <= item.rating ? "text-yellow-400" : "text-gray-300"} hover:text-yellow-500`}
+                                    />
+                                </button>
+                            ))}
                         </div>
-                    </div>
-                    <div className="mb-4 text-left">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                        <select
-                            className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={item.statut}
-                            onChange={(e) => handleChange(index, 'statut', e.target.value)}
-                            disabled={isSubmitting}
-                        >
-                            <option value="en_attente">En attente</option>
-                            <option value="traite">Traité</option>
-                            <option value="ignore">Ignoré</option>
-                        </select>
+                        <div className="text-center mt-2 text-sm text-gray-600">
+                            {item.rating} sur 5
+                        </div>
                     </div>
                 </div>
             ))}

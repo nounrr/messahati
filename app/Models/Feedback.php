@@ -6,17 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Feedback extends Model
 {
+    // Specify the table name explicitly
+    protected $table = 'feedbacks';
+
     protected $fillable = [
-        'titre',
         'contenu',
-        'note',
-        'statut',
+        'rating',
+        'status',
         'user_id'
     ];
 
     protected $casts = [
-        'note' => 'integer',
-        'statut' => 'string'
+        'rating' => 'integer',
+        'status' => 'boolean'
     ];
 
     public function user() {

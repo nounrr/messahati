@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('ordonances', function (Blueprint $table) {
             $table->id();
-            $table->date('date_emission');
+            $table->date('date_expiration');
+            $table->unsignedBigInteger('patient_id');
+            $table->unsignedBigInteger('docteur_id');
+
+            $table->foreign('patient_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('docteur_id')->references('id')->on('users')->onDelete('cascade');
+            
             $table->text('description')->nullable();
             $table->foreignId('traitement_id')->constrained()->onDelete('cascade');
             $table->timestamps();
