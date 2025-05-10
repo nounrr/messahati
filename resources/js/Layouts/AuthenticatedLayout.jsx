@@ -6,6 +6,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser, logout, resetAuth } from '../Redux/auth/authSlice';
+import ChatMainLayer from '@/Pages/Components/Chat/ChatMainLayer';
 
 export default function AuthenticatedLayout({ header, children }) {
     const dispatch = useDispatch();
@@ -65,6 +66,18 @@ export default function AuthenticatedLayout({ header, children }) {
                                     active={route().current('reclamations.*')}
                                 >
                                     Réclamations
+                                </NavLink>
+                                <NavLink
+                                    href={route('feedback.view')}
+                                    active={route().current('feedback.*')}
+                                >
+                                    Feedbacks
+                                </NavLink>
+                                <NavLink
+                                    href={route('rdv.view')}
+                                    active={route().current('rdv.*')}
+                                >
+                                    Rendez-vous
                                 </NavLink>
                             </div>
                         </div>
@@ -175,6 +188,18 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Réclamations
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('feedback.view')}
+                            active={route().current('feedback.*')}
+                        >
+                            Feedbacks
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('rdv.view')}
+                            active={route().current('rdv.*')}
+                        >
+                            Rendez-vous
+                        </ResponsiveNavLink>
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">
@@ -211,6 +236,9 @@ export default function AuthenticatedLayout({ header, children }) {
             )}
 
             <main>{children}</main>
+            
+            {/* Chat component */}
+            <ChatMainLayer />
         </div>
     );
 }

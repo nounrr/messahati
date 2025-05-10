@@ -14,7 +14,12 @@ export const createFeedback = createAsyncThunk(
     'feedbacks/createFeedback',
     async (feedbackData, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/feedbacks', { feedbacks: [feedbackData] });
+            // Check if feedbackData is already an array
+            const dataToSend = Array.isArray(feedbackData) 
+                ? { feedbacks: feedbackData } 
+                : { feedbacks: [feedbackData] };
+                
+            const response = await axiosInstance.post('/feedbacks', dataToSend);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

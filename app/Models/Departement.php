@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Departement extends Model
 {
-    protected $fillable=['nom','description','img_path'];
+    use HasFactory;
+
+    protected $fillable = [
+        'nom',
+        'description',
+        'status'
+    ];
 
     public function rendezvous(){
         return $this->hasMany(Rendezvous::class);

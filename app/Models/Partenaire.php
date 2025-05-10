@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Partenaire extends Model
 {
-ected $fillable = ['nom', 'adress', 'telephone', 'typepartenaires_id'];
-=======
     protected $fillable = [
         'nom',
         'adress',
@@ -15,8 +13,6 @@ ected $fillable = ['nom', 'adress', 'telephone', 'typepartenaires_id'];
         'typepartenaires_id'
     ];
 
-    
-   
     public function charges(){
         return $this->hasMany(Charge::class);
     }

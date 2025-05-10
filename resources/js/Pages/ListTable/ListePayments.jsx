@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchPayments, deletePayment } from '@/Redux/payments/paymentSlice';
+import { fetchPayments, deletePayments } from '@/Redux/payments/paymentSlice';
 import TableDataLayer from '../Components/tables/TableDataLayer';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -44,7 +44,7 @@ const ListePayments = () => {
 
         if (result.isConfirmed) {
             try {
-                await dispatch(deletePayment(id)).unwrap();
+                await dispatch(deletePayments([id])).unwrap();
                 Swal.fire(
                     'Supprimé !',
                     'Le paiement a été supprimé avec succès.',

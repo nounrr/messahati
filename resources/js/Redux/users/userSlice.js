@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axiosInstance';
 
-// Fetch all users
+// Fetch all users with their permissions
 export const fetchUsers = createAsyncThunk(
     'users/fetchUsers',
     async () => {

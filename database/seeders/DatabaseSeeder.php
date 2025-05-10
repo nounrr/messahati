@@ -3,46 +3,33 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\TypeTraitement;
+use App\Models\TypeMedicament;
+use App\Models\Departement;
+use App\Models\User;
+use App\Models\Traitement;
+use App\Models\Medicament;
+use App\Models\Ordonance;
+use App\Models\RendezVous;
+use App\Models\Payment;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
-{
-    /**
-     * Seed the application's database.
-     */
+{                                                                        
     public function run(): void
     {
         $this->call([
-
-            TypeTraitementSeeder::class,
-            MutuelSeeder::class,
-            CliniqueSeeder::class,
             RolesAndPermissionsSeeder::class,
             DepartementSeeder::class,
-            UserSeeder::class,    // UserSeeder runs after DepartementSeeder
-            TraitementSeeder::class,
-            RendezVousSeeder::class,
-            ReclamationSeeder::class,
-            NotificationSeeder::class,
-            OrdonanceSeeder::class,
             TypeMedicamentSeeder::class,
+            TypeTraitementSeeder::class,
+            UserSeeder::class,
+            TraitementSeeder::class,
+            RendezVousTestSeeder::class,
             MedicamentSeeder::class,
-            TypeCertificatSeeder::class,
-            CertificatMedicaleSeeder::class,
-            OrdonanceMedicamentSeeder::class,
+            OrdonanceSeeder::class,
             PaymentSeeder::class,
-            FeedbackSeeder::class,
-            TacheSeeder::class,
-            AuditLogCliniqueSeeder::class,
-            TypePartenaireSeeder::class,
-            PartenaireSeeder::class,
-            MessageSeeder::class,
-            MutuelUserSeeder::class,
-            NotificationUserSeeder::class,
-            AttachementSeeder::class,
-            UserTacheSeeder::class,
-            ChargeSeeder::class,
-            SalaireSeeder::class,
-
         ]);
     }
 }

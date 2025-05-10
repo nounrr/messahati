@@ -17,6 +17,7 @@ const ListeOrdonnances = () => {
     useEffect(() => {
         if (status === 'idle') {
             dispatch(fetchOrdonnances());
+            console.log(ordonnances);
         }
     }, [status, dispatch]);
 

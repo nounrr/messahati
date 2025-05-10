@@ -1,13 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUsers, fetchRoles, fetchPermissions, assignRoleToUser, removeRoleFromUser, assignPermissionToUser, fetchUserRoles } from '../../Redux/rolePermissions/rolePermissionSlice';
+import { fetchUsers } from '../../Redux/users/userSlice';
+import { fetchAllRoles as fetchRoles, assignRoleToUser, removeRoleFromUser } from '../../Redux/roles/roleSlice';
+import { fetchAllPermissions as fetchPermissions, assignPermissionToUser, getUserPermissions } from '../../Redux/permissions/permissionSlice';
 import Swal from 'sweetalert2';
 import { FaSearch, FaChevronLeft, FaChevronRight, FaKey, FaTrash } from 'react-icons/fa';
 
 const AssignRoleLayer = () => {
     const dispatch = useDispatch();
-    const { users, roles, permissions, userRoles, status } = useSelector((state) => state.rolePermissions);
-    const error = useSelector((state) => state.users?.error);
+    const { items: users, status: usersStatus, error: usersError } = useSelector((state) => state.users);
+    const { items: roles, status: rolesStatus, error: rolesError } = useSelector((state) => state.roles);
+    const { items: permissions, userPermissions, status: permissionsStatus, error: permissionsError } = useSelector((state) => state.permissions);
+    const status = usersStatus === 'loading' || rolesStatus === 'loading' || permissionsStatus === 'loading' ? 'loading' : 'idle';
+    const error = usersError || rolesError || permissionsError;
 
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
@@ -130,13 +135,13 @@ const AssignRoleLayer = () => {
     const handleOpenPermissionModal = (user) => {
         setSelectedUser(user);
         // Récupérer les rôles de l'utilisateur
-        dispatch(fetchUserRoles(user.id));
+        dispatch(getUserPermissions(user.id));
         
         // Récupérer les permissions directes de l'utilisateur
         const userPermissions = user.permissions || [];
         
         // Récupérer les permissions des rôles de l'utilisateur
-        const rolePermissions = userRoles[user.id]?.reduce((acc, role) => {
+        const rolePermissions = userPermissions[user.id]?.reduce((acc, role) => {
             return [...acc, ...(role.permissions || [])];
         }, []) || [];
         
@@ -332,7 +337,7 @@ const AssignRoleLayer = () => {
                                     </div>
                                 </td>
                                 <td className="text-center">
-                                        {userRoles[user.id]?.map(role => (
+                                        {userPermissions[user.id]?.map(role => (
                                             <span key={role.id} className="badge bg-primary me-1">
                                                 {role.name}
                                             </span>
@@ -529,7 +534,7 @@ const AssignRoleLayer = () => {
                                 ></button>
                             </div>
                             <div className="modal-body p-24">
-                                {userRoles[selectedUser?.id]?.length > 0 ? (
+                                {userPermissions[selectedUser?.id]?.length > 0 ? (
                                     <div className="table-responsive">
                                         <table className="table bordered-table sm-table mb-0">
                                             <thead>
@@ -539,7 +544,7 @@ const AssignRoleLayer = () => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {userRoles[selectedUser?.id]?.map(role => (
+                                                {userPermissions[selectedUser?.id]?.map(role => (
                                                     <tr key={role.id}>
                                                         <td>{role.name}</td>
                                                         <td className="text-center">

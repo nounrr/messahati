@@ -4,13 +4,22 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\RendezVous;
+use Carbon\Carbon;
+use App\Models\Traitement;
+use App\Models\TypeTraitement;
+use App\Models\User;
 
 class RendezVousController extends Controller
 {
     // Liste des rendez-vous
     public function index()
     {
-        $rendezVous = RendezVous::all();
+        $rendezVous = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])->get();
         return response()->json($rendezVous);
     }
 
@@ -48,17 +57,32 @@ class RendezVousController extends Controller
             $createdItems[] = $rendezVous;
         }
 
-        return response()->json($createdItems, 201);
+        // Charger les relations pour les éléments créés
+        $createdItemsWithRelations = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])
+            ->whereIn('id', collect($createdItems)->pluck('id'))
+            ->get();
+
+        return response()->json($createdItemsWithRelations, 201);
     }
 
     // Affiche un rendez-vous spécifique
     public function show(string $id)
     {
-        $rendezVous = RendezVous::findOrFail($id);
+        $rendezVous = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])->findOrFail($id);
         return response()->json($rendezVous);
     }
 
-    // Formulaire d’édition
+    // Formulaire d'édition
     public function edit(string $id)
     {
         $rendezVous = RendezVous::findOrFail($id);
@@ -79,7 +103,7 @@ class RendezVousController extends Controller
             'updates.*.statut' => 'required'
         ]);
 
-        $updatedItems = [];
+        $updatedIds = [];
 
         foreach ($validated['updates'] as $data) {
             $rendezVous = RendezVous::findOrFail($data['id']);
@@ -91,27 +115,67 @@ class RendezVousController extends Controller
             $rendezVous->statut = $data['statut'];
             $rendezVous->save();
 
-            $updatedItems[] = $rendezVous;
+            $updatedIds[] = $rendezVous->id;
         }
 
-        return response()->json($updatedItems, 200);
+        // Charger les relations pour les éléments mis à jour
+        $updatedItemsWithRelations = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement.typetraitement'
+        ])
+            ->whereIn('id', $updatedIds)
+            ->get();
+
+        return response()->json($updatedItemsWithRelations, 200);
     }
 
-    // Suppression d’un ou plusieurs rendez-vous
+    // Suppression d'un ou plusieurs rendez-vous
     public function destroy(Request $request, string $id = null)
     {
         if ($id) {
             $rendezVous = RendezVous::findOrFail($id);
             $rendezVous->delete();
-        } else {
-            $validatedData = $request->validate([
-                'ids' => 'required|array',
-                'ids.*' => 'required|exists:rendez_vous,id',
-            ]);
-
-            RendezVous::whereIn('id', $validatedData['ids'])->delete();
+            return response()->json(['message' => 'Rendez-vous supprimé avec succès.']);
         }
 
-        return response()->json(['message' => 'Rendez-vous supprimés avec succès.']);
+        $validatedData = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'required|integer|exists:rendez_vous,id',
+        ]);
+
+        try {
+            RendezVous::whereIn('id', $validatedData['ids'])->delete();
+            return response()->json(['message' => 'Rendez-vous supprimés avec succès.', 'ids' => $validatedData['ids']]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors de la suppression des rendez-vous.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+// Liste des rendez-vous en attente (date_heure null et créés aujourd'hui)
+    public function getListeAttends()
+    {
+        $today = Carbon::today();
+        $rendezVous = RendezVous::whereDate('created_at', $today)
+        ->get();
+        return response()->json($rendezVous);
+    }
+
+// Liste des rendez-vous du jour non confirmés
+    public function getListRendezVous()
+    {
+        $today = Carbon::today();
+        $rendezVous = RendezVous::with([
+            'patient', 
+            'docteur', 
+            'departement', 
+            'traitement',
+            'traitement.typeTraitement'
+        ])
+        ->whereDate('date_heure', $today)
+        ->where('statut', '!=', 1)
+        ->get();
+        return response()->json($rendezVous);
     }
 }

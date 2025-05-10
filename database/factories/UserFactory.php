@@ -30,8 +30,8 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'telephone' => fake()->phoneNumber(),
             'adresse' => fake()->address(),
-            'date_inscription' => now(),
-            'departement_id' => fake()->numberBetween(1, 3), // à adapter selon tes départements
+            'date_naissance' => fake()->dateTimeBetween('-80 years', '-18 years')->format('Y-m-d'),
+            'departement_id' => \App\Models\Departement::inRandomOrder()->first()->id ?? 1,
             'password' => Hash::make('password'), // ou bcrypt('password')
             'img_path' => 'default.png', // ou une image de test
             'status' => fake()->boolean(), // à adapter si c'est booléen

@@ -10,8 +10,6 @@ use App\Http\Controllers\FactureController;
 
 use App\Http\Controllers\Api\ChatController;
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\ReclamationController;
@@ -129,17 +127,33 @@ Route::post('/send-message', [ChatController::class, 'send']);
 Route::get('/messages/sent/{user_id}', [ChatController::class, 'getSentMessages']);
 Route::get('/messages/received/{user_id}', [ChatController::class, 'getReceivedMessages']);
 
+
+Route::get('/rdv', function () {
+    return Inertia::render('Components/RDV/CalendarMainLayer');
+})->name('rdv.view');
+
 // Route pour accéder à la vue du chat
 Route::get('/chat', function () {
     return Inertia::render('Components/Chat/ChatMessageLayer');
 })->name('chat.view');
 
+
 // Route::post('/send-data', [App\Http\Controllers\RealTimeController::class, 'sendData']);
+
+Route::get('/rendez-vous', function () {
+    return Inertia::render('ListTable/ListeRendezVous');
+})->name('rendez-vous.view'); //done
+
 
 // Route pour les types de partenaires
 Route::get('/type-partenaires', function () {
     return Inertia::render('ListTable/ListeTypePartenaires');
 })->name('type-partenaires.view'); //done
+
+// Route pour gérer les permissions directes des utilisateurs
+Route::get('/model-permissions', function () {
+    return Inertia::render('Components/ModelPermissionManager');
+})->name('model-permissions.view');
 
 Route::get('/type-medicaments', function () {
     return Inertia::render('ListTable/ListeTypeMedicaments');
@@ -183,11 +197,11 @@ Route::get('/partenaires', function () {
 })->name('partenaire.view');
 
 Route::get('/ordonnances', function () {
-    return Inertia::render('ListTable/ListeOrdonnance');
+    return Inertia::render('Ordonnances/Index');
 })->name('ordonnance.view');
 
 Route::get('/payments', function () {
-    return Inertia::render('ListTable/ListePayment');
+    return Inertia::render('ListTable/ListePayments');
 })->name('payment.view');
 
 Route::get('/salaires', function () {
@@ -201,5 +215,9 @@ Route::get('/charges', function () {
 
 
 Route::get('/facture/{id}', [FactureController::class, 'generatePDF'])->name('facture.generate');
+
+Route::get('/', function () {
+    return Inertia::render('Ordonnances/Index');
+});
 
 require __DIR__.'/auth.php';

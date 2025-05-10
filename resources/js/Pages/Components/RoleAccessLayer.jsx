@@ -3,16 +3,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
-    fetchRoles, 
+    fetchAllRoles as fetchRoles, 
     createRole, 
     updateRole, 
     deleteRole 
-} from '../../Redux/rolePermissions/rolePermissionSlice';
+} from '../../Redux/roles/roleSlice';
 import Swal from 'sweetalert2';
 
 const RoleAccessLayer = () => {
     const dispatch = useDispatch();
-    const { roles, status, error } = useSelector((state) => state.rolePermissions);
+    const { items: roles, status, error } = useSelector((state) => state.roles);
     
     // Form state
     const [formData, setFormData] = useState({

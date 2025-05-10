@@ -9,11 +9,27 @@ class Payment extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'patient_id',
+        'medecin_id',
+        'montant',
+        'date_paiement',
+        'mode_paiement',
+        'reference',
+        'status'
+    ];
 
-    protected $fillable = ['rendez_vous_id', 'montant', 'date', 'status'];
+    protected $casts = [
+        'date_paiement' => 'datetime'
+    ];
 
-    public function rendezVous()
+    public function patient()
     {
-        return $this->belongsTo(Rendezvous::class, 'rendez_vous_id');
+        return $this->belongsTo(Patient::class);
+    }
+
+    public function medecin()
+    {
+        return $this->belongsTo(User::class, 'medecin_id');
     }
 }
